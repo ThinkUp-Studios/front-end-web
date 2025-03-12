@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Website</title>
+    <link rel="stylesheet" href="main.css">
+    <script src="data.js" defer></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="main.html" class="logo">ThinkUp</a>
+            <div class="nav-links">
+                <a href="#menu">Menu</a>
+                <a href="createQuiz.html">Créer</a>
+                <a href="#search">Recherche</a>
+            </div>
+            <div class="profile">
+                <img src="/api/placeholder/150/150" alt="Profile Picture" class="profile-pic">
+            </div>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <section class="hero">
+            <h1>Welcome to ThinkUp</h1>
+            <p>A place to create, explore, and connect with others through fun quizzes.</p>
+            <a href="createQuiz.html" class="btn">Create Your Own Quiz</a>
+        </section>
+
+        <section class="featured-quizzes">
+            <h2>Featured Quizzes</h2>
+            <div class="quiz-cards" id="quiz-cards">
+                <!-- Quiz cards will be dynamically inserted here from data.js -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 ThinkUp. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">About</a>
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

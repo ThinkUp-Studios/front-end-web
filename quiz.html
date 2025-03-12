@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - MyWebsite</title>
+    <link rel="stylesheet" href="quiz.css">
+    <script src="data.js" defer></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="main.html" class="logo">MyWebsite</a>
+            <div class="quiz-info">
+                <h2 id="quiz-title"></h2>
+                <div class="question-counter">Question <span id="current-question">1</span>/<span id="total-questions"></span></div>
+            </div>
+            <div class="profile">
+                <img src="/api/placeholder/150/150" alt="Profile Picture" class="profile-pic">
+            </div>
+        </nav>
+    </header>
+
+    <main class="quiz-container">
+        <div class="timer-container">
+            <div class="timer-bar" id="timer-bar"></div>
+            <div class="timer-text"><span id="timer-seconds">20</span>s</div>
+        </div>
+
+        <div class="question-container">
+            <h1 id="question-text"></h1>
+        </div>
+
+        <div class="answers-grid">
+            <div class="answer-card red" data-option="0">
+                <div class="answer-shape triangle"></div>
+                <div class="answer-text"></div>
+            </div>
+            <div class="answer-card blue" data-option="1">
+                <div class="answer-shape diamond"></div>
+                <div class="answer-text"></div>
+            </div>
+            <div class="answer-card yellow" data-option="2">
+                <div class="answer-shape circle"></div>
+                <div class="answer-text"></div>
+            </div>
+            <div class="answer-card green" data-option="3">
+                <div class="answer-shape square"></div>
+                <div class="answer-text"></div>
+            </div>
+        </div>
+    </main>
+
+    <div class="feedback-overlay" id="feedback-overlay">
+        <div class="feedback-modal correct" id="feedback-modal">
+            <div class="feedback-icon">✓</div>
+            <div class="feedback-text">Correct!</div>
+            <div class="points">+100 points</div>
+            <div class="waiting-text">Waiting for next question...</div>
+        </div>
+    </div>
+</body>
+</html>

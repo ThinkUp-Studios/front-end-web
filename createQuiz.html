@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Quiz</title>
+    <link rel="stylesheet" href="createQuiz.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="index.html" class="logo">MyWebsite</a>
+            <div class="nav-links">
+                <a href="main.html">Menu</a>
+                <a href="createQuiz.html" class="active">Create</a>
+                <a href="#search">Search</a>
+            </div>
+            <div class="profile">
+                <img src="/api/placeholder/150/150" alt="Profile Picture" class="profile-pic">
+            </div>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <section class="quiz-header">
+            <h1>Create New Quiz</h1>
+            <div class="quiz-details">
+                <div class="input-group">
+                    <label for="quiz-title">Quiz Title</label>
+                    <input type="text" id="quiz-title" placeholder="Enter quiz title" required>
+                </div>
+                <div class="input-group">
+                    <label for="quiz-description">Description (Optional)</label>
+                    <textarea id="quiz-description" placeholder="Enter a description for your quiz"></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="quiz-category">Category</label>
+                    <select id="quiz-category">
+                        <option value="education">Education</option>
+                        <option value="entertainment">Entertainment</option>
+                        <option value="sports">Sports</option>
+                        <option value="science">Science</option>
+                        <option value="history">History</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <section class="questions-container">
+            <div class="question-card" id="question-1">
+                <div class="question-header">
+                    <h2>Question 1</h2>
+                    <div class="question-controls">
+                        <button class="btn-icon" title="Delete question">🗑️</button>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="question-text-1">Question Text</label>
+                    <input type="text" id="question-text-1" placeholder="Enter your question" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="question-time-1">Time Limit (seconds)</label>
+                    <select id="question-time-1">
+                        <option value="10">10 seconds</option>
+                        <option value="20" selected>20 seconds</option>
+                        <option value="30">30 seconds</option>
+                        <option value="60">60 seconds</option>
+                        <option value="90">90 seconds</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label>Answer Choices</label>
+                    <div class="answer-choice">
+                        <div class="color-block color-red"></div>
+                        <input type="text" placeholder="Enter answer choice" required>
+                        <div class="correct-toggle" data-correct="false">
+                            ✓
+                        </div>
+                    </div>
+                    <div class="answer-choice">
+                        <div class="color-block color-blue"></div>
+                        <input type="text" placeholder="Enter answer choice" required>
+                        <div class="correct-toggle" data-correct="false">
+                            ✓
+                        </div>
+                    </div>
+                    <div class="answer-choice">
+                        <div class="color-block color-yellow"></div>
+                        <input type="text" placeholder="Enter answer choice" required>
+                        <div class="correct-toggle" data-correct="false">
+                            ✓
+                        </div>
+                    </div>
+                    <div class="answer-choice">
+                        <div class="color-block color-green"></div>
+                        <input type="text" placeholder="Enter answer choice" required>
+                        <div class="correct-toggle" data-correct="false">
+                            ✓
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="quiz-actions">
+            <button id="add-question" class="btn btn-secondary">Add Another Question</button>
+            <button id="complete-quiz" class="btn btn-primary">Complete Quiz</button>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 MyWebsite. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">About</a>
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple script for the quiz creation page functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            let questionCount = 1;
+            
+            // Function to toggle correct answer
+            const setupCorrectToggles = () => {
+                document.querySelectorAll('.correct-toggle').forEach(toggle => {
+                    toggle.addEventListener('click', function() {
+                        const isCorrect = this.getAttribute('data-correct') === 'true';
+                        // Toggle the data attribute
+                        this.setAttribute('data-correct', !isCorrect);
+                        // Toggle the active class
+                        this.classList.toggle('active', !isCorrect);
+                    });
+                });
+            };
+            
+            // Initialize the correct toggles for the first question
+            setupCorrectToggles();
+            
+            // Add new question
+            document.getElementById('add-question').addEventListener('click', function() {
+                questionCount++;
+                
+                // Clone the first question card as a template
+                const newQuestion = document.querySelector('.question-card').cloneNode(true);
+                newQuestion.id = `question-${questionCount}`;
+                
+                // Update the question number
+                newQuestion.querySelector('h2').textContent = `Question ${questionCount}`;
+                
+                // Reset inputs
+                newQuestion.querySelectorAll('input[type="text"]').forEach(input => {
+                    input.value = '';
+                });
+                
+                // Reset correct toggles
+                newQuestion.querySelectorAll('.correct-toggle').forEach(toggle => {
+                    toggle.setAttribute('data-correct', 'false');
+                    toggle.classList.remove('active');
+                });
+                
+                // Update IDs to be unique
+                newQuestion.querySelector(`[id^="question-text-"]`).id = `question-text-${questionCount}`;
+                newQuestion.querySelector(`[id^="question-time-"]`).id = `question-time-${questionCount}`;
+                
+                // Add the new question to the container
+                document.querySelector('.questions-container').appendChild(newQuestion);
+                
+                // Setup correct toggles for the new question
+                setupCorrectToggles();
+                
+                // Setup delete button for the new question
+                setupDeleteButtons();
+                
+                // Scroll to the new question
+                newQuestion.scrollIntoView({ behavior: 'smooth' });
+            });
+            
+            // Setup delete question functionality
+            const setupDeleteButtons = () => {
+                document.querySelectorAll('.btn-icon').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        // Don't delete if it's the only question
+                        if (document.querySelectorAll('.question-card').length > 1) {
+                            const card = this.closest('.question-card');
+                            card.remove();
+                            
+                            // Renumber the questions
+                            document.querySelectorAll('.question-card').forEach((card, index) => {
+                                const num = index + 1;
+                                card.id = `question-${num}`;
+                                card.querySelector('h2').textContent = `Question ${num}`;
+                            });
+                            
+                            questionCount = document.querySelectorAll('.question-card').length;
+                        } else {
+                            alert('You must have at least one question in your quiz.');
+                        }
+                    });
+                });
+            };
+            
+            // Initialize delete buttons
+            setupDeleteButtons();
+            
+            // Complete quiz submission
+            document.getElementById('complete-quiz').addEventListener('click', function() {
+                // Here we would normally validate and submit the quiz data
+                // For now, just show an alert
+                alert('Quiz completed! In a real application, this would save your quiz.');
+            });
+        });
+    </script>
+</body>
+</html>
