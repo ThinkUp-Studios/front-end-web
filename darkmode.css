@@ -1,0 +1,348 @@
+/* Dark Mode Styles */
+:root {
+    --bg-color: #f5f5f5;
+    --card-bg: #ffffff;
+    --text-color: #333;
+    --text-secondary: #666;
+    --border-color: #ddd;
+    --primary-color: #007bff;
+    --primary-hover: #0056b3;
+    --secondary-bg: #f8f9fa;
+    --header-bg: #ffffff;
+    --header-shadow: rgba(0, 0, 0, 0.1);
+    --footer-bg: #333;
+    --footer-text: #fff;
+    --footer-link: #ddd;
+    --input-bg: #ffffff;
+    --card-shadow: rgba(0, 0, 0, 0.05);
+    --hover-bg: #f0f0f0;
+}
+
+body.dark-mode {
+    --bg-color: #121212;
+    --card-bg: #1e1e1e;
+    --text-color: #e0e0e0;
+    --text-secondary: #aaaaaa;
+    --border-color: #333;
+    --primary-color: #4d9fff;
+    --primary-hover: #2c7ae0;
+    --secondary-bg: #2d2d2d;
+    --header-bg: #1a1a1a;
+    --header-shadow: rgba(0, 0, 0, 0.3);
+    --footer-bg: #1a1a1a;
+    --footer-text: #e0e0e0;
+    --footer-link: #aaaaaa;
+    --input-bg: #2c2c2c;
+    --card-shadow: rgba(0, 0, 0, 0.2);
+    --hover-bg: #333333;
+}
+
+/* Apply CSS variables */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+header {
+    background-color: var(--header-bg);
+    box-shadow: 0 2px 5px var(--header-shadow);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.logo {
+    color: var(--text-color);
+    transition: color 0.3s ease;
+}
+
+.nav-links a {
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: var(--primary-color);
+}
+
+/* Profile Menu */
+.profile-menu {
+    background-color: var(--card-bg);
+    box-shadow: 0 5px 15px var(--header-shadow);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-menu::before {
+    border-bottom-color: var(--card-bg);
+    transition: border-bottom-color 0.3s ease;
+}
+
+.profile-menu a {
+    color: var(--text-color);
+    transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.profile-menu a:hover {
+    background-color: var(--hover-bg);
+}
+
+/* Main Content */
+.main-content, 
+.quiz-container,
+.login-container {
+    transition: background-color 0.3s ease;
+}
+
+.hero, 
+.question-container, 
+.login-card, 
+.login-features, 
+.feature-card, 
+.quiz-card, 
+.question-card, 
+.quiz-header {
+    background-color: var(--card-bg);
+    box-shadow: 0 2px 10px var(--card-shadow);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hero h1, 
+.feature-card h2, 
+.login-header h1, 
+.login-features h2, 
+.quiz-card-title,
+.question-header h2 {
+    color: var(--text-color);
+    transition: color 0.3s ease;
+}
+
+.hero p, 
+.feature-card p, 
+.login-header p, 
+.quiz-card-description,
+.feature-text p {
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
+}
+
+/* Form Elements */
+input[type="text"], 
+input[type="email"], 
+input[type="password"],
+textarea, 
+select {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border-color: var(--border-color);
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+input[type="text"]:focus, 
+input[type="email"]:focus, 
+input[type="password"]:focus,
+textarea:focus, 
+select:focus {
+    border-color: var(--primary-color);
+}
+
+.input-group label {
+    color: var(--text-color);
+    transition: color 0.3s ease;
+}
+
+.password-hint,
+.waiting-text,
+.question-counter {
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--primary-color);
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-secondary {
+    background-color: var(--secondary-bg);
+    color: var(--text-color);
+    border-color: var(--border-color);
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background-color: var(--hover-bg);
+}
+
+.social-btn {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.social-btn:hover {
+    background-color: var(--secondary-bg);
+}
+
+/* Footer */
+footer {
+    background-color: var(--footer-bg);
+    color: var(--footer-text);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.footer-links a {
+    color: var(--footer-link);
+    transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: var(--footer-text);
+}
+
+/* Dark Mode Toggle */
+.theme-toggle {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 10px 15px;
+    transition: background-color 0.2s ease;
+}
+
+.theme-toggle:hover {
+    background-color: var(--hover-bg);
+}
+
+.toggle-switch {
+    position: relative;
+    width: 50px;
+    height: 24px;
+    background-color: #ddd;
+    border-radius: 12px;
+    transition: background-color 0.3s;
+}
+
+.toggle-switch.active {
+    background-color: var(--primary-color);
+}
+
+.toggle-switch::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    background-color: white;
+    transition: transform 0.3s;
+}
+
+.toggle-switch.active::before {
+    transform: translateX(26px);
+}
+
+/* Quiz Specific Dark Mode */
+.answer-card {
+    transition: transform 0.2s, opacity 0.2s, background-color 0.3s;
+}
+
+.correct-toggle {
+    border-color: var(--border-color);
+    transition: border-color 0.3s, background-color 0.3s, color 0.3s;
+}
+
+.btn-icon {
+    transition: background-color 0.2s;
+}
+
+.btn-icon:hover {
+    background-color: var(--hover-bg);
+}
+
+/* Settings page specific styles */
+.settings-container {
+    max-width: 800px;
+    margin: 100px auto 2rem;
+    padding: 0 2rem;
+}
+
+.settings-card {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px var(--card-shadow);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.settings-card h1 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
+    transition: color 0.3s ease;
+}
+
+.settings-section {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1.5rem;
+    transition: border-color 0.3s ease;
+}
+
+.settings-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.settings-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+    transition: color 0.3s ease;
+}
+
+.settings-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+
+.settings-option:hover {
+    background-color: var(--hover-bg);
+}
+
+.settings-option-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-option-text h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.3rem;
+    color: var(--text-color);
+    transition: color 0.3s ease;
+}
+
+.settings-option-text p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
+}
+
+.settings-actions {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}

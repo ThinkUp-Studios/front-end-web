@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - MyWebsite</title>
+    <link rel="stylesheet" href="login.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="main.html" class="logo">MyWebsite</a>
+            <div class="nav-links">
+                <a href="main.html">Menu</a>
+                <a href="createQuiz.html">Create</a>
+                <a href="#search">Search</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>Create Account</h1>
+                <p>Join our quiz community today</p>
+            </div>
+            
+            <form class="login-form">
+                <div class="input-group">
+                    <label for="fullname">Full Name</label>
+                    <input type="text" id="fullname" placeholder="Enter your full name" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Enter your email" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <div class="password-field">
+                        <input type="password" id="password" placeholder="Create a password" required>
+                        <button type="button" class="toggle-password" aria-label="Toggle password visibility">👁️</button>
+                    </div>
+                    <small class="password-hint">Password must be at least 8 characters long and include a mix of letters, numbers, and symbols.</small>
+                </div>
+                
+                <div class="input-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <div class="password-field">
+                        <input type="password" id="confirm-password" placeholder="Confirm your password" required>
+                        <button type="button" class="toggle-password" aria-label="Toggle password visibility">👁️</button>
+                    </div>
+                </div>
+                
+                <div class="terms-checkbox">
+                    <input type="checkbox" id="terms" required>
+                    <label for="terms">I agree to the <a href="#terms">Terms of Service</a> and <a href="#privacy">Privacy Policy</a></label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary login-btn">Create Account</button>
+                
+                <div class="login-divider">
+                    <span>OR</span>
+                </div>
+                
+                <div class="social-login">
+                    <button type="button" class="social-btn google">
+                        <img src="/api/placeholder/20/20" alt="Google" class="social-icon">
+                        Sign up with Google
+                    </button>
+                    <button type="button" class="social-btn facebook">
+                        <img src="/api/placeholder/20/20" alt="Facebook" class="social-icon">
+                        Sign up with Facebook
+                    </button>
+                </div>
+            </form>
+            
+            <div class="signup-prompt">
+                <p>Already have an account? <a href="login.html" class="signup-link">Sign In</a></p>
+            </div>
+        </div>
+        
+        <div class="login-features">
+            <h2>Why Join MyWebsite?</h2>
+            <div class="features-list">
+                <div class="feature-item">
+                    <div class="feature-icon">📝</div>
+                    <div class="feature-text">
+                        <h3>Create Your Own Quizzes</h3>
+                        <p>Design custom quizzes tailored to your interests and share them with friends.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🏆</div>
+                    <div class="feature-text">
+                        <h3>Track Your Progress</h3>
+                        <p>Monitor your quiz performance and see how you compare to others.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🔍</div>
+                    <div class="feature-text">
+                        <h3>Discover New Content</h3>
+                        <p>Explore a vast library of quizzes across various topics and categories.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🌟</div>
+                    <div class="feature-text">
+                        <h3>Join the Community</h3>
+                        <p>Connect with fellow quiz enthusiasts and challenge your friends.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 MyWebsite. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">About</a>
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

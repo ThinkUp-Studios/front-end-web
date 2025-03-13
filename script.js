@@ -14,9 +14,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Create menu items
                 const menuItems = [
                     { text: 'View Profile', icon: '👤', href: '#profile' },
-                    { text: 'Settings', icon: '⚙️', href: '#settings' },
+                    { text: 'Settings', icon: '⚙️', href: 'settings.html' },
                     { text: 'FAQ', icon: '❓', href: '#faq' },
-                    { text: 'Logout', icon: '🚪', href: '#logout' }
+                    { text: 'Logout', icon: '🚪', href: 'login.html' }
                 ];
                 
                 // Add each menu item to the dropdown
@@ -348,10 +348,218 @@ document.addEventListener('DOMContentLoaded', function() {
         init();
     };
     
+    // Create Quiz Page Functionality
+    const initCreateQuiz = () => {
+        let questionCount = 1;
+        
+        // Function to toggle correct answer
+        const setupCorrectToggles = () => {
+            document.querySelectorAll('.correct-toggle').forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    // First, remove active class from all toggles in this question
+                    const questionCard = this.closest('.question-card');
+                    questionCard.querySelectorAll('.correct-toggle').forEach(t => {
+                        t.setAttribute('data-correct', 'false');
+                        t.classList.remove('active');
+                    });
+                    
+                    // Then set this one as active
+                    this.setAttribute('data-correct', 'true');
+                    this.classList.add('active');
+                });
+            });
+        };
+        
+        // Initialize the correct toggles for the first question
+        setupCorrectToggles();
+        
+        // Add new question
+        const addQuestionBtn = document.getElementById('add-question');
+        if (addQuestionBtn) {
+            addQuestionBtn.addEventListener('click', function() {
+                questionCount++;
+                
+                // Clone the first question card as a template
+                const newQuestion = document.querySelector('.question-card').cloneNode(true);
+                newQuestion.id = `question-${questionCount}`;
+                
+                // Update the question number
+                newQuestion.querySelector('h2').textContent = `Question ${questionCount}`;
+                
+                // Reset inputs
+                newQuestion.querySelectorAll('input[type="text"]').forEach(input => {
+                    input.value = '';
+                });
+                
+                // Reset correct toggles
+                newQuestion.querySelectorAll('.correct-toggle').forEach(toggle => {
+                    toggle.setAttribute('data-correct', 'false');
+                    toggle.classList.remove('active');
+                });
+                
+                // Update IDs to be unique
+                newQuestion.querySelector(`[id^="question-text-"]`).id = `question-text-${questionCount}`;
+                newQuestion.querySelector(`[id^="question-time-"]`).id = `question-time-${questionCount}`;
+                
+                // Add the new question to the container
+                document.querySelector('.questions-container').appendChild(newQuestion);
+                
+                // Setup correct toggles for the new question
+                setupCorrectToggles();
+                
+                // Setup delete button for the new question
+                setupDeleteButtons();
+                
+                // Scroll to the new question
+                newQuestion.scrollIntoView({ behavior: 'smooth' });
+            });
+        }
+        
+        // Setup delete question functionality
+        const setupDeleteButtons = () => {
+            document.querySelectorAll('.btn-icon').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Don't delete if it's the only question
+                    if (document.querySelectorAll('.question-card').length > 1) {
+                        const card = this.closest('.question-card');
+                        card.remove();
+                        
+                        // Renumber the questions
+                        document.querySelectorAll('.question-card').forEach((card, index) => {
+                            const num = index + 1;
+                            card.id = `question-${num}`;
+                            card.querySelector('h2').textContent = `Question ${num}`;
+                        });
+                        
+                        questionCount = document.querySelectorAll('.question-card').length;
+                    } else {
+                        alert('You must have at least one question in your quiz.');
+                    }
+                });
+            });
+        };
+        
+        // Initialize delete buttons
+        setupDeleteButtons();
+        
+        // Complete quiz submission
+        const completeQuizBtn = document.getElementById('complete-quiz');
+        if (completeQuizBtn) {
+            completeQuizBtn.addEventListener('click', function() {
+                // Here we would normally validate and submit the quiz data
+                // For now, just show an alert
+                alert('Quiz completed! In a real application, this would save your quiz.');
+            });
+        }
+    };
+    
+        // Login/Signup page functionality
+    const initLoginPage = () => {
+        // Toggle password visibility
+        const togglePasswordButtons = document.querySelectorAll('.toggle-password');
+        
+        if (togglePasswordButtons.length > 0) {
+            togglePasswordButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const passwordField = this.previousElementSibling;
+                    const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordField.setAttribute('type', type);
+                    this.textContent = type === 'password' ? '👁️' : '👁️‍🗨️';
+                });
+            });
+        }
+        
+        // Form submission with redirect to main page
+        const loginForm = document.querySelector('.login-form');
+        if (loginForm) {
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Show a brief message before redirecting
+                alert('Login successful! Redirecting to main page...');
+                
+                // Redirect to main page after a short delay
+                setTimeout(() => {
+                    window.location.href = 'main.html';
+                }, 500);
+            });
+        }
+    };
+
+    // Dark mode functionality
+    const initDarkMode = () => {
+        // Check for saved theme preference or use device preference
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        // Set initial theme
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            document.body.classList.add('dark-mode');
+            updateToggles(true);
+        } else {
+            updateToggles(false);
+        }
+        
+        // Toggle dark mode function
+        const toggleDarkMode = () => {
+            const isDarkMode = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+            updateToggles(isDarkMode);
+        };
+        
+        // Update all toggle switches
+        function updateToggles(isDark) {
+            document.querySelectorAll('#dark-mode-toggle').forEach(toggle => {
+                toggle.classList.toggle('active', isDark);
+            });
+        }
+        
+        // Set up event listeners
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        if (darkModeToggle) {
+            darkModeToggle.addEventListener('click', toggleDarkMode);
+        }
+        
+        // Initialize other toggle switches
+        document.querySelectorAll('.toggle-switch:not(#dark-mode-toggle)').forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                this.classList.toggle('active');
+            });
+        });
+    };
+
+    // Settings page functionality
+    const initSettingsPage = () => {
+        // Save changes button
+        const saveButton = document.querySelector('.settings-actions .btn-primary');
+        if (saveButton) {
+            saveButton.addEventListener('click', function() {
+                alert('Settings saved successfully!');
+            });
+        }
+        
+        // Cancel button
+        const cancelButton = document.querySelector('.settings-actions .btn-secondary');
+        if (cancelButton) {
+            cancelButton.addEventListener('click', function() {
+                window.location.href = 'main.html';
+            });
+        }
+    };
+
     // Check which page we're on and run appropriate functions
     if (document.querySelector('.quiz-container')) {
         initQuiz(); // We're on the quiz page
     } else if (document.getElementById('quiz-cards')) {
         renderQuizCards(); // We're on the main page
+    } else if (document.querySelector('.questions-container')) {
+        initCreateQuiz(); // We're on the create quiz page
+    } else if (document.querySelector('.login-form')) {
+        initLoginPage(); // We're on the login or signup page
+    } else if (document.querySelector('.settings-container')) {
+        initSettingsPage(); // We're on the settings page
     }
+    
+    // Initialize dark mode on every page
+    initDarkMode();
 });
