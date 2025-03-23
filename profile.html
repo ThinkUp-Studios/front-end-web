@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil - ThinkUp</title>
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="profile.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="main.html" class="logo">ThinkUp</a>
+            <div class="nav-links">
+                <a href="main.html">Accueil</a>
+                <a href="createQuiz.html">Créer</a>
+                <a href="search.html">Rechercher</a>
+            </div>
+            <div class="profile">
+                <img src="/api/placeholder/150/150" alt="Photo de Profil" class="profile-pic">
+            </div>
+        </nav>
+    </header>
+
+    <main class="profile-container">
+        <div class="profile-header">
+            <div class="profile-cover"></div>
+            <div class="profile-info">
+                <div class="profile-avatar">
+                    <img src="/api/placeholder/150/150" alt="Photo de Profil">
+                    <button class="change-avatar-btn"><span class="avatar-icon">📷</span></button>
+                </div>
+                <div class="profile-details">
+                    <h1 class="profile-name">Martin Dubois</h1>
+                    <p class="profile-username">@martindubois</p>
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <span class="stat-value">42</span>
+                            <span class="stat-label">Quiz créés</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">128</span>
+                            <span class="stat-label">Quiz complétés</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">3850</span>
+                            <span class="stat-label">Points</span>
+                        </div>
+                    </div>
+                </div>
+                <a href="settings.html" class="edit-profile-btn">Modifier le profil</a>
+            </div>
+        </div>
+
+        <div class="profile-content">
+            <div class="profile-tabs">
+                <button class="tab-btn active" data-tab="created">Mes Quiz</button>
+                <button class="tab-btn" data-tab="completed">Quiz Complétés</button>
+                <button class="tab-btn" data-tab="badges">Badges</button>
+            </div>
+
+            <div class="tab-content active" id="created-content">
+                <h2>Mes Quiz Créés</h2>
+                <div class="quiz-cards" id="created-quizzes">
+                    <div class="quiz-card">
+                        <img src="/api/placeholder/400/200" alt="Quiz" class="quiz-card-image">
+                        <div class="quiz-card-content">
+                            <h3 class="quiz-card-title">Histoire de France</h3>
+                            <p class="quiz-card-description">Testez vos connaissances sur l'histoire de France.</p>
+                            <div class="quiz-card-meta">
+                                <span>15 questions</span>
+                                <span class="quiz-card-category">Histoire</span>
+                            </div>
+                            <div class="quiz-card-actions">
+                                <a href="#" class="quiz-card-btn">Jouer</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="quiz-card">
+                        <img src="/api/placeholder/400/200" alt="Quiz" class="quiz-card-image">
+                        <div class="quiz-card-content">
+                            <h3 class="quiz-card-title">Mathématiques avancées</h3>
+                            <p class="quiz-card-description">Questions difficiles de mathématiques pour experts.</p>
+                            <div class="quiz-card-meta">
+                                <span>10 questions</span>
+                                <span class="quiz-card-category">Éducation</span>
+                            </div>
+                            <div class="quiz-card-actions">
+                                <a href="#" class="quiz-card-btn">Jouer</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="completed-content">
+                <h2>Quiz Complétés</h2>
+                <div class="quiz-history">
+                    <div class="history-item">
+                        <div class="history-quiz-info">
+                            <h3>Culture Générale</h3>
+                            <span class="history-category">Divers</span>
+                        </div>
+                        <div class="history-score">
+                            <div class="score-circle">
+                                <span class="score-value">85%</span>
+                            </div>
+                        </div>
+                        <div class="history-date">
+                            <span>18 Mars 2025</span>
+                        </div>
+                        <a href="#" class="replay-btn">Rejouer</a>
+                    </div>
+                    <div class="history-item">
+                        <div class="history-quiz-info">
+                            <h3>Géographie Mondiale</h3>
+                            <span class="history-category">Éducation</span>
+                        </div>
+                        <div class="history-score">
+                            <div class="score-circle">
+                                <span class="score-value">92%</span>
+                            </div>
+                        </div>
+                        <div class="history-date">
+                            <span>15 Mars 2025</span>
+                        </div>
+                        <a href="#" class="replay-btn">Rejouer</a>
+                    </div>
+                    <div class="history-item">
+                        <div class="history-quiz-info">
+                            <h3>Sciences et Technologie</h3>
+                            <span class="history-category">Science</span>
+                        </div>
+                        <div class="history-score">
+                            <div class="score-circle">
+                                <span class="score-value">78%</span>
+                            </div>
+                        </div>
+                        <div class="history-date">
+                            <span>10 Mars 2025</span>
+                        </div>
+                        <a href="#" class="replay-btn">Rejouer</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="badges-content">
+                <h2>Mes Badges</h2>
+                <div class="badges-grid">
+                    <div class="badge-item achieved">
+                        <div class="badge-icon">🏆</div>
+                        <div class="badge-info">
+                            <h3>Quiz Master</h3>
+                            <p>Créer 10 quiz</p>
+                        </div>
+                    </div>
+                    <div class="badge-item achieved">
+                        <div class="badge-icon">🧠</div>
+                        <div class="badge-info">
+                            <h3>Expert</h3>
+                            <p>Obtenir un score parfait 5 fois</p>
+                        </div>
+                    </div>
+                    <div class="badge-item achieved">
+                        <div class="badge-icon">🔥</div>
+                        <div class="badge-info">
+                            <h3>Sur une lancée</h3>
+                            <p>Jouer 5 jours consécutifs</p>
+                        </div>
+                    </div>
+                    <div class="badge-item">
+                        <div class="badge-icon">⭐</div>
+                        <div class="badge-info">
+                            <h3>Populaire</h3>
+                            <p>Avoir un quiz joué 100 fois</p>
+                        </div>
+                    </div>
+                    <div class="badge-item">
+                        <div class="badge-icon">🌟</div>
+                        <div class="badge-info">
+                            <h3>Créateur Élite</h3>
+                            <p>Créer 25 quiz</p>
+                        </div>
+                    </div>
+                    <div class="badge-item">
+                        <div class="badge-icon">🎯</div>
+                        <div class="badge-info">
+                            <h3>Précision</h3>
+                            <p>Maintenir une précision de 90% sur 20 quiz</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 ThinkUp. Tous droits réservés.</p>
+            <div class="footer-links">
+                <a href="#">À propos</a>
+                <a href="#">Confidentialité</a>
+                <a href="#">Conditions</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

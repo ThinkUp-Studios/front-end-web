@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - MyWebsite</title>
+    <title>Connexion - ThinkUp</title>
     <link rel="stylesheet" href="login.css">
     <script src="script.js" defer></script>
 </head>
 <body>
     <header>
         <nav class="navbar">
-            <a href="main.html" class="logo">MyWebsite</a>
+            <a href="main.html" class="logo">ThinkUp</a>
             <div class="nav-links">
-                <a href="main.html">Menu</a>
-                <a href="createQuiz.html">Create</a>
-                <a href="#search">Search</a>
+                <a href="main.html">Accueil</a>
+                <a href="createQuiz.html">Créer</a>
+                <a href="search.html">Rechercher</a>
             </div>
         </nav>
     </header>
@@ -22,79 +22,64 @@
     <main class="login-container">
         <div class="login-card">
             <div class="login-header">
-                <h1>Welcome Back</h1>
-                <p>Sign in to continue your quiz journey</p>
+                <h1>Bienvenue</h1>
+                <p>Connectez-vous pour continuer votre aventure quiz</p>
             </div>
             
             <form class="login-form">
                 <div class="input-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" placeholder="Enter your email" required>
+                    <label for="username">Nom d'utilisateur</label>
+                    <input type="text" id="username" placeholder="Entrez votre nom d'utilisateur" required>
                 </div>
                 
                 <div class="input-group">
-                    <label for="password">Password</label>
+                    <label for="password">Mot de passe</label>
                     <div class="password-field">
-                        <input type="password" id="password" placeholder="Enter your password" required>
-                        <button type="button" class="toggle-password" aria-label="Toggle password visibility">👁️</button>
+                        <input type="password" id="password" placeholder="Entrez votre mot de passe" required>
+                        <button type="button" class="toggle-password" aria-label="Afficher/masquer le mot de passe">👁️</button>
                     </div>
                     <div class="forgot-password">
-                        <a href="#forgot-password">Forgot password?</a>
+                        <a href="#forgot-password">Mot de passe oublié?</a>
                     </div>
                 </div>
                 
-                <button type="submit" class="btn btn-primary login-btn">Sign In</button>
-                
-                <div class="login-divider">
-                    <span>OR</span>
-                </div>
-                
-                <div class="social-login">
-                    <button type="button" class="social-btn google">
-                        <img src="/api/placeholder/20/20" alt="Google" class="social-icon">
-                        Sign in with Google
-                    </button>
-                    <button type="button" class="social-btn facebook">
-                        <img src="/api/placeholder/20/20" alt="Facebook" class="social-icon">
-                        Sign in with Facebook
-                    </button>
-                </div>
+                <button type="submit" class="btn btn-primary login-btn">Se connecter</button>
             </form>
             
             <div class="signup-prompt">
-                <p>Don't have an account? <a href="signup.html" class="signup-link">Sign Up</a></p>
+                <p>Vous n'avez pas de compte? <a href="signup.html" class="signup-link">S'inscrire</a></p>
             </div>
         </div>
         
         <div class="login-features">
-            <h2>Why Join MyWebsite?</h2>
+            <h2>Pourquoi rejoindre ThinkUp?</h2>
             <div class="features-list">
                 <div class="feature-item">
                     <div class="feature-icon">📝</div>
                     <div class="feature-text">
-                        <h3>Create Your Own Quizzes</h3>
-                        <p>Design custom quizzes tailored to your interests and share them with friends.</p>
+                        <h3>Créez vos propres Quiz</h3>
+                        <p>Concevez des quiz personnalisés selon vos intérêts et partagez-les avec vos amis.</p>
                     </div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">🏆</div>
                     <div class="feature-text">
-                        <h3>Track Your Progress</h3>
-                        <p>Monitor your quiz performance and see how you compare to others.</p>
+                        <h3>Suivez votre progression</h3>
+                        <p>Surveillez vos performances aux quiz et comparez-vous aux autres.</p>
                     </div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">🔍</div>
                     <div class="feature-text">
-                        <h3>Discover New Content</h3>
-                        <p>Explore a vast library of quizzes across various topics and categories.</p>
+                        <h3>Découvrez du nouveau contenu</h3>
+                        <p>Explorez une vaste bibliothèque de quiz sur divers sujets et catégories.</p>
                     </div>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">🌟</div>
                     <div class="feature-text">
-                        <h3>Join the Community</h3>
-                        <p>Connect with fellow quiz enthusiasts and challenge your friends.</p>
+                        <h3>Rejoignez la communauté</h3>
+                        <p>Connectez-vous avec d'autres passionnés de quiz et défiez vos amis.</p>
                     </div>
                 </div>
             </div>
@@ -103,11 +88,11 @@
 
     <footer>
         <div class="footer-content">
-            <p>&copy; 2025 MyWebsite. All rights reserved.</p>
+            <p>&copy; 2025 ThinkUp. Tous droits réservés.</p>
             <div class="footer-links">
-                <a href="#">About</a>
-                <a href="#">Privacy</a>
-                <a href="#">Terms</a>
+                <a href="#">À propos</a>
+                <a href="#">Confidentialité</a>
+                <a href="#">Conditions</a>
                 <a href="#">Contact</a>
             </div>
         </div>

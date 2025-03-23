@@ -1,25 +1,19 @@
-// Wait for the DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Profile menu functionality
     const profilePic = document.querySelector('.profile-pic');
     
     if (profilePic) {
-        // Create the profile dropdown menu
         const createProfileMenu = () => {
-            // Create the menu element if it doesn't exist yet
             if (!document.querySelector('.profile-menu')) {
                 const menu = document.createElement('div');
                 menu.className = 'profile-menu';
                 
-                // Create menu items
                 const menuItems = [
-                    { text: 'View Profile', icon: '👤', href: '#profile' },
-                    { text: 'Settings', icon: '⚙️', href: 'settings.html' },
+                    { text: 'Voir Profil', icon: '👤', href: 'profile.html' },
+                    { text: 'Paramètres', icon: '⚙️', href: 'settings.html' },
                     { text: 'FAQ', icon: '❓', href: '#faq' },
-                    { text: 'Logout', icon: '🚪', href: 'login.html' }
+                    { text: 'Déconnexion', icon: '🚪', href: 'login.html' }
                 ];
                 
-                // Add each menu item to the dropdown
                 menuItems.forEach(item => {
                     const menuItem = document.createElement('a');
                     menuItem.href = item.href;
@@ -27,23 +21,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     menu.appendChild(menuItem);
                 });
                 
-                // Add the menu to the profile container
                 document.querySelector('.profile').appendChild(menu);
             }
         };
         
-        // Toggle the profile menu visibility
         const toggleProfileMenu = () => {
-            // Create the menu if it doesn't exist
             createProfileMenu();
             
-            // Get the menu
             const menu = document.querySelector('.profile-menu');
             
-            // Toggle the active class
             menu.classList.toggle('active');
             
-            // Close menu when clicking outside
             if (menu.classList.contains('active')) {
                 document.addEventListener('click', closeMenuOnClickOutside);
             } else {
@@ -51,26 +39,22 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         };
         
-        // Close the menu when clicking outside
         const closeMenuOnClickOutside = (event) => {
             const menu = document.querySelector('.profile-menu');
             const profile = document.querySelector('.profile');
             
-            // If the click is outside the profile area
             if (!profile.contains(event.target)) {
                 menu.classList.remove('active');
                 document.removeEventListener('click', closeMenuOnClickOutside);
             }
         };
         
-        // Add click event to profile picture
         profilePic.addEventListener('click', function(event) {
-            event.stopPropagation(); // Prevent the click from immediately closing the menu
+            event.stopPropagation();
             toggleProfileMenu();
         });
     }
     
-    // Main page quiz cards functionality
     const renderQuizCards = () => {
         const quizCardsContainer = document.getElementById('quiz-cards');
         
@@ -84,11 +68,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         <h3 class="quiz-card-title">${quiz.title}</h3>
                         <p class="quiz-card-description">${quiz.description}</p>
                         <div class="quiz-card-meta">
-                            <span>By ${quiz.author}</span>
+                            <span>Par ${quiz.author}</span>
                             <span class="quiz-card-category">${quiz.category}</span>
                         </div>
                         <div class="quiz-card-actions">
-                            <a href="quiz.html?id=${quiz.id}" class="quiz-card-btn">Play Quiz</a>
+                            <a href="quiz.html?id=${quiz.id}" class="quiz-card-btn">Jouer</a>
                         </div>
                     </div>
                 `;
@@ -97,29 +81,72 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
     
-    // Quiz page functionality
+    const renderRecommendedQuizzes = () => {
+        const recommendedContainer = document.getElementById('recommended-quiz-cards');
+        
+        if (recommendedContainer && quizData && quizData.length > 0) {
+            const numberOfQuizzesToShow = Math.min(3, quizData.length);
+            
+            for (let i = 0; i < numberOfQuizzesToShow; i++) {
+                const quiz = quizData[i];
+                const quizCard = document.createElement('div');
+                quizCard.className = 'quiz-card';
+                
+                let tagName = "";
+                let tagClass = "";
+                
+                if (i === 0) {
+                    tagName = "Populaire";
+                    tagClass = "popular-tag";
+                } else if (i === 1) {
+                    tagName = "Nouveau"; 
+                    tagClass = "new-tag";
+                } else if (i === 2) {
+                    tagName = "Recommandé";
+                    tagClass = "recommended-tag";
+                }
+                
+                quizCard.innerHTML = `
+                    <div class="quiz-card-tag ${tagClass}">${tagName}</div>
+                    <img src="${quiz.imageUrl}" alt="${quiz.title}" class="quiz-card-image">
+                    <div class="quiz-card-content">
+                        <h3 class="quiz-card-title">${quiz.title}</h3>
+                        <p class="quiz-card-description">${quiz.description}</p>
+                        <div class="quiz-card-meta">
+                            <span>Par ${quiz.author}</span>
+                            <span class="quiz-card-category">${quiz.category}</span>
+                        </div>
+                        <div class="quiz-card-info">
+                            <span class="quiz-questions-count">${quiz.questions.length} questions</span>
+                            <span class="quiz-time-estimate">${Math.round(quiz.questions.reduce((total, q) => total + q.timeLimit, 0) / 60)} min</span>
+                        </div>
+                        <div class="quiz-card-actions">
+                            <a href="quiz.html?id=${quiz.id}" class="quiz-card-btn">Jouer</a>
+                        </div>
+                    </div>
+                `;
+                recommendedContainer.appendChild(quizCard);
+            }
+        }
+    };
+    
     const initQuiz = () => {
-        // Get the quiz ID from the URL
         const urlParams = new URLSearchParams(window.location.search);
         const quizId = urlParams.get('id');
         
-        // Find the quiz data based on the ID
         const currentQuizData = quizData.find(quiz => quiz.id === quizId);
         
-        // If no quiz found, redirect to main page
         if (!currentQuizData) {
             window.location.href = 'main.html';
             return;
         }
         
-        // Quiz state
         let currentQuestionIndex = 0;
         let score = 0;
         let timer;
         let timeLeft;
         let isAnswered = false;
         
-        // DOM Elements
         const timerBar = document.getElementById('timer-bar');
         const timerSeconds = document.getElementById('timer-seconds');
         const questionText = document.getElementById('question-text');
@@ -129,30 +156,22 @@ document.addEventListener('DOMContentLoaded', function() {
         const feedbackOverlay = document.getElementById('feedback-overlay');
         const feedbackModal = document.getElementById('feedback-modal');
         
-        // Initialize the quiz
         function init() {
-            // Set the document title to include the quiz name
-            document.title = `${currentQuizData.title} - MyWebsite`;
+            document.title = `${currentQuizData.title} - ThinkUp`;
             
-            // Set the quiz title in the header
             document.getElementById('quiz-title').textContent = currentQuizData.title;
             
-            // Set the total number of questions dynamically
             totalQuestionsSpan.textContent = currentQuizData.questions.length;
             
-            // Start with the first question
             loadQuestion(0);
             
-            // Add event listeners to answer cards
             answerCards.forEach(card => {
                 card.addEventListener('click', handleAnswerClick);
             });
         }
         
-        // Load a question
         function loadQuestion(index) {
             if (index >= currentQuizData.questions.length) {
-                // Quiz is over
                 endQuiz();
                 return;
             }
@@ -161,43 +180,36 @@ document.addEventListener('DOMContentLoaded', function() {
             currentQuestionIndex = index;
             const question = currentQuizData.questions[index];
             
-            // Update question text and counter
             questionText.textContent = question.text;
             currentQuestionSpan.textContent = index + 1;
             
-            // Update answer options
             answerCards.forEach((card, i) => {
                 card.querySelector('.answer-text').textContent = question.options[i];
                 card.classList.remove('disabled');
             });
             
-            // Start the timer
             startTimer(question.timeLimit);
         }
         
-        // Start timer for current question
         function startTimer(seconds) {
             clearInterval(timer);
             timeLeft = seconds;
             timerSeconds.textContent = timeLeft;
             timerBar.style.transition = 'none';
             timerBar.style.width = '100%';
-            timerBar.style.backgroundColor = '#4CAF50'; // Reset color to green
+            timerBar.style.backgroundColor = '#4CAF50';
             
-            // Force a reflow to make sure the transition is reset
             void timerBar.offsetWidth;
             
             timerBar.style.transition = `width ${seconds}s linear`;
             timerBar.style.width = '0%';
             
-            // Calculate time threshold for turning red (20% of total time)
             const warningThreshold = Math.ceil(seconds * 0.2);
             
             timer = setInterval(() => {
                 timeLeft--;
                 timerSeconds.textContent = timeLeft;
                 
-                // Check if timer should turn red (at 20% time remaining)
                 if (timeLeft <= warningThreshold && timerBar.style.backgroundColor !== 'red') {
                     timerBar.style.backgroundColor = 'red';
                 }
@@ -211,7 +223,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 1000);
         }
         
-        // Handle answer click
         function handleAnswerClick() {
             if (isAnswered) return;
             
@@ -222,45 +233,37 @@ document.addEventListener('DOMContentLoaded', function() {
             const correctOption = currentQuizData.questions[currentQuestionIndex].correctOption;
             const totalTime = currentQuizData.questions[currentQuestionIndex].timeLimit;
             
-            // Disable all answer cards
             answerCards.forEach(card => {
                 card.classList.add('disabled');
             });
             
-            // Show feedback
             if (selectedOption === correctOption) {
-                // Calculate points based on time remaining: points = 100 + 100 * timeRemaining/totalTime
                 const pointsEarned = 100 + Math.round(100 * (timeLeft / totalTime));
                 
-                // Correct answer
                 feedbackModal.className = 'feedback-modal correct';
                 feedbackModal.querySelector('.feedback-icon').textContent = '✓';
                 feedbackModal.querySelector('.feedback-text').textContent = 'Correct!';
                 feedbackModal.querySelector('.points').textContent = `+${pointsEarned} points`;
                 score += pointsEarned;
                 
-                // Show time bonus info
                 let timeBonus = feedbackModal.querySelector('.time-bonus');
                 if (!timeBonus) {
                     timeBonus = document.createElement('div');
                     timeBonus.className = 'time-bonus';
                     feedbackModal.insertBefore(timeBonus, feedbackModal.querySelector('.waiting-text'));
                 }
-                timeBonus.textContent = `Speed Bonus: ${Math.round((timeLeft/totalTime) * 100)}%`;
+                timeBonus.textContent = `Bonus de rapidité: ${Math.round((timeLeft/totalTime) * 100)}%`;
                 
-                // Remove correct answer display if it exists from a previous question
                 const existingCorrectAnswer = feedbackModal.querySelector('.correct-answer');
                 if (existingCorrectAnswer) {
                     feedbackModal.removeChild(existingCorrectAnswer);
                 }
             } else {
-                // Wrong answer
                 feedbackModal.className = 'feedback-modal incorrect';
                 feedbackModal.querySelector('.feedback-icon').textContent = '✗';
                 feedbackModal.querySelector('.feedback-text').textContent = 'Incorrect!';
                 feedbackModal.querySelector('.points').textContent = '+0 points';
                 
-                // Display correct answer
                 const correctAnswerText = currentQuizData.questions[currentQuestionIndex].options[correctOption];
                 let correctAnswer = feedbackModal.querySelector('.correct-answer');
                 if (!correctAnswer) {
@@ -268,9 +271,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     correctAnswer.className = 'correct-answer';
                     feedbackModal.insertBefore(correctAnswer, feedbackModal.querySelector('.waiting-text'));
                 }
-                correctAnswer.textContent = `Correct answer: ${correctAnswerText}`;
+                correctAnswer.textContent = `Réponse correcte: ${correctAnswerText}`;
                 
-                // Remove time bonus if it exists from a previous question
                 const existingTimeBonus = feedbackModal.querySelector('.time-bonus');
                 if (existingTimeBonus) {
                     feedbackModal.removeChild(existingTimeBonus);
@@ -279,29 +281,24 @@ document.addEventListener('DOMContentLoaded', function() {
             
             feedbackOverlay.classList.add('active');
             
-            // Move to next question after a delay
             setTimeout(() => {
                 feedbackOverlay.classList.remove('active');
                 loadQuestion(currentQuestionIndex + 1);
             }, 3000);
         }
         
-        // Handle timeout (no answer selected in time)
         function handleTimeout() {
             isAnswered = true;
             
-            // Disable all answer cards
             answerCards.forEach(card => {
                 card.classList.add('disabled');
             });
-            
-            // Show timeout feedback
+
             feedbackModal.className = 'feedback-modal timeout';
             feedbackModal.querySelector('.feedback-icon').textContent = '⏱';
-            feedbackModal.querySelector('.feedback-text').textContent = 'Time\'s up!';
+            feedbackModal.querySelector('.feedback-text').textContent = 'Temps écoulé!';
             feedbackModal.querySelector('.points').textContent = '+0 points';
             
-            // Display correct answer
             const correctOption = currentQuizData.questions[currentQuestionIndex].correctOption;
             const correctAnswerText = currentQuizData.questions[currentQuestionIndex].options[correctOption];
             let correctAnswer = feedbackModal.querySelector('.correct-answer');
@@ -310,9 +307,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 correctAnswer.className = 'correct-answer';
                 feedbackModal.insertBefore(correctAnswer, feedbackModal.querySelector('.waiting-text'));
             }
-            correctAnswer.textContent = `Correct answer: ${correctAnswerText}`;
+            correctAnswer.textContent = `Réponse correcte: ${correctAnswerText}`;
             
-            // Remove time bonus if it exists from a previous question
             const existingTimeBonus = feedbackModal.querySelector('.time-bonus');
             if (existingTimeBonus) {
                 feedbackModal.removeChild(existingTimeBonus);
@@ -320,111 +316,88 @@ document.addEventListener('DOMContentLoaded', function() {
             
             feedbackOverlay.classList.add('active');
             
-            // Move to next question after a delay
             setTimeout(() => {
                 feedbackOverlay.classList.remove('active');
                 loadQuestion(currentQuestionIndex + 1);
             }, 3000);
         }
         
-        // End the quiz
         function endQuiz() {
-            // Remove the timer and question
             document.querySelector('.timer-container').style.display = 'none';
             document.querySelector('.question-container').style.display = 'none';
             
-            // Replace answers with results
             const answersGrid = document.querySelector('.answers-grid');
             answersGrid.innerHTML = `
                 <div class="results-container">
-                    <h2>Quiz Complete!</h2>
-                    <p class="final-score">Your score: ${score}</p>
-                    <button class="btn" onclick="window.location.href='main.html'">Return to Home</button>
+                    <h2>Quiz Terminé!</h2>
+                    <p class="final-score">Votre score: ${score}</p>
+                    <button class="btn" onclick="window.location.href='main.html'">Retour à l'Accueil</button>
                 </div>
             `;
         }
         
-        // Initialize the quiz
         init();
     };
     
-    // Create Quiz Page Functionality
     const initCreateQuiz = () => {
         let questionCount = 1;
         
-        // Function to toggle correct answer
         const setupCorrectToggles = () => {
             document.querySelectorAll('.correct-toggle').forEach(toggle => {
                 toggle.addEventListener('click', function() {
-                    // First, remove active class from all toggles in this question
                     const questionCard = this.closest('.question-card');
                     questionCard.querySelectorAll('.correct-toggle').forEach(t => {
                         t.setAttribute('data-correct', 'false');
                         t.classList.remove('active');
                     });
                     
-                    // Then set this one as active
                     this.setAttribute('data-correct', 'true');
                     this.classList.add('active');
                 });
             });
         };
         
-        // Initialize the correct toggles for the first question
         setupCorrectToggles();
         
-        // Add new question
         const addQuestionBtn = document.getElementById('add-question');
         if (addQuestionBtn) {
             addQuestionBtn.addEventListener('click', function() {
                 questionCount++;
                 
-                // Clone the first question card as a template
                 const newQuestion = document.querySelector('.question-card').cloneNode(true);
                 newQuestion.id = `question-${questionCount}`;
                 
-                // Update the question number
                 newQuestion.querySelector('h2').textContent = `Question ${questionCount}`;
                 
-                // Reset inputs
                 newQuestion.querySelectorAll('input[type="text"]').forEach(input => {
                     input.value = '';
                 });
                 
-                // Reset correct toggles
                 newQuestion.querySelectorAll('.correct-toggle').forEach(toggle => {
                     toggle.setAttribute('data-correct', 'false');
                     toggle.classList.remove('active');
                 });
                 
-                // Update IDs to be unique
                 newQuestion.querySelector(`[id^="question-text-"]`).id = `question-text-${questionCount}`;
                 newQuestion.querySelector(`[id^="question-time-"]`).id = `question-time-${questionCount}`;
                 
-                // Add the new question to the container
                 document.querySelector('.questions-container').appendChild(newQuestion);
                 
-                // Setup correct toggles for the new question
                 setupCorrectToggles();
                 
-                // Setup delete button for the new question
                 setupDeleteButtons();
                 
-                // Scroll to the new question
                 newQuestion.scrollIntoView({ behavior: 'smooth' });
             });
         }
         
-        // Setup delete question functionality
         const setupDeleteButtons = () => {
             document.querySelectorAll('.btn-icon').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    // Don't delete if it's the only question
                     if (document.querySelectorAll('.question-card').length > 1) {
                         const card = this.closest('.question-card');
                         card.remove();
                         
-                        // Renumber the questions
                         document.querySelectorAll('.question-card').forEach((card, index) => {
                             const num = index + 1;
                             card.id = `question-${num}`;
@@ -433,29 +406,23 @@ document.addEventListener('DOMContentLoaded', function() {
                         
                         questionCount = document.querySelectorAll('.question-card').length;
                     } else {
-                        alert('You must have at least one question in your quiz.');
+                        alert('Vous devez avoir au moins une question dans votre quiz.');
                     }
                 });
             });
         };
         
-        // Initialize delete buttons
         setupDeleteButtons();
         
-        // Complete quiz submission
         const completeQuizBtn = document.getElementById('complete-quiz');
         if (completeQuizBtn) {
             completeQuizBtn.addEventListener('click', function() {
-                // Here we would normally validate and submit the quiz data
-                // For now, just show an alert
-                alert('Quiz completed! In a real application, this would save your quiz.');
+                alert('Quiz terminé! Dans une application réelle, cela enregistrerait votre quiz.');
             });
         }
     };
     
-        // Login/Signup page functionality
     const initLoginPage = () => {
-        // Toggle password visibility
         const togglePasswordButtons = document.querySelectorAll('.toggle-password');
         
         if (togglePasswordButtons.length > 0) {
@@ -469,16 +436,13 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        // Form submission with redirect to main page
         const loginForm = document.querySelector('.login-form');
         if (loginForm) {
             loginForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
-                // Show a brief message before redirecting
-                alert('Login successful! Redirecting to main page...');
+                alert('Connexion réussie! Redirection vers la page d\'accueil...');
                 
-                // Redirect to main page after a short delay
                 setTimeout(() => {
                     window.location.href = 'main.html';
                 }, 500);
@@ -486,80 +450,465 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    // Dark mode functionality
-    const initDarkMode = () => {
-        // Check for saved theme preference or use device preference
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initSettingsPage = () => {
+        initSettingsTabs();
         
-        // Set initial theme
-        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-            document.body.classList.add('dark-mode');
-            updateToggles(true);
-        } else {
-            updateToggles(false);
-        }
+        initModals();
         
-        // Toggle dark mode function
-        const toggleDarkMode = () => {
-            const isDarkMode = document.body.classList.toggle('dark-mode');
-            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-            updateToggles(isDarkMode);
-        };
+        initActionButtons();
         
-        // Update all toggle switches
-        function updateToggles(isDark) {
-            document.querySelectorAll('#dark-mode-toggle').forEach(toggle => {
-                toggle.classList.toggle('active', isDark);
+        initToggles();
+        
+        initAppearanceSelectors();
+    };
+    
+    function initSettingsTabs() {
+        const navItems = document.querySelectorAll('.settings-nav-item');
+        
+        if (!navItems.length) return;
+        
+        navItems.forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.settings-nav-item').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                document.querySelectorAll('.settings-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                this.classList.add('active');
+                
+                const sectionId = this.getAttribute('data-section') + '-section';
+                document.getElementById(sectionId).classList.add('active');
+            });
+        });
+    }
+    
+    function initModals() {
+        const editModal = document.getElementById('edit-modal');
+        if (!editModal) return;
+        
+        const modalTitle = document.getElementById('modal-title');
+        const modalFields = document.getElementById('modal-fields');
+        const closeModalBtn = document.querySelector('.close-modal');
+        const cancelBtns = document.querySelectorAll('.cancel-btn');
+        
+        initNameEditor();
+        initUsernameEditor();
+        initBioEditor();
+        initEmailEditor();
+        initPasswordEditor();
+        
+        initDeleteConfirmation();
+        
+        function closeModal() {
+            document.querySelectorAll('.edit-modal').forEach(modal => {
+                modal.style.display = 'none';
             });
         }
         
-        // Set up event listeners
-        const darkModeToggle = document.getElementById('dark-mode-toggle');
-        if (darkModeToggle) {
-            darkModeToggle.addEventListener('click', toggleDarkMode);
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', closeModal);
         }
         
-        // Initialize other toggle switches
-        document.querySelectorAll('.toggle-switch:not(#dark-mode-toggle)').forEach(toggle => {
+        cancelBtns.forEach(btn => {
+            btn.addEventListener('click', closeModal);
+        });
+        
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('edit-modal')) {
+                closeModal();
+            }
+        });
+        
+        const editForm = document.getElementById('edit-form');
+        if (editForm) {
+            editForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                setTimeout(() => {
+                    alert('Modifications enregistrées avec succès!');
+                    closeModal();
+                }, 500);
+            });
+        }
+        
+        function initNameEditor() {
+            const updateNameBtn = document.getElementById('update-name-btn');
+            if (updateNameBtn) {
+                updateNameBtn.addEventListener('click', function() {
+                    modalTitle.textContent = 'Modifier vos informations';
+                    modalFields.innerHTML = `
+                        <div class="form-field">
+                            <label for="edit-firstname">Prénom</label>
+                            <input type="text" id="edit-firstname" value="Martin" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="edit-lastname">Nom</label>
+                            <input type="text" id="edit-lastname" value="Dubois" required>
+                        </div>
+                    `;
+                    editModal.style.display = 'block';
+                });
+            }
+        }
+        
+        function initUsernameEditor() {
+            const updateUsernameBtn = document.getElementById('update-username-btn');
+            if (updateUsernameBtn) {
+                updateUsernameBtn.addEventListener('click', function() {
+                    modalTitle.textContent = 'Modifier votre nom d\'utilisateur';
+                    modalFields.innerHTML = `
+                        <div class="form-field">
+                            <label for="edit-username">Nom d'utilisateur</label>
+                            <input type="text" id="edit-username" value="martindubois" required>
+                            <p class="field-info">Votre nom d'utilisateur est unique et visible par tous les utilisateurs.</p>
+                        </div>
+                    `;
+                    editModal.style.display = 'block';
+                });
+            }
+        }
+        
+        function initBioEditor() {
+            const updateBioBtn = document.getElementById('update-bio-btn');
+            if (updateBioBtn) {
+                updateBioBtn.addEventListener('click', function() {
+                    modalTitle.textContent = 'Modifier votre bio';
+                    modalFields.innerHTML = `
+                        <div class="form-field">
+                            <label for="edit-bio">Bio</label>
+                            <textarea id="edit-bio" rows="4">Passionné de quiz et de jeux de connaissances. J'aime créer des quiz sur l'histoire et la science.</textarea>
+                            <p class="field-info">Votre bio est visible sur votre profil public (maximum 160 caractères).</p>
+                        </div>
+                    `;
+                    editModal.style.display = 'block';
+                });
+            }
+        }
+        
+        function initEmailEditor() {
+            const updateEmailBtn = document.getElementById('update-email-btn');
+            if (updateEmailBtn) {
+                updateEmailBtn.addEventListener('click', function() {
+                    modalTitle.textContent = 'Modifier votre adresse e-mail';
+                    modalFields.innerHTML = `
+                        <div class="form-field">
+                            <label for="edit-email">Nouvelle adresse e-mail</label>
+                            <input type="email" id="edit-email" value="user@example.com" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="confirm-password">Mot de passe actuel</label>
+                            <input type="password" id="confirm-password" placeholder="Entrez votre mot de passe pour confirmer" required>
+                        </div>
+                    `;
+                    editModal.style.display = 'block';
+                });
+            }
+        }
+        
+        function initPasswordEditor() {
+            const updatePasswordBtn = document.getElementById('update-password-btn');
+            if (updatePasswordBtn) {
+                updatePasswordBtn.addEventListener('click', function() {
+                    modalTitle.textContent = 'Modifier votre mot de passe';
+                    modalFields.innerHTML = `
+                        <div class="form-field">
+                            <label for="current-password">Mot de passe actuel</label>
+                            <input type="password" id="current-password" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="new-password">Nouveau mot de passe</label>
+                            <input type="password" id="new-password" required>
+                            <p class="field-info">Le mot de passe doit contenir au moins 8 caractères avec un mélange de lettres, chiffres et symboles.</p>
+                        </div>
+                        <div class="form-field">
+                            <label for="confirm-new-password">Confirmer le nouveau mot de passe</label>
+                            <input type="password" id="confirm-new-password" required>
+                        </div>
+                    `;
+                    editModal.style.display = 'block';
+                });
+            }
+        }
+        
+        function initDeleteConfirmation() {
+            const deleteAccountBtn = document.getElementById('delete-account-btn');
+            const confirmModal = document.getElementById('confirm-modal');
+            const confirmBtn = document.querySelector('.confirm-btn');
+            
+            if (deleteAccountBtn && confirmModal) {
+                deleteAccountBtn.addEventListener('click', function() {
+                    confirmModal.style.display = 'block';
+                });
+                
+                if (confirmBtn) {
+                    confirmBtn.addEventListener('click', function() {
+                        alert('Votre compte a été supprimé définitivement.');
+                        window.location.href = 'main.html';
+                    });
+                }
+            }
+        }
+    }
+    
+    function initActionButtons() {
+        const saveSettingsBtn = document.getElementById('save-settings');
+        const cancelSettingsBtn = document.getElementById('cancel-settings');
+        
+        if (saveSettingsBtn) {
+            saveSettingsBtn.addEventListener('click', function() {
+                setTimeout(() => {
+                    alert('Paramètres enregistrés avec succès!');
+                }, 500);
+            });
+        }
+        
+        if (cancelSettingsBtn) {
+            cancelSettingsBtn.addEventListener('click', function() {
+                if (confirm('Êtes-vous sûr de vouloir annuler? Les modifications non enregistrées seront perdues.')) {
+                    window.location.href = 'main.html';
+                }
+            });
+        }
+        
+        const uploadAvatarBtn = document.getElementById('upload-avatar-btn');
+        if (uploadAvatarBtn) {
+            uploadAvatarBtn.addEventListener('click', function() {
+                alert('Dans une application réelle, cela ouvrirait un sélecteur de fichier pour télécharger une nouvelle photo de profil.');
+            });
+        }
+    }
+    
+    function initToggles() {
+        const toggleSwitches = document.querySelectorAll('.toggle-switch');
+        
+        toggleSwitches.forEach(toggle => {
             toggle.addEventListener('click', function() {
                 this.classList.toggle('active');
             });
         });
-    };
+    }
+    
+    function initAppearanceSelectors() {
+        const themeBtns = document.querySelectorAll('.theme-btn');
+        
+        themeBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                themeBtns.forEach(b => b.classList.remove('active'));
+                
+                this.classList.add('active');
+                
+                const theme = this.getAttribute('data-theme');
+                
+                if (theme === 'dark') {
+                    document.body.classList.add('dark-mode');
+                } else if (theme === 'light') {
+                    document.body.classList.remove('dark-mode');
+                } else if (theme === 'system') {
+                    const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    if (prefersDarkMode) {
+                        document.body.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                    }
+                }
+            });
+        });
+        
+        const textSizeBtns = document.querySelectorAll('.text-size-btn');
+        
+        textSizeBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                textSizeBtns.forEach(b => b.classList.remove('active'));
+                
+                this.classList.add('active');
+                
+                const size = this.getAttribute('data-size');
+                
+                document.body.classList.remove('text-small', 'text-medium', 'text-large');
+                
+                if (size === 'small' || size === 'large') {
+                    document.body.classList.add(`text-${size}`);
+                }
+            });
+        });
+    }
 
-    // Settings page functionality
-    const initSettingsPage = () => {
-        // Save changes button
-        const saveButton = document.querySelector('.settings-actions .btn-primary');
-        if (saveButton) {
-            saveButton.addEventListener('click', function() {
-                alert('Settings saved successfully!');
+    const initSearchPage = () => {
+        const searchTabs = document.querySelectorAll('.search-tab');
+        if (!searchTabs.length) return;
+        
+        searchTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.search-tab').forEach(t => {
+                    t.classList.remove('active');
+                });
+                document.querySelectorAll('.results-section').forEach(s => {
+                    s.classList.remove('active');
+                });
+                
+                const tabName = this.getAttribute('data-tab');
+                this.classList.add('active');
+                document.getElementById(`${tabName}-results`).classList.add('active');
+            });
+        });
+        
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const filter = this.getAttribute('data-filter');
+                
+                document.querySelectorAll('.filter-btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                const categoryFilter = document.getElementById('category-filter');
+                if (categoryFilter) {
+                    if (filter === 'users') {
+                        categoryFilter.style.display = 'none';
+                    } else {
+                        categoryFilter.style.display = 'flex';
+                    }
+                }
+            });
+        });
+        
+        const searchBtn = document.getElementById('search-btn');
+        const searchInput = document.getElementById('search-input');
+        
+        if (searchBtn && searchInput) {
+            searchBtn.addEventListener('click', performSearch);
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
             });
         }
         
-        // Cancel button
-        const cancelButton = document.querySelector('.settings-actions .btn-secondary');
-        if (cancelButton) {
-            cancelButton.addEventListener('click', function() {
-                window.location.href = 'main.html';
+        function performSearch() {
+            const searchTerm = searchInput.value.trim();
+            const searchTermDisplay = document.getElementById('search-term');
+            
+            if (searchTerm && searchTermDisplay) {
+                searchTermDisplay.textContent = searchTerm;
+                document.getElementById('results-number').textContent = '5 résultats trouvés';
+            }
+        }
+        
+        const pageButtons = document.querySelectorAll('.page-num');
+        if (pageButtons.length) {
+            pageButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const currentPage = document.querySelector('.page-num.active');
+                    if (currentPage) {
+                        currentPage.classList.remove('active');
+                    }
+                    this.classList.add('active');
+                    
+                    const prevBtn = this.closest('.pagination').querySelector('.prev');
+                    const nextBtn = this.closest('.pagination').querySelector('.next');
+                    
+                    if (this.textContent === '1') {
+                        prevBtn.setAttribute('disabled', 'true');
+                    } else {
+                        prevBtn.removeAttribute('disabled');
+                    }
+                    
+                    const isLastPage = this.textContent === '8' || this.textContent === '3';
+                    if (isLastPage) {
+                        nextBtn.setAttribute('disabled', 'true');
+                    } else {
+                        nextBtn.removeAttribute('disabled');
+                    }
+                });
             });
         }
-    };
-
-    // Check which page we're on and run appropriate functions
-    if (document.querySelector('.quiz-container')) {
-        initQuiz(); // We're on the quiz page
-    } else if (document.getElementById('quiz-cards')) {
-        renderQuizCards(); // We're on the main page
-    } else if (document.querySelector('.questions-container')) {
-        initCreateQuiz(); // We're on the create quiz page
-    } else if (document.querySelector('.login-form')) {
-        initLoginPage(); // We're on the login or signup page
-    } else if (document.querySelector('.settings-container')) {
-        initSettingsPage(); // We're on the settings page
+        
+        const prevButtons = document.querySelectorAll('.page-btn.prev');
+        const nextButtons = document.querySelectorAll('.page-btn.next');
+        
+        prevButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (this.hasAttribute('disabled')) return;
+                
+                const activePage = this.closest('.pagination').querySelector('.page-num.active');
+                if (activePage && activePage.previousElementSibling && activePage.previousElementSibling.classList.contains('page-num')) {
+                    activePage.classList.remove('active');
+                    activePage.previousElementSibling.classList.add('active');
+                    
+                    if (activePage.previousElementSibling.textContent === '1') {
+                        this.setAttribute('disabled', 'true');
+                    }
+                    
+                    const nextBtn = this.closest('.pagination').querySelector('.next');
+                    nextBtn.removeAttribute('disabled');
+                }
+            });
+        });
+        
+        nextButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (this.hasAttribute('disabled')) return;
+                
+                const activePage = this.closest('.pagination').querySelector('.page-num.active');
+                if (activePage && activePage.nextElementSibling && activePage.nextElementSibling.classList.contains('page-num')) {
+                    activePage.classList.remove('active');
+                    activePage.nextElementSibling.classList.add('active');
+                    
+                    const isLastPage = activePage.nextElementSibling.nextElementSibling === null || 
+                                       !activePage.nextElementSibling.nextElementSibling.classList.contains('page-num');
+                    
+                    if (isLastPage) {
+                        this.setAttribute('disabled', 'true');
+                    }
+                    
+                    const prevBtn = this.closest('.pagination').querySelector('.prev');
+                    prevBtn.removeAttribute('disabled');
+                }
+            });
+        });
     }
     
-    // Initialize dark mode on every page
-    initDarkMode();
+    const initProfilePage = () => {
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        if (!tabButtons.length) return;
+        
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+                document.querySelectorAll('.tab-content').forEach(c => {
+                    c.classList.remove('active');
+                });
+                
+                const tabName = this.getAttribute('data-tab');
+                this.classList.add('active');
+                document.getElementById(`${tabName}-content`).classList.add('active');
+            });
+        });
+    }
+
+    if (document.querySelector('.quiz-container')) {
+        initQuiz();
+    } else if (document.getElementById('quiz-cards')) {
+        renderQuizCards();
+        
+        if (document.getElementById('recommended-quiz-cards')) {
+            renderRecommendedQuizzes();
+        }
+    } else if (document.querySelector('.questions-container')) {
+        initCreateQuiz();
+    } else if (document.querySelector('.login-form')) {
+        initLoginPage();
+    } else if (document.querySelector('.settings-container')) {
+        initSettingsPage();
+    } else if (document.querySelector('.search-container')) {
+        initSearchPage();
+    } else if (document.querySelector('.profile-container')) {
+        initProfilePage();
+    }
 });

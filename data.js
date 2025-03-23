@@ -1,40 +1,39 @@
-// Sample quiz data for multiple quizzes
 const quizData = [
     {
         id: "science-quiz",
-        title: "Fun Science Trivia",
-        description: "Test your knowledge of basic science facts with this fun quiz!",
+        title: "Quiz de Sciences Amusant",
+        description: "Testez vos connaissances sur les faits scientifiques de base avec ce quiz amusant!",
         category: "Science",
         author: "ScienceGuru",
         imageUrl: "/api/placeholder/400/200",
         questions: [
             {
-                text: "What is the largest planet in our solar system?",
-                options: ["Mars", "Jupiter", "Saturn", "Venus"],
+                text: "Quelle est la plus grande planète de notre système solaire?",
+                options: ["Mars", "Jupiter", "Saturne", "Vénus"],
                 correctOption: 1,
                 timeLimit: 20
             },
             {
-                text: "What is the chemical symbol for gold?",
+                text: "Quel est le symbole chimique de l'or?",
                 options: ["Go", "Gl", "Au", "Ag"],
                 correctOption: 2,
                 timeLimit: 15
             },
             {
-                text: "Which of these animals is a mammal?",
-                options: ["Shark", "Dolphin", "Snake", "Crocodile"],
+                text: "Lequel de ces animaux est un mammifère?",
+                options: ["Requin", "Dauphin", "Serpent", "Crocodile"],
                 correctOption: 1,
                 timeLimit: 20
             },
             {
-                text: "How many elements are in the periodic table (as of 2024)?",
+                text: "Combien d'éléments y a-t-il dans le tableau périodique (en 2024)?",
                 options: ["92", "103", "118", "120"],
                 correctOption: 2,
                 timeLimit: 20
             },
             {
-                text: "What is the closest star to Earth?",
-                options: ["Proxima Centauri", "Alpha Centauri", "The Sun", "Sirius"],
+                text: "Quelle est l'étoile la plus proche de la Terre?",
+                options: ["Proxima Centauri", "Alpha Centauri", "Le Soleil", "Sirius"],
                 correctOption: 2,
                 timeLimit: 15
             }
@@ -42,39 +41,39 @@ const quizData = [
     },
     {
         id: "history-quiz",
-        title: "World History Challenge",
-        description: "Journey through time with challenging questions about world history!",
-        category: "History",
+        title: "Défi d'Histoire Mondiale",
+        description: "Voyagez à travers le temps avec des questions stimulantes sur l'histoire mondiale!",
+        category: "Histoire",
         author: "HistoryBuff",
         imageUrl: "/api/placeholder/400/200",
         questions: [
             {
-                text: "In which year did World War II end?",
+                text: "En quelle année la Seconde Guerre mondiale s'est-elle terminée?",
                 options: ["1943", "1945", "1947", "1950"],
                 correctOption: 1,
                 timeLimit: 15
             },
             {
-                text: "Who was the first Emperor of Rome?",
-                options: ["Julius Caesar", "Augustus", "Nero", "Constantine"],
+                text: "Qui était le premier Empereur de Rome?",
+                options: ["Jules César", "Auguste", "Néron", "Constantin"],
                 correctOption: 1,
                 timeLimit: 20
             },
             {
-                text: "Which civilization built Machu Picchu?",
-                options: ["Maya", "Aztec", "Inca", "Olmec"],
+                text: "Quelle civilisation a construit le Machu Picchu?",
+                options: ["Maya", "Aztèque", "Inca", "Olmèque"],
                 correctOption: 2,
                 timeLimit: 20
             },
             {
-                text: "Which country was NOT part of the Allied Powers during World War II?",
-                options: ["United States", "Soviet Union", "Italy", "United Kingdom"],
+                text: "Quel pays NE faisait PAS partie des Alliés pendant la Seconde Guerre mondiale?",
+                options: ["États-Unis", "Union Soviétique", "Italie", "Royaume-Uni"],
                 correctOption: 2,
                 timeLimit: 25
             },
             {
-                text: "Who wrote 'The Communist Manifesto'?",
-                options: ["Vladimir Lenin", "Joseph Stalin", "Karl Marx", "Friedrich Engels"],
+                text: "Qui a écrit 'Le Manifeste communiste'?",
+                options: ["Vladimir Lénine", "Joseph Staline", "Karl Marx", "Friedrich Engels"],
                 correctOption: 2,
                 timeLimit: 20
             }
@@ -82,38 +81,38 @@ const quizData = [
     },
     {
         id: "pop-culture-quiz",
-        title: "Pop Culture Mania",
-        description: "How well do you know modern entertainment and pop culture?",
-        category: "Entertainment",
+        title: "Quiz Culture Pop",
+        description: "À quel point connaissez-vous la culture et le divertissement modernes?",
+        category: "Divertissement",
         author: "PopCultureFan",
         imageUrl: "/api/placeholder/400/200",
         questions: [
             {
-                text: "Which artist has won the most Grammy Awards?",
+                text: "Quel artiste a remporté le plus de Grammy Awards?",
                 options: ["Beyoncé", "Adele", "Taylor Swift", "Billie Eilish"],
                 correctOption: 0,
                 timeLimit: 20
             },
             {
-                text: "Which movie won the Oscar for Best Picture in 2020?",
+                text: "Quel film a remporté l'Oscar du meilleur film en 2020?",
                 options: ["1917", "Joker", "Parasite", "Once Upon a Time in Hollywood"],
                 correctOption: 2,
                 timeLimit: 20
             },
             {
-                text: "Which video game franchise features characters named Mario and Luigi?",
+                text: "Quelle franchise de jeux vidéo présente des personnages nommés Mario et Luigi?",
                 options: ["The Legend of Zelda", "Super Mario", "Pokémon", "Sonic the Hedgehog"],
                 correctOption: 1,
                 timeLimit: 15
             },
             {
-                text: "Who played Iron Man in the Marvel Cinematic Universe?",
+                text: "Qui a joué Iron Man dans l'Univers Cinématographique Marvel?",
                 options: ["Chris Evans", "Chris Hemsworth", "Robert Downey Jr.", "Mark Ruffalo"],
                 correctOption: 2,
                 timeLimit: 15
             },
             {
-                text: "Which of these is NOT a social media platform?",
+                text: "Laquelle de ces options N'EST PAS une plateforme de médias sociaux?",
                 options: ["Instagram", "Snapchat", "MyWeb", "TikTok"],
                 correctOption: 2,
                 timeLimit: 15

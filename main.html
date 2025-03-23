@@ -1,49 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuizMaster</title>
+    <title>ThinkUp - Le monde des quiz</title>
     <link rel="stylesheet" href="main.css">
-    <link rel="stylesheet" href="darkmode.css">
 </head>
 <body>
     <header>
         <nav class="navbar">
-            <a href="main.html" class="logo">QuizMaster</a>
+            <a href="main.html" class="logo">ThinkUp</a>
             <div class="nav-links">
-                <a href="#menu">Explore</a>
-                <a href="createQuiz.html">Create</a>
-                <a href="#search">Search</a>
+                <a href="main.html">Accueil</a>
+                <a href="createQuiz.html">Créer</a>
+                <a href="search.html">Rechercher</a>
             </div>
             <div class="profile">
-                <img src="/api/placeholder/150/150" alt="Profile Picture" class="profile-pic">
+                <img src="/api/placeholder/150/150" alt="Photo de Profil" class="profile-pic">
             </div>
         </nav>
     </header>
 
     <main class="main-content">
         <section class="hero">
-            <h1>Challenge Your Knowledge</h1>
-            <p>Create, share, and test your skills with thousands of fun and educational quizzes on any topic.</p>
-            <a href="createQuiz.html" class="btn">Create Your Quiz</a>
+            <h1>Testez vos connaissances</h1>
+            <p>Créez, partagez et testez vos compétences avec des milliers de quiz ludiques et éducatifs sur n'importe quel sujet.</p>
+            <a href="createQuiz.html" class="btn">Créer votre Quiz</a>
         </section>
 
         <section class="featured-quizzes">
-            <h2>Featured Quizzes</h2>
+            <h2>Quiz à la Une</h2>
             <div class="quiz-cards" id="quiz-cards">
-                <!-- Quiz cards will be dynamically inserted here from data.js -->
+            </div>
+        </section>
+        
+        <section class="recommended-quizzes">
+            <h2>Quiz Recommandés</h2>
+            <div class="quiz-cards" id="recommended-quiz-cards">
             </div>
         </section>
     </main>
 
     <footer>
         <div class="footer-content">
-            <p>&copy; 2025 QuizMaster. All rights reserved.</p>
+            <p>&copy; 2025 ThinkUp. Tous droits réservés.</p>
             <div class="footer-links">
-                <a href="#">About</a>
-                <a href="#">Privacy</a>
-                <a href="#">Terms</a>
+                <a href="#">À propos</a>
+                <a href="#">Confidentialité</a>
+                <a href="#">Conditions</a>
                 <a href="#">Contact</a>
             </div>
         </div>

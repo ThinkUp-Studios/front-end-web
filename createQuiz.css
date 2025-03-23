@@ -1,16 +1,11 @@
-/* Import main styles for consistency */
 @import url('main.css');
 
-/* Additional styles specific to the quiz creation page */
-
-/* Main content adjustments */
 .main-content {
     max-width: 800px;
     margin: 100px auto 2rem;
     padding: 0 2rem;
 }
 
-/* Quiz header section */
 .quiz-header {
     background-color: #ffffff;
     padding: 2rem;
@@ -30,7 +25,6 @@
     gap: 1.5rem;
 }
 
-/* Form elements */
 .input-group {
     display: flex;
     flex-direction: column;
@@ -61,7 +55,6 @@ select {
     background-color: white;
 }
 
-/* Question cards */
 .questions-container {
     display: flex;
     flex-direction: column;
@@ -107,7 +100,6 @@ select {
     background-color: #f0f0f0;
 }
 
-/* Answer choices */
 .answer-choice {
     display: flex;
     align-items: center;
@@ -161,7 +153,6 @@ select {
     color: white;
 }
 
-/* Quiz action buttons */
 .quiz-actions {
     display: flex;
     justify-content: space-between;
@@ -198,13 +189,11 @@ select {
     background-color: #e9ecef;
 }
 
-/* Active nav link */
 .nav-links a.active {
     color: #007bff;
     font-weight: 600;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
     .main-content {
         padding: 0 1rem;

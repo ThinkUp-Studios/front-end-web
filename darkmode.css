@@ -1,4 +1,3 @@
-/* Dark Mode Styles */
 :root {
     --bg-color: #f5f5f5;
     --card-bg: #ffffff;
@@ -17,7 +16,6 @@
     --card-shadow: rgba(0, 0, 0, 0.05);
     --hover-bg: #f0f0f0;
     
-    /* Quiz specific colors */
     --timer-bg: #f8f8f8;
     --timer-fill: #4CAF50;
     --timer-text: #333;
@@ -30,25 +28,20 @@
     --correct-answer-bg: #e6f7ef;
     --correct-answer-text: #0a7d44;
     
-    /* Card colors */
     --red-card: #ff5252;
     --blue-card: #4285f4;
     --yellow-card: #ffb700;
     --green-card: #0f9d58;
     
-    /* Quiz card specific */
     --quiz-card-meta: #777;
     --quiz-card-category-bg: #f0f0f0;
     
-    /* Featured section */
     --featured-heading: #333;
     
-    /* Button colors */
     --btn-color: #007bff;
     --btn-text: white;
     --btn-hover: #0056b3;
     
-    /* Hero section */
     --hero-heading: #333;
     --hero-text: #666;
 }
@@ -71,7 +64,6 @@ body.dark-mode {
     --card-shadow: rgba(0, 0, 0, 0.2);
     --hover-bg: #333333;
     
-    /* Quiz specific colors - dark mode */
     --timer-bg: #2d2d2d;
     --timer-fill: #2e8b57;
     --timer-text: #e0e0e0;
@@ -84,30 +76,24 @@ body.dark-mode {
     --correct-answer-bg: #1a2e22;
     --correct-answer-text: #4acf7f;
     
-    /* Card colors - dark mode (slightly darker) */
     --red-card: #d32f2f;
     --blue-card: #1a73e8;
     --yellow-card: #f9a825;
     --green-card: #0d8043;
     
-    /* Quiz card specific */
     --quiz-card-meta: #aaaaaa;
     --quiz-card-category-bg: #2d2d2d;
     
-    /* Featured section */
     --featured-heading: #e0e0e0;
     
-    /* Button colors */
     --btn-color: #4d9fff;
     --btn-text: #ffffff;
     --btn-hover: #2c7ae0;
     
-    /* Hero section */
     --hero-heading: #e0e0e0;
     --hero-text: #aaaaaa;
 }
 
-/* Apply CSS variables */
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
@@ -135,13 +121,11 @@ header {
     color: var(--primary-color);
 }
 
-/* Profile section */
 .profile-pic {
     border-color: var(--card-bg);
     transition: border-color 0.3s ease;
 }
 
-/* Profile Menu */
 .profile-menu {
     background-color: var(--card-bg);
     box-shadow: 0 5px 15px var(--header-shadow);
@@ -162,14 +146,12 @@ header {
     background-color: var(--hover-bg);
 }
 
-/* Main Content */
 .main-content, 
 .quiz-container,
 .login-container {
     transition: background-color 0.3s ease;
 }
 
-/* Hero Section */
 .hero {
     background-color: var(--card-bg);
     box-shadow: 0 2px 10px var(--card-shadow);
@@ -186,13 +168,11 @@ header {
     transition: color 0.3s ease;
 }
 
-/* Featured Quizzes */
 .featured-quizzes h2 {
     color: var(--featured-heading);
     transition: color 0.3s ease;
 }
 
-/* Card Components */
 .question-container, 
 .login-card, 
 .login-features, 
@@ -206,7 +186,6 @@ header {
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Card Headings */
 .feature-card h2, 
 .login-header h1, 
 .login-features h2, 
@@ -217,7 +196,6 @@ header {
     transition: color 0.3s ease;
 }
 
-/* Card Text */
 .feature-card p, 
 .login-header p, 
 .quiz-card-description,
@@ -227,7 +205,6 @@ header {
     transition: color 0.3s ease;
 }
 
-/* Quiz Card Specific */
 .quiz-card-meta {
     color: var(--quiz-card-meta);
     transition: color 0.3s ease;
@@ -248,7 +225,6 @@ header {
     background-color: var(--btn-hover);
 }
 
-/* Buttons */
 .btn {
     background-color: var(--btn-color);
     color: var(--btn-text);
@@ -289,7 +265,6 @@ header {
     background-color: var(--secondary-bg);
 }
 
-/* Form Elements */
 input[type="text"], 
 input[type="email"], 
 input[type="password"],
@@ -321,7 +296,6 @@ select:focus {
     transition: color 0.3s ease;
 }
 
-/* Footer */
 footer {
     background-color: var(--footer-bg);
     color: var(--footer-text);
@@ -341,7 +315,6 @@ footer {
     color: var(--footer-text);
 }
 
-/* Dark Mode Toggle */
 .theme-toggle {
     cursor: pointer;
     display: flex;
@@ -384,7 +357,6 @@ footer {
     transform: translateX(26px);
 }
 
-/* Quiz Specific Dark Mode */
 .timer-container {
     background-color: var(--timer-bg);
     transition: background-color 0.3s ease;
@@ -410,7 +382,6 @@ footer {
     transition: color 0.3s ease;
 }
 
-/* Answer cards */
 .answer-card {
     transition: transform 0.2s, opacity 0.2s, box-shadow 0.3s;
     box-shadow: 0 4px 8px var(--card-shadow);
@@ -432,7 +403,6 @@ footer {
     background-color: var(--green-card);
 }
 
-/* Feedback overlay */
 .feedback-overlay {
     background-color: var(--feedback-bg);
     transition: background-color 0.3s ease;
@@ -454,7 +424,6 @@ footer {
     transition: color 0.3s ease;
 }
 
-/* Feedback types */
 .feedback-modal.correct {
     border-top-color: var(--correct-color);
 }
@@ -487,7 +456,6 @@ footer {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Settings page specific styles */
 .settings-container {
     max-width: 800px;
     margin: 100px auto 2rem;
@@ -569,7 +537,6 @@ footer {
     gap: 1rem;
 }
 
-/* Create Quiz Page */
 .create-quiz-container {
     background-color: var(--bg-color);
     transition: background-color 0.3s ease;
@@ -602,7 +569,6 @@ footer {
     transition: background-color 0.3s, color 0.3s, border-color 0.3s;
 }
 
-/* Add support for any other components used in all pages */
 .btn-icon {
     color: var(--text-color);
     background-color: var(--secondary-bg);

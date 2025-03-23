@@ -1,125 +1,320 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings - MyWebsite</title>
+    <title>Paramètres - ThinkUp</title>
     <link rel="stylesheet" href="main.css">
-    <link rel="stylesheet" href="darkmode.css">
+    <link rel="stylesheet" href="settings.css">
     <script src="script.js" defer></script>
 </head>
 <body>
     <header>
         <nav class="navbar">
-            <a href="main.html" class="logo">MyWebsite</a>
+            <a href="main.html" class="logo">ThinkUp</a>
             <div class="nav-links">
-                <a href="main.html">Menu</a>
-                <a href="createQuiz.html">Create</a>
-                <a href="#search">Search</a>
+                <a href="main.html">Accueil</a>
+                <a href="createQuiz.html">Créer</a>
+                <a href="search.html">Rechercher</a>
             </div>
             <div class="profile">
-                <img src="/api/placeholder/150/150" alt="Profile Picture" class="profile-pic">
+                <img src="/api/placeholder/150/150" alt="Photo de Profil" class="profile-pic">
             </div>
         </nav>
     </header>
 
     <main class="settings-container">
-        <div class="settings-card">
-            <h1>Settings</h1>
-            
-            <div class="settings-section">
-                <h2>Appearance</h2>
-                <div class="settings-option">
-                    <div class="settings-option-text">
-                        <h3>Dark Mode</h3>
-                        <p>Switch between light and dark themes</p>
-                    </div>
-                    <div class="toggle-switch" id="dark-mode-toggle"></div>
-                </div>
+        <div class="settings-header">
+            <h1>Paramètres du Compte</h1>
+            <p class="settings-subtitle">Personnalisez votre expérience ThinkUp</p>
+        </div>
+        
+        <div class="settings-content">
+            <div class="settings-sidebar">
+                <ul class="settings-nav">
+                    <li class="settings-nav-item active" data-section="profile">
+                        <span class="nav-icon">👤</span>
+                        <span class="nav-text">Profil</span>
+                    </li>
+                    <li class="settings-nav-item" data-section="account">
+                        <span class="nav-icon">🔐</span>
+                        <span class="nav-text">Compte</span>
+                    </li>
+                    <li class="settings-nav-item" data-section="notifications">
+                        <span class="nav-icon">🔔</span>
+                        <span class="nav-text">Notifications</span>
+                    </li>
+                    <li class="settings-nav-item" data-section="privacy">
+                        <span class="nav-icon">🔒</span>
+                        <span class="nav-text">Confidentialité</span>
+                    </li>
+                    <li class="settings-nav-item" data-section="appearance">
+                        <span class="nav-icon">🎨</span>
+                        <span class="nav-text">Apparence</span>
+                    </li>
+                </ul>
             </div>
             
-            <div class="settings-section">
-                <h2>Account</h2>
-                <div class="settings-option">
-                    <div class="settings-option-text">
-                        <h3>Email</h3>
-                        <p>user@example.com</p>
+            <div class="settings-main">
+                <div class="settings-section active" id="profile-section">
+                    <div class="section-header">
+                        <h2>Paramètres du Profil</h2>
+                        <p>Modifiez vos informations personnelles et votre photo de profil</p>
                     </div>
-                    <button class="btn btn-secondary">Change</button>
-                </div>
-                <div class="settings-option">
-                    <div class="settings-option-text">
-                        <h3>Password</h3>
-                        <p>Last changed 30 days ago</p>
+                    
+                    <div class="profile-settings">
+                        <div class="profile-picture-container">
+                            <div class="profile-picture">
+                                <img src="/api/placeholder/150/150" alt="Photo de profil">
+                                <div class="upload-overlay">
+                                    <span>Changer</span>
+                                </div>
+                            </div>
+                            <button id="upload-avatar-btn" class="btn btn-secondary">Télécharger une photo</button>
+                        </div>
+                        
+                        <div class="profile-info">
+                            <div class="settings-card">
+                                <div class="settings-option">
+                                    <div class="settings-option-text">
+                                        <h3><span class="option-icon">📋</span> Informations personnelles</h3>
+                                        <div class="info-value">
+                                            <span class="info-label">Prénom:</span>
+                                            <span class="info-data">Martin</span>
+                                        </div>
+                                        <div class="info-value">
+                                            <span class="info-label">Nom:</span>
+                                            <span class="info-data">Dubois</span>
+                                        </div>
+                                    </div>
+                                    <button id="update-name-btn" class="btn btn-secondary">Modifier</button>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-card">
+                                <div class="settings-option">
+                                    <div class="settings-option-text">
+                                        <h3><span class="option-icon">👤</span> Nom d'utilisateur</h3>
+                                        <p class="info-value">@martindubois</p>
+                                    </div>
+                                    <button id="update-username-btn" class="btn btn-secondary">Modifier</button>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-card">
+                                <div class="settings-option">
+                                    <div class="settings-option-text">
+                                        <h3><span class="option-icon">✏️</span> Bio</h3>
+                                        <p class="user-bio">Passionné de quiz et de jeux de connaissances. J'aime créer des quiz sur l'histoire et la science.</p>
+                                    </div>
+                                    <button id="update-bio-btn" class="btn btn-secondary">Modifier</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <button class="btn btn-secondary">Update</button>
                 </div>
-                <div class="settings-option">
-                    <div class="settings-option-text">
-                        <h3>Profile Picture</h3>
-                        <p>Upload a new profile picture</p>
+                
+                <div class="settings-section" id="account-section">
+                    <div class="section-header">
+                        <h2>Paramètres du Compte</h2>
+                        <p>Gérez vos informations de connexion et la sécurité de votre compte</p>
                     </div>
-                    <button class="btn btn-secondary">Upload</button>
-                </div>
-            </div>
-            
-            <div class="settings-section">
-                <h2>Notifications</h2>
-                <div class="settings-option">
-                    <div class="settings-option-text">
-                        <h3>Email Notifications</h3>
-                        <p>Receive updates and quiz invitations via email</p>
+                    
+                    <div class="settings-card">
+                        <div class="settings-option">
+                            <div class="settings-option-text">
+                                <h3><span class="option-icon">📧</span> Adresse e-mail</h3>
+                                <p>user@example.com</p>
+                            </div>
+                            <button id="update-email-btn" class="btn btn-secondary">Changer</button>
+                        </div>
                     </div>
-                    <div class="toggle-switch active"></div>
-                </div>
-                <div class="settings-option">
-                    <div class="settings-option-text">
-                        <h3>Push Notifications</h3>
-                        <p>Get notifications directly in your browser</p>
+                    
+                    <div class="settings-card">
+                        <div class="settings-option">
+                            <div class="settings-option-text">
+                                <h3><span class="option-icon">🔑</span> Mot de passe</h3>
+                                <p>Dernière modification il y a 30 jours</p>
+                            </div>
+                            <button id="update-password-btn" class="btn btn-secondary">Mettre à jour</button>
+                        </div>
                     </div>
-                    <div class="toggle-switch"></div>
-                </div>
-            </div>
-            
-            <div class="settings-section">
-                <h2>Privacy</h2>
-                <div class="settings-option">
-                    <div class="settings-option-text">
-                        <h3>Profile Visibility</h3>
-                        <p>Control who can see your profile and activities</p>
+                    
+                    <div class="settings-card danger-zone">
+                        <div class="danger-header">
+                            <h3>Zone de danger</h3>
+                            <p>Ces actions sont irréversibles, procédez avec prudence</p>
+                        </div>
+                        <button id="delete-account-btn" class="btn btn-danger">Supprimer mon compte</button>
                     </div>
-                    <select class="form-select">
-                        <option>Public</option>
-                        <option>Friends Only</option>
-                        <option>Private</option>
-                    </select>
                 </div>
-                <div class="settings-option">
-                    <div class="settings-option-text">
-                        <h3>Quiz Score Sharing</h3>
-                        <p>Allow others to see your quiz scores</p>
+                
+                <div class="settings-section" id="notifications-section">
+                    <div class="section-header">
+                        <h2>Paramètres de Notifications</h2>
+                        <p>Contrôlez comment et quand vous recevez des notifications</p>
                     </div>
-                    <div class="toggle-switch active"></div>
+                    
+                    <div class="settings-card">
+                        <div class="settings-option">
+                            <div class="settings-option-text">
+                                <h3><span class="option-icon">📩</span> Notifications par e-mail</h3>
+                                <p>Recevez des mises à jour et des invitations aux quiz par e-mail</p>
+                            </div>
+                            <div id="email-notifications-toggle" class="toggle-switch active"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <div class="settings-option">
+                            <div class="settings-option-text">
+                                <h3><span class="option-icon">💬</span> Notifications push</h3>
+                                <p>Recevez des notifications directement dans votre navigateur</p>
+                            </div>
+                            <div id="push-notifications-toggle" class="toggle-switch"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <div class="settings-option">
+                            <div class="settings-option-text">
+                                <h3><span class="option-icon">🏆</span> Notifications de scores</h3>
+                                <p>Soyez alerté quand quelqu'un bat votre score sur un quiz</p>
+                            </div>
+                            <div id="score-notifications-toggle" class="toggle-switch active"></div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="settings-actions">
-                <button class="btn btn-secondary">Cancel</button>
-                <button class="btn btn-primary">Save Changes</button>
+                
+                <div class="settings-section" id="privacy-section">
+                    <div class="section-header">
+                        <h2>Paramètres de Confidentialité</h2>
+                        <p>Contrôlez qui peut voir votre profil et vos activités</p>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <div class="settings-option">
+                            <div class="settings-option-text">
+                                <h3><span class="option-icon">👁️</span> Visibilité du profil</h3>
+                                <p>Contrôlez qui peut voir votre profil et vos activités</p>
+                            </div>
+                            <select id="profile-visibility" class="form-select">
+                                <option>Public</option>
+                                <option>Amis seulement</option>
+                                <option>Privé</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <div class="settings-option">
+                            <div class="settings-option-text">
+                                <h3><span class="option-icon">🏆</span> Partage des scores</h3>
+                                <p>Permettre aux autres de voir vos scores aux quiz</p>
+                            </div>
+                            <div id="score-sharing-toggle" class="toggle-switch active"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <div class="settings-option">
+                            <div class="settings-option-text">
+                                <h3><span class="option-icon">🔍</span> Apparaître dans les recherches</h3>
+                                <p>Permettre aux autres utilisateurs de vous trouver via la recherche</p>
+                            </div>
+                            <div id="search-visibility-toggle" class="toggle-switch active"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="settings-section" id="appearance-section">
+                    <div class="section-header">
+                        <h2>Paramètres d'Apparence</h2>
+                        <p>Personnalisez l'apparence de l'interface</p>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <div class="settings-option">
+                            <div class="settings-option-text">
+                                <h3><span class="option-icon">🌓</span> Thème</h3>
+                                <p>Choisissez entre le mode clair et le mode sombre</p>
+                            </div>
+                            <div class="theme-selector">
+                                <button class="theme-btn active" data-theme="light">
+                                    <span class="theme-icon">☀️</span>
+                                    <span>Clair</span>
+                                </button>
+                                <button class="theme-btn" data-theme="dark">
+                                    <span class="theme-icon">🌙</span>
+                                    <span>Sombre</span>
+                                </button>
+                                <button class="theme-btn" data-theme="system">
+                                    <span class="theme-icon">⚙️</span>
+                                    <span>Système</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <div class="settings-option">
+                            <div class="settings-option-text">
+                                <h3><span class="option-icon">🔤</span> Taille du texte</h3>
+                                <p>Ajustez la taille du texte pour une meilleure lisibilité</p>
+                            </div>
+                            <div class="text-size-selector">
+                                <button class="text-size-btn" data-size="small">A</button>
+                                <button class="text-size-btn active" data-size="medium">A</button>
+                                <button class="text-size-btn" data-size="large">A</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="settings-actions">
+                    <button id="cancel-settings" class="btn btn-secondary">Annuler</button>
+                    <button id="save-settings" class="btn btn-primary">Enregistrer les modifications</button>
+                </div>
             </div>
         </div>
     </main>
 
     <footer>
         <div class="footer-content">
-            <p>&copy; 2025 MyWebsite. All rights reserved.</p>
+            <p>&copy; 2025 ThinkUp. Tous droits réservés.</p>
             <div class="footer-links">
-                <a href="#">About</a>
-                <a href="#">Privacy</a>
-                <a href="#">Terms</a>
+                <a href="#">À propos</a>
+                <a href="#">Confidentialité</a>
+                <a href="#">Conditions</a>
                 <a href="#">Contact</a>
             </div>
         </div>
     </footer>
+
+    <div id="edit-modal" class="edit-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="modal-title">Modifier les informations</h2>
+            <form id="edit-form" class="edit-form">
+                <div id="modal-fields">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary cancel-btn">Annuler</button>
+                    <button type="submit" class="btn btn-primary save-btn">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="confirm-modal" class="edit-modal">
+        <div class="modal-content confirm-content">
+            <h2>Êtes-vous sûr?</h2>
+            <p>Cette action est irréversible et supprimera définitivement votre compte et toutes vos données.</p>
+            <div class="confirm-actions">
+                <button class="btn btn-secondary cancel-btn">Annuler</button>
+                <button class="btn btn-danger confirm-btn">Supprimer définitivement</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

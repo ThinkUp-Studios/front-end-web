@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Quiz</title>
+    <title>Créer un Quiz - ThinkUp</title>
     <link rel="stylesheet" href="createQuiz.css">
     <script src="data.js" defer></script>
     <script src="script.js" defer></script>
@@ -11,39 +11,39 @@
 <body>
     <header>
         <nav class="navbar">
-            <a href="main.html" class="logo">MyWebsite</a>
+            <a href="main.html" class="logo">ThinkUp</a>
             <div class="nav-links">
-                <a href="main.html">Menu</a>
-                <a href="createQuiz.html" class="active">Create</a>
-                <a href="#search">Search</a>
+                <a href="main.html">Accueil</a>
+                <a href="createQuiz.html" class="active">Créer</a>
+                <a href="search.html">Rechercher</a>
             </div>
             <div class="profile">
-                <img src="/api/placeholder/150/150" alt="Profile Picture" class="profile-pic">
+                <img src="/api/placeholder/150/150" alt="Photo de Profil" class="profile-pic">
             </div>
         </nav>
     </header>
 
     <main class="main-content">
         <section class="quiz-header">
-            <h1>Create New Quiz</h1>
+            <h1>Créer un Nouveau Quiz</h1>
             <div class="quiz-details">
                 <div class="input-group">
-                    <label for="quiz-title">Quiz Title</label>
-                    <input type="text" id="quiz-title" placeholder="Enter quiz title" required>
+                    <label for="quiz-title">Titre du Quiz</label>
+                    <input type="text" id="quiz-title" placeholder="Entrez le titre du quiz" required>
                 </div>
                 <div class="input-group">
-                    <label for="quiz-description">Description (Optional)</label>
-                    <textarea id="quiz-description" placeholder="Enter a description for your quiz"></textarea>
+                    <label for="quiz-description">Description (Optionnel)</label>
+                    <textarea id="quiz-description" placeholder="Entrez une description pour votre quiz"></textarea>
                 </div>
                 <div class="input-group">
-                    <label for="quiz-category">Category</label>
+                    <label for="quiz-category">Catégorie</label>
                     <select id="quiz-category">
-                        <option value="education">Education</option>
-                        <option value="entertainment">Entertainment</option>
+                        <option value="education">Éducation</option>
+                        <option value="entertainment">Divertissement</option>
                         <option value="sports">Sports</option>
                         <option value="science">Science</option>
-                        <option value="history">History</option>
-                        <option value="other">Other</option>
+                        <option value="history">Histoire</option>
+                        <option value="other">Autre</option>
                     </select>
                 </div>
             </div>
@@ -54,52 +54,52 @@
                 <div class="question-header">
                     <h2>Question 1</h2>
                     <div class="question-controls">
-                        <button class="btn-icon" title="Delete question">🗑️</button>
+                        <button class="btn-icon" title="Supprimer la question">🗑️</button>
                     </div>
                 </div>
                 
                 <div class="input-group">
-                    <label for="question-text-1">Question Text</label>
-                    <input type="text" id="question-text-1" placeholder="Enter your question" required>
+                    <label for="question-text-1">Texte de la Question</label>
+                    <input type="text" id="question-text-1" placeholder="Entrez votre question" required>
                 </div>
                 
                 <div class="input-group">
-                    <label for="question-time-1">Time Limit (seconds)</label>
+                    <label for="question-time-1">Limite de Temps (secondes)</label>
                     <select id="question-time-1">
-                        <option value="10">10 seconds</option>
-                        <option value="20" selected>20 seconds</option>
-                        <option value="30">30 seconds</option>
-                        <option value="60">60 seconds</option>
-                        <option value="90">90 seconds</option>
+                        <option value="10">10 secondes</option>
+                        <option value="20" selected>20 secondes</option>
+                        <option value="30">30 secondes</option>
+                        <option value="60">60 secondes</option>
+                        <option value="90">90 secondes</option>
                     </select>
                 </div>
                 
                 <div class="input-group">
-                    <label>Answer Choices</label>
+                    <label>Choix de Réponses</label>
                     <div class="answer-choice">
                         <div class="color-block color-red"></div>
-                        <input type="text" placeholder="Enter answer choice" required>
+                        <input type="text" placeholder="Entrez un choix de réponse" required>
                         <div class="correct-toggle" data-correct="false">
                             ✓
                         </div>
                     </div>
                     <div class="answer-choice">
                         <div class="color-block color-blue"></div>
-                        <input type="text" placeholder="Enter answer choice" required>
+                        <input type="text" placeholder="Entrez un choix de réponse" required>
                         <div class="correct-toggle" data-correct="false">
                             ✓
                         </div>
                     </div>
                     <div class="answer-choice">
                         <div class="color-block color-yellow"></div>
-                        <input type="text" placeholder="Enter answer choice" required>
+                        <input type="text" placeholder="Entrez un choix de réponse" required>
                         <div class="correct-toggle" data-correct="false">
                             ✓
                         </div>
                     </div>
                     <div class="answer-choice">
                         <div class="color-block color-green"></div>
-                        <input type="text" placeholder="Enter answer choice" required>
+                        <input type="text" placeholder="Entrez un choix de réponse" required>
                         <div class="correct-toggle" data-correct="false">
                             ✓
                         </div>
@@ -109,18 +109,18 @@
         </section>
 
         <section class="quiz-actions">
-            <button id="add-question" class="btn btn-secondary">Add Another Question</button>
-            <button id="complete-quiz" class="btn btn-primary">Complete Quiz</button>
+            <button id="add-question" class="btn btn-secondary">Ajouter une autre question</button>
+            <button id="complete-quiz" class="btn btn-primary">Terminer le Quiz</button>
         </section>
     </main>
 
     <footer>
         <div class="footer-content">
-            <p>&copy; 2025 MyWebsite. All rights reserved.</p>
+            <p>&copy; 2025 ThinkUp. Tous droits réservés.</p>
             <div class="footer-links">
-                <a href="#">About</a>
-                <a href="#">Privacy</a>
-                <a href="#">Terms</a>
+                <a href="#">À propos</a>
+                <a href="#">Confidentialité</a>
+                <a href="#">Conditions</a>
                 <a href="#">Contact</a>
             </div>
         </div>
