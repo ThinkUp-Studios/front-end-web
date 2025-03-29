@@ -43,6 +43,13 @@ header {
     gap: 2.5rem;
 }
 
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: #6b7280;
+    font-style: italic;
+}
+
 .nav-links a {
     text-decoration: none;
     color: rgba(255, 255, 255, 0.85);

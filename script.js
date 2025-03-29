@@ -1,3 +1,4 @@
+import { getAllQuizzes, getQuiz } from './api.js';
 document.addEventListener('DOMContentLoaded', function() {
     const profilePic = document.querySelector('.profile-pic');
     
@@ -55,21 +56,50 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    const renderQuizCards = () => {
-        const quizCardsContainer = document.getElementById('quiz-cards');
-        
-        if (quizCardsContainer) {
-            quizData.forEach(quiz => {
+    // Au début du fichier script.js, ajoutez cet import
+// Import the required functions from the API module
+
+
+// ... rest of the code
+
+// Puis remplacez les fonctions renderQuizCards et renderRecommendedQuizzes
+
+const renderQuizCards = async () => {
+    const quizCardsContainer = document.getElementById('quiz-cards');
+    
+    if (quizCardsContainer) {
+        try {
+            // Afficher un indicateur de chargement
+            quizCardsContainer.innerHTML = '<div class="loading">Chargement des quiz...</div>';
+            
+            // Récupérer les quiz depuis l'API
+            const quizzes = await getAllQuizzes();
+            
+            // Vider le conteneur
+            quizCardsContainer.innerHTML = '';
+            
+            // Si aucun quiz n'est trouvé
+            if (quizzes.length === 0) {
+                quizCardsContainer.innerHTML = '<p>Aucun quiz disponible.</p>';
+                return;
+            }
+            
+            // Afficher chaque quiz
+            quizzes.forEach(quiz => {
                 const quizCard = document.createElement('div');
                 quizCard.className = 'quiz-card';
+                
+                // Utiliser une image par défaut si imageUrl n'est pas défini
+                const imageUrl = quiz.imageUrl || '/api/placeholder/300/180';
+                
                 quizCard.innerHTML = `
-                    <img src="${quiz.imageUrl}" alt="${quiz.title}" class="quiz-card-image">
+                    <img src="${imageUrl}" alt="${quiz.title}" class="quiz-card-image">
                     <div class="quiz-card-content">
                         <h3 class="quiz-card-title">${quiz.title}</h3>
-                        <p class="quiz-card-description">${quiz.description}</p>
+                        <p class="quiz-card-description">${quiz.description || 'Aucune description disponible.'}</p>
                         <div class="quiz-card-meta">
-                            <span>Par ${quiz.author}</span>
-                            <span class="quiz-card-category">${quiz.category}</span>
+                            <span>Par ${quiz.author || 'Anonyme'}</span>
+                            <span class="quiz-card-category">${quiz.category || 'Divers'}</span>
                         </div>
                         <div class="quiz-card-actions">
                             <a href="quiz.html?id=${quiz.id}" class="quiz-card-btn">Jouer</a>
@@ -78,17 +108,38 @@ document.addEventListener('DOMContentLoaded', function() {
                 `;
                 quizCardsContainer.appendChild(quizCard);
             });
+        } catch (error) {
+            console.error('Erreur lors du chargement des quiz:', error);
+            quizCardsContainer.innerHTML = '<p>Impossible de charger les quiz. Veuillez réessayer plus tard.</p>';
         }
-    };
+    }
+};
+
+const renderRecommendedQuizzes = async () => {
+    const recommendedContainer = document.getElementById('recommended-quiz-cards');
     
-    const renderRecommendedQuizzes = () => {
-        const recommendedContainer = document.getElementById('recommended-quiz-cards');
-        
-        if (recommendedContainer && quizData && quizData.length > 0) {
-            const numberOfQuizzesToShow = Math.min(3, quizData.length);
+    if (recommendedContainer) {
+        try {
+            // Afficher un indicateur de chargement
+            recommendedContainer.innerHTML = '<div class="loading">Chargement des recommandations...</div>';
+            
+            // Récupérer les quiz depuis l'API
+            const quizzes = await getAllQuizzes();
+            
+            // Vider le conteneur
+            recommendedContainer.innerHTML = '';
+            
+            // Si aucun quiz n'est trouvé
+            if (quizzes.length === 0) {
+                recommendedContainer.innerHTML = '<p>Aucune recommandation disponible.</p>';
+                return;
+            }
+            
+            // Afficher jusqu'à 3 quiz recommandés
+            const numberOfQuizzesToShow = Math.min(3, quizzes.length);
             
             for (let i = 0; i < numberOfQuizzesToShow; i++) {
-                const quiz = quizData[i];
+                const quiz = quizzes[i];
                 const quizCard = document.createElement('div');
                 quizCard.className = 'quiz-card';
                 
@@ -106,19 +157,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     tagClass = "recommended-tag";
                 }
                 
+                // Utiliser une image par défaut si imageUrl n'est pas défini
+                const imageUrl = quiz.imageUrl || '/api/placeholder/300/180';
+                
                 quizCard.innerHTML = `
                     <div class="quiz-card-tag ${tagClass}">${tagName}</div>
-                    <img src="${quiz.imageUrl}" alt="${quiz.title}" class="quiz-card-image">
+                    <img src="${imageUrl}" alt="${quiz.title}" class="quiz-card-image">
                     <div class="quiz-card-content">
                         <h3 class="quiz-card-title">${quiz.title}</h3>
-                        <p class="quiz-card-description">${quiz.description}</p>
+                        <p class="quiz-card-description">${quiz.description || 'Aucune description disponible.'}</p>
                         <div class="quiz-card-meta">
-                            <span>Par ${quiz.author}</span>
-                            <span class="quiz-card-category">${quiz.category}</span>
+                            <span>Par ${quiz.author || 'Anonyme'}</span>
+                            <span class="quiz-card-category">${quiz.category || 'Divers'}</span>
                         </div>
                         <div class="quiz-card-info">
-                            <span class="quiz-questions-count">${quiz.questions.length} questions</span>
-                            <span class="quiz-time-estimate">${Math.round(quiz.questions.reduce((total, q) => total + q.timeLimit, 0) / 60)} min</span>
+                            <span class="quiz-questions-count">${quiz.questionCount || 0} questions</span>
+                            <span class="quiz-time-estimate">${quiz.estimatedTime || 5} min</span>
                         </div>
                         <div class="quiz-card-actions">
                             <a href="quiz.html?id=${quiz.id}" class="quiz-card-btn">Jouer</a>
@@ -127,18 +181,88 @@ document.addEventListener('DOMContentLoaded', function() {
                 `;
                 recommendedContainer.appendChild(quizCard);
             }
+        } catch (error) {
+            console.error('Erreur lors du chargement des recommandations:', error);
+            recommendedContainer.innerHTML = '<p>Impossible de charger les recommandations. Veuillez réessayer plus tard.</p>';
         }
-    };
+    }
+};
     
-    const initQuiz = () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const quizId = urlParams.get('id');
+const initQuiz = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const quizId = urlParams.get('id');
+    
+    if (!quizId) {
+        window.location.href = 'main.html';
+        return;
+    }
+    
+    try {
+        // Afficher un indicateur de chargement
+        const quizContainer = document.querySelector('.quiz-container');
+        if (quizContainer) {
+            quizContainer.innerHTML = '<div class="loading">Chargement du quiz...</div>';
+        }
         
-        const currentQuizData = quizData.find(quiz => quiz.id === quizId);
+        // Récupérer le quiz depuis l'API
+        const currentQuizData = await getQuiz(quizId);
         
         if (!currentQuizData) {
             window.location.href = 'main.html';
             return;
+        }
+        
+        // Restaurer le contenu du quiz
+        if (quizContainer) {
+            quizContainer.innerHTML = `
+                <h1 id="quiz-title"></h1>
+                <div class="timer-container">
+                    <div class="timer">
+                        <div class="timer-bar" id="timer-bar"></div>
+                        <div class="timer-count"><span id="timer-seconds">30</span>s</div>
+                    </div>
+                </div>
+                <div class="question-container">
+                    <div class="question-header">
+                        <span>Question <span id="current-question">1</span>/<span id="total-questions">10</span></span>
+                    </div>
+                    <h2 id="question-text"></h2>
+                </div>
+                <div class="answers-grid">
+                    <div class="answer-card" data-option="0">
+                        <div class="answer-content">
+                            <span class="answer-letter">A</span>
+                            <span class="answer-text"></span>
+                        </div>
+                    </div>
+                    <div class="answer-card" data-option="1">
+                        <div class="answer-content">
+                            <span class="answer-letter">B</span>
+                            <span class="answer-text"></span>
+                        </div>
+                    </div>
+                    <div class="answer-card" data-option="2">
+                        <div class="answer-content">
+                            <span class="answer-letter">C</span>
+                            <span class="answer-text"></span>
+                        </div>
+                    </div>
+                    <div class="answer-card" data-option="3">
+                        <div class="answer-content">
+                            <span class="answer-letter">D</span>
+                            <span class="answer-text"></span>
+                        </div>
+                    </div>
+                </div>
+                <div id="feedback-overlay" class="feedback-overlay">
+                    <div id="feedback-modal" class="feedback-modal">
+                        <div class="feedback-icon">✓</div>
+                        <div class="feedback-text">Correct!</div>
+                        <div class="points">+100 points</div>
+                        <div class="waiting-text">Prochaine question dans <span class="countdown">3</span>...</div>
+                    </div>
+                </div>
+            `;
         }
         
         let currentQuestionIndex = 0;
@@ -160,6 +284,11 @@ document.addEventListener('DOMContentLoaded', function() {
             document.title = `${currentQuizData.title} - ThinkUp`;
             
             document.getElementById('quiz-title').textContent = currentQuizData.title;
+            
+            // S'assurer que questions existe et est un tableau
+            if (!currentQuizData.questions || !Array.isArray(currentQuizData.questions)) {
+                currentQuizData.questions = [];
+            }
             
             totalQuestionsSpan.textContent = currentQuizData.questions.length;
             
@@ -183,12 +312,24 @@ document.addEventListener('DOMContentLoaded', function() {
             questionText.textContent = question.text;
             currentQuestionSpan.textContent = index + 1;
             
+            // S'assurer que options existe et est un tableau
+            if (!question.options || !Array.isArray(question.options)) {
+                question.options = ['Option A', 'Option B', 'Option C', 'Option D'];
+            }
+            
             answerCards.forEach((card, i) => {
-                card.querySelector('.answer-text').textContent = question.options[i];
-                card.classList.remove('disabled');
+                if (i < question.options.length) {
+                    card.style.display = 'block';
+                    card.querySelector('.answer-text').textContent = question.options[i];
+                    card.classList.remove('disabled');
+                } else {
+                    card.style.display = 'none'; // Cacher les options supplémentaires si moins de 4 options
+                }
             });
             
-            startTimer(question.timeLimit);
+            // Utiliser timeLimit s'il existe, sinon 30 secondes par défaut
+            const timeLimit = question.timeLimit || 30;
+            startTimer(timeLimit);
         }
         
         function startTimer(seconds) {
@@ -199,6 +340,7 @@ document.addEventListener('DOMContentLoaded', function() {
             timerBar.style.width = '100%';
             timerBar.style.backgroundColor = '#4CAF50';
             
+            // Force reflow
             void timerBar.offsetWidth;
             
             timerBar.style.transition = `width ${seconds}s linear`;
@@ -231,7 +373,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const selectedOption = parseInt(this.dataset.option);
             const correctOption = currentQuizData.questions[currentQuestionIndex].correctOption;
-            const totalTime = currentQuizData.questions[currentQuestionIndex].timeLimit;
+            const totalTime = currentQuizData.questions[currentQuestionIndex].timeLimit || 30;
             
             answerCards.forEach(card => {
                 card.classList.add('disabled');
@@ -281,6 +423,20 @@ document.addEventListener('DOMContentLoaded', function() {
             
             feedbackOverlay.classList.add('active');
             
+            // Mise à jour du compte à rebours
+            const countdownElement = feedbackModal.querySelector('.countdown');
+            let countdown = 3;
+            countdownElement.textContent = countdown;
+            
+            const countdownTimer = setInterval(() => {
+                countdown--;
+                countdownElement.textContent = countdown;
+                
+                if (countdown <= 0) {
+                    clearInterval(countdownTimer);
+                }
+            }, 1000);
+            
             setTimeout(() => {
                 feedbackOverlay.classList.remove('active');
                 loadQuestion(currentQuestionIndex + 1);
@@ -316,6 +472,20 @@ document.addEventListener('DOMContentLoaded', function() {
             
             feedbackOverlay.classList.add('active');
             
+            // Mise à jour du compte à rebours
+            const countdownElement = feedbackModal.querySelector('.countdown');
+            let countdown = 3;
+            countdownElement.textContent = countdown;
+            
+            const countdownTimer = setInterval(() => {
+                countdown--;
+                countdownElement.textContent = countdown;
+                
+                if (countdown <= 0) {
+                    clearInterval(countdownTimer);
+                }
+            }, 1000);
+            
             setTimeout(() => {
                 feedbackOverlay.classList.remove('active');
                 loadQuestion(currentQuestionIndex + 1);
@@ -337,7 +507,21 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         init();
-    };
+    } catch (error) {
+        console.error('Erreur lors du chargement du quiz:', error);
+        // Afficher un message d'erreur à l'utilisateur
+        const quizContainer = document.querySelector('.quiz-container');
+        if (quizContainer) {
+            quizContainer.innerHTML = `
+                <div class="error-message">
+                    <h2>Impossible de charger le quiz</h2>
+                    <p>Une erreur est survenue lors du chargement du quiz. Veuillez réessayer plus tard.</p>
+                    <a href="main.html" class="btn">Retourner à l'accueil</a>
+                </div>
+            `;
+        }
+    }
+};
     
     const initCreateQuiz = () => {
         let questionCount = 1;
@@ -911,4 +1095,6 @@ document.addEventListener('DOMContentLoaded', function() {
     } else if (document.querySelector('.profile-container')) {
         initProfilePage();
     }
+
+    
 });
