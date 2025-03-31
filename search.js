@@ -3,6 +3,7 @@ const isEmpty = str => !str.trim().length;
 
 function selectQuizDisplay() {
     if (window.location.pathname.includes("search.html")) {
+        fetchQuizzes();
         document.getElementById("search-btn").addEventListener("click", function() {
             let searchInput = document.getElementById("search-input").value;
             if (isEmpty(searchInput)) {
@@ -59,7 +60,7 @@ function displayQuizzes() {
                         <span class="result-author">Par ${quiz.nomCreateur}</span>
                     </div>
                 </div>
-                <a href="#" class="play-btn">Jouer</a>
+                <a href="#" class="play-btn" i="play-btn-${quiz.id_quiz}">Jouer</a>
             </div>
         `;
         console.log("Test");
