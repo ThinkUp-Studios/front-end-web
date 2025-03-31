@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="search.css">
     <script src="data.js" defer></script>
     <script src="script.js" defer></script>
+    <script src="search.js" defer></script>
 </head>
 <body>
     <header>
@@ -80,31 +81,7 @@
             <div class="results-section active" id="all-results">
                 <div class="result-group">
                     <h3>Quiz</h3>
-                    <div class="quiz-results">
-                        <div class="quiz-result-card">
-                            <img src="/api/placeholder/120/80" alt="Quiz" class="result-thumb">
-                            <div class="result-details">
-                                <h4>Culture Générale</h4>
-                                <p>Un quiz pour tester vos connaissances générales dans divers domaines.</p>
-                                <div class="result-meta">
-                                    <span class="result-category">Éducation</span>
-                                    <span class="result-author">Par JeanDupont</span>
-                                </div>
-                            </div>
-                            <a href="#" class="play-btn">Jouer</a>
-                        </div>
-                        <div class="quiz-result-card">
-                            <img src="/api/placeholder/120/80" alt="Quiz" class="result-thumb">
-                            <div class="result-details">
-                                <h4>Histoire de France</h4>
-                                <p>Testez vos connaissances sur l'histoire française à travers les siècles.</p>
-                                <div class="result-meta">
-                                    <span class="result-category">Histoire</span>
-                                    <span class="result-author">Par MarieMartin</span>
-                                </div>
-                            </div>
-                            <a href="#" class="play-btn">Jouer</a>
-                        </div>
+                    <div class="quiz-results" id="quiz-results">
                     </div>
                     <a href="#" class="view-more-btn">Voir plus de quiz</a>
                 </div>
