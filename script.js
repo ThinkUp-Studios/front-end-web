@@ -64,56 +64,51 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Puis remplacez les fonctions renderQuizCards et renderRecommendedQuizzes
 
-const renderQuizCards = async () => {
+const renderQuizCards = () => {
     const quizCardsContainer = document.getElementById('quiz-cards');
     
     if (quizCardsContainer) {
-        try {
-            // Afficher un indicateur de chargement
-            quizCardsContainer.innerHTML = '<div class="loading">Chargement des quiz...</div>';
-            
-            // Récupérer les quiz depuis l'API
-            const quizzes = await getAllQuizzes();
-            
-            // Vider le conteneur
-            quizCardsContainer.innerHTML = '';
-            
-            // Si aucun quiz n'est trouvé
-            if (quizzes.length === 0) {
-                quizCardsContainer.innerHTML = '<p>Aucun quiz disponible.</p>';
-                return;
-            }
-            
-            // Afficher chaque quiz
-            quizzes.forEach(quiz => {
-                const quizCard = document.createElement('div');
-                quizCard.className = 'quiz-card';
+        quizCardsContainer.innerHTML = '<div class="loading">Chargement des quiz...</div>';
+        
+        fetch('http://localhost:8000/api/quizzes')
+            .then(response => response.json())
+            .then(data => {
+                quizCardsContainer.innerHTML = '';
                 
-                // Utiliser une image par défaut si imageUrl n'est pas défini
-                const imageUrl = quiz.imageUrl || '/api/placeholder/300/180';
+                if (data.count === 0) {
+                    quizCardsContainer.innerHTML = `<p>${data.message || 'Aucun quiz disponible'}</p>`;
+                    return;
+                }
                 
-                quizCard.innerHTML = `
-                    <img src="${imageUrl}" alt="${quiz.title}" class="quiz-card-image">
-                    <div class="quiz-card-content">
-                        <h3 class="quiz-card-title">${quiz.title}</h3>
-                        <p class="quiz-card-description">${quiz.description || 'Aucune description disponible.'}</p>
-                        <div class="quiz-card-meta">
-                            <span>Par ${quiz.author || 'Anonyme'}</span>
-                            <span class="quiz-card-category">${quiz.category || 'Divers'}</span>
+                data.quizzes.forEach(quiz => {
+                    const quizCard = document.createElement('div');
+                    quizCard.className = 'quiz-card';
+                    
+                    const imageUrl = quiz.imageUrl || '/api/placeholder/300/180';
+                    quizCard.innerHTML = `
+                        <img src="${imageUrl}" alt="${quiz.title}" class="quiz-card-image">
+                        <div class="quiz-card-content">
+                            <h3 class="quiz-card-title">${quiz.title}</h3>
+                            <p class="quiz-card-description">${quiz.description || 'Aucune description disponible.'}</p>
+                            <div class="quiz-card-meta">
+                                <span>Par ${quiz.author || 'Anonyme'}</span>
+                                <span class="quiz-card-category">${quiz.category || 'Divers'}</span>
+                            </div>
+                            <div class="quiz-card-actions">
+                                <a href="quiz.html?id=${quiz.id}" class="quiz-card-btn">Jouer</a>
+                            </div>
                         </div>
-                        <div class="quiz-card-actions">
-                            <a href="quiz.html?id=${quiz.id}" class="quiz-card-btn">Jouer</a>
-                        </div>
-                    </div>
-                `;
-                quizCardsContainer.appendChild(quizCard);
+                    `;
+                    quizCardsContainer.appendChild(quizCard);
+                });
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                quizCardsContainer.innerHTML = '<p>Erreur de chargement</p>';
             });
-        } catch (error) {
-            console.error('Erreur lors du chargement des quiz:', error);
-            quizCardsContainer.innerHTML = '<p>Impossible de charger les quiz. Veuillez réessayer plus tard.</p>';
-        }
     }
 };
+
 
 const renderRecommendedQuizzes = async () => {
     const recommendedContainer = document.getElementById('recommended-quiz-cards');

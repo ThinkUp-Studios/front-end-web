@@ -327,7 +327,7 @@ select:focus {
     margin-bottom: 1.5rem;
 }
 
-.user-result-card {
+#user-result-card{
     display: flex;
     align-items: center;
     gap: 1.5rem;
@@ -337,7 +337,7 @@ select:focus {
     transition: all 0.3s ease;
 }
 
-.user-result-card:hover {
+#user-result-card:hover {
     background-color: #f1f3f5;
     transform: translateY(-3px);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
