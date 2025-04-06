@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     { text: 'Voir Profil', icon: '👤', href: 'profile.html' },
                     { text: 'Paramètres', icon: '⚙️', href: 'settings.html' },
                     { text: 'FAQ', icon: '❓', href: '#faq' },
-                    { text: 'Déconnexion', icon: '🚪', href: 'login.html' }
+                    { text: 'Se connecter', icon: '🚪', href: 'login.html' }
                 ];
                 
                 menuItems.forEach(item => {
@@ -135,10 +135,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 card.classList.remove('disabled', 'correct', 'incorrect');
             });
 
-            startTimer(question.timeLimit);
+            startTimer(question.timeLimit, quizData);
         }
 
-        function startTimer(seconds) {
+        function startTimer(seconds, quizData) {
             clearInterval(timer);
             timeLeft = seconds;
             timerSeconds.textContent = timeLeft;
@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (timeLeft <= 0) {
                     clearInterval(timer);
                     if (!isAnswered) {
-                        handleTimeout();
+                        handleTimeout(quizData);
                     }
                 }
             }, 1000);
@@ -230,14 +230,19 @@ document.addEventListener('DOMContentLoaded', function() {
             feedbackOverlay.classList.add('active');
         }
 
-        function handleTimeout() {
+        function handleTimeout(quizData) {
             isAnswered = true;
             answerCards.forEach(card => card.classList.add('disabled'));
 
-            const correctOption = currentQuizData.questions[currentQuestionIndex].correctOption;
-            const correctAnswerText = currentQuizData.questions[currentQuestionIndex].options[correctOption];
+            const correctOption = quizData.questions[currentQuestionIndex].correctOption;
+            const correctAnswerText = quizData.questions[currentQuestionIndex].options[correctOption];
             
             showFeedback('timeout', '⏱', 'Temps écoulé!', 0, 0, 0, correctAnswerText);
+            setTimeout(() => {
+                feedbackOverlay.classList.remove('active');
+                loadQuestion(quizData, currentQuestionIndex + 1);
+            }, 3000);
+
         }
 
         function endQuiz() {
