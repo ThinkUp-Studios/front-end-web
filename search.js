@@ -81,7 +81,7 @@ function displayQuizzes() {
                         <span class="result-author">Par ${quiz.nomCreateur}</span>
                     </div>
                 </div>
-                <a href="#" class="play-btn" i="play-btn-${quiz.id_quiz}">Jouer</a>
+                <a href="quiz.html?id=${quiz.id_quiz}" class="play-btn" i="play-btn-${quiz.id_quiz}">Jouer</a>
             </div>
         `;
         quizContainer.appendChild(quizElement);
