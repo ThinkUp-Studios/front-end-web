@@ -181,14 +181,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 // Préparation des données du quiz pour l'envoi au format attendu par l'API
+                // Pour la démonstration, nous utilisons un utilisateur existant dans la base de données
                 const quizData = {
-                    titre: title,
+                    nom: title,  // Changé de 'titre' à 'nom' pour correspondre à la structure en base
                     description: document.getElementById('quiz-description').value.trim(),
                     categorie: document.getElementById('quiz-category').value,
-                    tags: [document.getElementById('quiz-category').value],
-                    estPublic: true,
-                    // Ajout d'un champ nbQuestions qui est obligatoire
                     nbQuestions: document.querySelectorAll('.question-card').length,
+                    difficulte: 'Facile',  // Valeur par défaut
+                    nomCreateur: 'Jawad2Bagnolet',  // Utilisateur existant dans la base
+                    estPublic: 1,
+                    tags: [document.getElementById('quiz-category').value],
                     questions: []
                 };
                 
@@ -207,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                     
                     quizData.questions.push({
-                        texte_question: questionText,  // Changé de 'enonce' à 'texte_question'
+                        texte_question: questionText,
                         reponses: options,
                         bonneReponse: correctOption,
                         tempsReponse: timeLimit
