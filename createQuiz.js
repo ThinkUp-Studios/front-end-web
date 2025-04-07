@@ -212,17 +212,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 });
                 
+                // Afficher les données envoyées dans la console pour débogage
+                console.log('Données du quiz à envoyer:', quizData);
+                
                 // Envoi des données à l'API
                 fetch('http://localhost:8000/api/quizzes/complete', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     },
                     body: JSON.stringify(quizData)
                 })
                 .then(response => {
+                    console.log('Status de la réponse:', response.status);
                     if (!response.ok) {
-                        throw new Error('Erreur lors de la création du quiz');
+                        return response.text().then(text => {
+                            console.error('Réponse d\'erreur:', text);
+                            throw new Error('Erreur lors de la création du quiz: ' + response.status);
+                        });
                     }
                     return response.json();
                 })
