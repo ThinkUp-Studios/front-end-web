@@ -63,6 +63,7 @@ function fetchQuizzes() {
 document.addEventListener('DOMContentLoaded', function () {
     selectQuizDisplay();
     hideQuizResults();
+    hideUserResults();
     populateCategories();
 });
 
@@ -174,7 +175,7 @@ function fetchUsers() {
         .then(response => response.json())
         .then(data=> {
             if (data.count === 0) {
-                // displayNoUserMessage(data.message || 'Aucun utilisateur trouvé');
+
             } else {
                 users = data.users;
                 userCount = data.count;
@@ -183,7 +184,6 @@ function fetchUsers() {
         })
         .catch(error => {
             console.error('Erreur réseau ou serveur: ', error);
-            // displayErrorMessageUsers('Une erreur est survenue lors de la récupération des utilisateurs')
         });
 }
 
@@ -216,12 +216,19 @@ function displayUsers() {
         return;
     }
 
+    let i = 1;
+
     users.forEach(user => {
         const userElement = document.createElement("div");
-        userElement.classList.add("user-results");
+        let classeDiv;
+        if( i >= 3 ) {
+            classeDiv = "user-result-card-hidden";
+        } else {
+            classeDiv = "user-result-card";
+        }
 
         userElement.innerHTML = `
-        <div id="user-result-card">
+        <div id="user-result-card" class=${classeDiv}>
             <img src="" alt="User" class="user-avatar">
             <div class="user-details">
                 <h4>${user.username}</h4>
@@ -231,7 +238,9 @@ function displayUsers() {
         </div>
         `
         userContainer.appendChild(userElement);
+        i++;
     })
+
 }
 
 function hideQuizResults() {
@@ -250,6 +259,24 @@ function hideQuizResults() {
     });
 }
 
+function hideUserResults() {
+    const viewMoreUserBtn = document.getElementById("view-more-btn-user");
+
+    viewMoreUserBtn.addEventListener("click", function () {
+        const hiddenUsers = document.querySelectorAll(".user-result-card-hidden");
+
+        console.log(hiddenUsers);  
+        const isHidden = hiddenUsers[0].style.display === "none" || hiddenUsers[0].style.display === "";
+
+        hiddenUsers.forEach(user => {
+            user.style.display = isHidden ? "flex" : "none";
+        });
+
+        viewMoreUserBtn.textContent = isHidden ? "Voir moins d'utilisateurs" : "Voir plus d'utilisateurs";
+    });
+
+}
+
 
 function populateCategories() {
     const categorySelect = document.getElementById("category-select");
@@ -260,15 +287,10 @@ function populateCategories() {
             if (data.count !== 0) {
                 let quizzes = data.quizzes;
 
-                // Récupère toutes les catégories
                 let categories = quizzes.map(quiz => quiz.categorie);
 
-                // Filtrer les catégories uniques
                 let uniqueCategories = [...new Set(categories)];
 
-                console.log("Unique categories:", uniqueCategories);
-
-                // Remplir le select
                 uniqueCategories.forEach(categorie => {
                     let option = document.createElement("option");
                     option.textContent = categorie;
