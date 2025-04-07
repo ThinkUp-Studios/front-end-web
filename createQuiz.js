@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 
                 // Envoi des données à l'API
-                fetch('/api/quizzes/complete', {
+                fetch('http://localhost:8000/api/quizzes/complete', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
