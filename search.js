@@ -63,6 +63,7 @@ function fetchQuizzes() {
 document.addEventListener('DOMContentLoaded', function () {
     selectQuizDisplay();
     hideQuizResults();
+    populateCategories();
 });
 
 
@@ -247,4 +248,33 @@ function hideQuizResults() {
 
         viewMoreBtn.textContent = isHidden ? "Voir moins de quiz" : "Voir plus de quiz";
     });
+}
+
+
+function populateCategories() {
+    const categorySelect = document.getElementById("category-select");
+
+    fetch('http://localhost:8000/api/quizzes')
+        .then(response => response.json())
+        .then(data => {
+            if (data.count !== 0) {
+                let quizzes = data.quizzes;
+
+                // Récupère toutes les catégories
+                let categories = quizzes.map(quiz => quiz.categorie);
+
+                // Filtrer les catégories uniques
+                let uniqueCategories = [...new Set(categories)];
+
+                console.log("Unique categories:", uniqueCategories);
+
+                // Remplir le select
+                uniqueCategories.forEach(categorie => {
+                    let option = document.createElement("option");
+                    option.textContent = categorie;
+                    option.value = categorie;
+                    categorySelect.appendChild(option);
+                });
+            }
+        })
 }
