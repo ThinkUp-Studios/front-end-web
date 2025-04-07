@@ -185,8 +185,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     titre: title,
                     description: document.getElementById('quiz-description').value.trim(),
                     categorie: document.getElementById('quiz-category').value,
-                    tags: [document.getElementById('quiz-category').value], // Utilisation de la catégorie comme tag par défaut
+                    tags: [document.getElementById('quiz-category').value],
                     estPublic: true,
+                    // Ajout d'un champ nbQuestions qui est obligatoire
+                    nbQuestions: document.querySelectorAll('.question-card').length,
                     questions: []
                 };
                 
@@ -205,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                     
                     quizData.questions.push({
-                        enonce: questionText,
+                        texte_question: questionText,  // Changé de 'enonce' à 'texte_question'
                         reponses: options,
                         bonneReponse: correctOption,
                         tempsReponse: timeLimit
