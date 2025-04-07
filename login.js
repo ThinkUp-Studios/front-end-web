@@ -9,7 +9,7 @@ async function login() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ username, motDePasse: password })
         });
 
         const data = await response.json();
@@ -27,8 +27,15 @@ async function login() {
     }
 }
 
-document.getElementById('login-form').addEventListener('submit', function(event) {
-    event.preventDefault();  
-    login();  
-});
 
+function submitForm() {
+    document.getElementById('login-form').addEventListener('submit', function(event) {
+        event.preventDefault();  
+        login();  
+    });
+}
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    submitForm();
+});

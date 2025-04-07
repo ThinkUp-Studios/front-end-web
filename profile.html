@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="main.css">
     <link rel="stylesheet" href="profile.css">
     <script src="script.js" defer></script>
+    <script src="profile.js" defer> </script>
 </head>
 <body>
     <header>
@@ -26,25 +27,24 @@
     <main class="profile-container">
         <div class="profile-header">
             <div class="profile-cover"></div>
-            <div class="profile-info">
+            <div class="profile-info" id="profile-info">
                 <div class="profile-avatar">
-                    <img src="/api/placeholder/150/150" alt="Photo de Profil">
+                    <img src="" alt="Photo de Profil">
                     <button class="change-avatar-btn"><span class="avatar-icon">📷</span></button>
                 </div>
                 <div class="profile-details">
-                    <h1 class="profile-name">Martin Dubois</h1>
-                    <p class="profile-username">@martindubois</p>
+                    <h1 id="profile-name"></h1>
                     <div class="profile-stats">
                         <div class="stat-item">
-                            <span class="stat-value">42</span>
+                            <span class="stat-value" id="stat-quiz-cree"></span>
                             <span class="stat-label">Quiz créés</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-value">128</span>
+                            <span class="stat-value" id="stat-quiz-complete"></span>
                             <span class="stat-label">Quiz complétés</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-value">3850</span>
+                            <span class="stat-value" id="stat-pts-total"></span>
                             <span class="stat-label">Points</span>
                         </div>
                     </div>
