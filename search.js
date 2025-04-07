@@ -1,7 +1,9 @@
 let quizzes = [];
 let count = [];
+let userCount = [];
 let users = [];
 let searchInput = "";
+let hiddenBool = 0;
 const isEmpty = str => !str.trim().length;
 
 function selectQuizDisplay() {
@@ -14,10 +16,13 @@ function selectQuizDisplay() {
             console.log(searchInput);
             if (isEmpty(searchInput)) {
                 fetchQuizzes();
+                fetchUsers();
             } else if (searchInput === "random" || searchInput === "hasard"){
                 fetchRandomQuiz();
+                fetchUsers();
             } else {
                 fetchQuizzesBySearch();
+                fetchUsersBySearch();
             }
         }
         });
@@ -57,6 +62,7 @@ function fetchQuizzes() {
 
 document.addEventListener('DOMContentLoaded', function () {
     selectQuizDisplay();
+    hideQuizResults();
 });
 
 
@@ -69,12 +75,20 @@ function displayQuizzes() {
         return;
     }
 
+    let i = 0;
+
     quizzes.forEach(quiz => {
+
         const quizElement = document.createElement("div");
-        quizElement.classList.add("quiz-results");
+        let classeDiv;
+        if (i >= 3) {
+            classeDiv = "quiz-results-card-hidden";
+        } else {
+            classeDiv = "quiz-result-card";
+        }
 
         quizElement.innerHTML = `
-            <div id="quiz-result-card-${quiz.id_quiz}" class="quiz-result-card">
+            <div id="quiz-result-card" class=${classeDiv}>
                 <div class="result-details">
                     <h4>${quiz.nom}</h4>
                     <p>${quiz.description}</p>
@@ -87,9 +101,18 @@ function displayQuizzes() {
             </div>
         `;
         quizContainer.appendChild(quizElement);
+        i++;
     })
     document.getElementById("results-number").innerHTML = count + " resultats trouvés";
     document.getElementById("search-term").innerHTML = searchInput;
+
+    const viewMoreBtn = document.getElementById("view-more-btn");
+    if (quizzes.length > 3) {
+        viewMoreBtn.style.display = "block";
+    } else {
+        viewMoreBtn.style.display = "none";
+    }
+    viewMoreBtn.textContent = "Voir plus de quiz";
 
 }
 
@@ -163,6 +186,26 @@ function fetchUsers() {
         });
 }
 
+function fetchUsersBySearch() {
+    let recherche = document.getElementById("search-input").value;
+    fetch(`http://localhost:8000/api/users/find?search=${recherche}}`)
+        .then(response => {
+            if(!response.ok) {
+                throw new Error('Erreur lors de la récupération des utilisateurs');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data);
+            users = data.users;
+            userCount = data.count;
+            displayUsers();
+        })
+        .catch(error => {
+            console.error("Erreur: ", error);
+        });
+}
+
 function displayUsers() {
     const userContainer = document.getElementById('user-results');
     userContainer.innerHTML = "";
@@ -188,4 +231,20 @@ function displayUsers() {
         `
         userContainer.appendChild(userElement);
     })
+}
+
+function hideQuizResults() {
+    const viewMoreBtn = document.getElementById("view-more-btn");
+
+    viewMoreBtn.addEventListener("click", function () {
+        const hiddenQuizzes = document.querySelectorAll(".quiz-results-card-hidden");
+
+        const isHidden = hiddenQuizzes[0].style.display === "none" || hiddenQuizzes[0].style.display === "";
+
+        hiddenQuizzes.forEach(quiz => {
+            quiz.style.display = isHidden ? "flex" : "none";
+        });
+
+        viewMoreBtn.textContent = isHidden ? "Voir moins de quiz" : "Voir plus de quiz";
+    });
 }

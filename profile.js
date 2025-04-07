@@ -18,8 +18,14 @@ function fetchUserData() {
         });
 }
 
+function fetchUserQuizzes() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const username = null;
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     fetchUserData();
+    fetchUserQuizzes();
 });
 
 function updateProfile(user) {

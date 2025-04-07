@@ -241,7 +241,7 @@ select:focus {
     margin-bottom: 1.5rem;
 }
 
-.quiz-result-card {
+.quiz-result-card, .quiz-results-card-hidden {
     display: flex;
     align-items: center;
     gap: 1.5rem;
@@ -251,7 +251,7 @@ select:focus {
     transition: all 0.3s ease;
 }
 
-.quiz-result-card:hover {
+.quiz-result-card:hover, .quiz-results-card-hidden:hover  {
     background-color: #f1f3f5;
     transform: translateY(-3px);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
@@ -615,7 +615,8 @@ footer {
     }
     
     .quiz-result-card,
-    .user-result-card {
+    .user-result-card,
+    .quiz-results-card-hidden {
         flex-direction: column;
         text-align: center;
     }
@@ -658,4 +659,7 @@ footer {
     .quiz-grid {
         grid-template-columns: 1fr;
     }
+}
+.quiz-results-card-hidden {
+    display: none;
 }
