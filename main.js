@@ -92,16 +92,17 @@ function displayQuizzes() {
         return;
     }
 
-    quizzes.forEach(quiz => {
+    const randomQuizzes = quizzes.sort(() => 0.5 - Math.random()).slice(0, 3);
+
+    randomQuizzes.forEach(quiz => {
         const quizCard = document.createElement("div");
         quizCard.classList.add("quiz-card");
-
-        // Utiliser une image par défaut si nécessaire
-        const imageUrl = quiz.imageUrl || '/api/placeholder/300/180';
-
+    
+        // const imageUrl = quiz.imageUrl || '/api/placeholder/300/180';
+    
         quizCard.innerHTML = `
             <div class="quiz-card-tag"></div>
-            <img src="${imageUrl}" alt="${quiz.nom}" class="quiz-card-image">
+            <img src="" alt="${quiz.nom}" class="quiz-card-image">
             <div class="quiz-card-content">
                 <h3 class="quiz-card-title">${quiz.nom}</h3>
                 <p class="quiz-card-description">${quiz.description || 'Aucune description disponible.'}</p>
@@ -119,8 +120,7 @@ function displayQuizzes() {
             </div>
         `;
         quizContainer.appendChild(quizCard);
-    });
-}
+    });}
 
 function displayNoQuizMessage(message) {
     const container = document.getElementById('quiz-cards');

@@ -180,11 +180,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
                 
-                // Préparation des données du quiz pour l'envoi
+                // Préparation des données du quiz pour l'envoi au format attendu par l'API
                 const quizData = {
-                    title: title,
+                    titre: title,
                     description: document.getElementById('quiz-description').value.trim(),
-                    category: document.getElementById('quiz-category').value,
+                    categorie: document.getElementById('quiz-category').value,
+                    tags: [document.getElementById('quiz-category').value], // Utilisation de la catégorie comme tag par défaut
+                    estPublic: true,
                     questions: []
                 };
                 
@@ -203,21 +205,40 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                     
                     quizData.questions.push({
-                        text: questionText,
-                        options: options,
-                        correctOption: correctOption,
-                        timeLimit: timeLimit
+                        enonce: questionText,
+                        reponses: options,
+                        bonneReponse: correctOption,
+                        tempsReponse: timeLimit
                     });
                 });
                 
-                // En production, ici on enverrait les données à l'API
-                console.log('Quiz data to be sent:', quizData);
-                alert('Quiz créé avec succès! Dans une application complète, ce quiz serait maintenant enregistré dans la base de données.');
-                
-                // Simuler une redirection
-                setTimeout(() => {
-                    window.location.href = 'main.html';
-                }, 1000);
+                // Envoi des données à l'API
+                fetch('http://localhost:8000/api/quizzes/complete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(quizData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erreur lors de la création du quiz');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Quiz créé avec succès:', data);
+                    alert('Quiz créé avec succès! Redirection vers la page d\'accueil...');
+                    
+                    // Redirection vers la page d'accueil
+                    setTimeout(() => {
+                        window.location.href = 'main.html';
+                    }, 1000);
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Erreur lors de la création du quiz: ' + error.message);
+                });
             });
         }
     };
