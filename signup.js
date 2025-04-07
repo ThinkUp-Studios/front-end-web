@@ -1,11 +1,23 @@
-
 async function register() {
+    const firstname = document.getElementById('firstname').value;
+    const lastname = document.getElementById('lastname').value;
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirm-password').value;
+    const termsAccepted = document.getElementById('terms').checked;
+
+    if (!firstname || !lastname || !username || !password || !confirmPassword) {
+        alert('Tous les champs sont requis');
+        return;
+    }
 
     if (password !== confirmPassword) {
         alert('Les mots de passe ne correspondent pas');
+        return;
+    }
+
+    if (!termsAccepted) {
+        alert("Vous devez accepter les conditions d'utilisation");
         return;
     }
 
