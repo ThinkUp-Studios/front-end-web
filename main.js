@@ -57,86 +57,86 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-    // Gestion des quiz
-    let quizzes = [];
+// Gestion des quiz
+let quizzes = [];
 
-    function fetchQuizzes() {
-        const quizCardContainer = document.getElementById('quiz-cards');
+function fetchQuizzes() {
+    const quizCardContainer = document.getElementById('quiz-cards');
 
-        if (quizCardContainer) {
-            quizCardContainer.innerHTML = '<div class="loading">Chargement des quiz...</div>';
+    if (quizCardContainer) {
+        quizCardContainer.innerHTML = '<div class="loading">Chargement des quiz...</div>';
 
-            fetch('http://localhost:8000/api/quizzes')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.count === 0) {
-                        displayNoQuizMessage(data.message || 'Aucun quiz trouvé');
-                    } else {
-                        quizzes = data.quizzes;
-                        displayQuizzes();
-                    }
-                })
-                .catch(error => {
-                    console.error('Erreur réseau ou serveur: ', error);
-                    displayErrorMessage('Une erreur est survenue lors de la récupération des quiz.');
-                });
-        }
+        fetch('http://localhost:8000/api/quizzes')
+            .then(response => response.json())
+            .then(data => {
+                if (data.count === 0) {
+                    displayNoQuizMessage(data.message || 'Aucun quiz trouvé');
+                } else {
+                    quizzes = data.quizzes;
+                    displayQuizzes();
+                }
+            })
+            .catch(error => {
+                console.error('Erreur réseau ou serveur: ', error);
+                displayErrorMessage('Une erreur est survenue lors de la récupération des quiz.');
+            });
+    }
+}
+
+function displayQuizzes() {
+    const quizContainer = document.getElementById('quiz-cards');
+    quizContainer.innerHTML = "";
+
+    if (quizzes.length === 0) {
+        quizContainer.innerHTML = "<p>Aucun quiz trouvé.</p>";
+        return;
     }
 
-    function displayQuizzes() {
-        const quizContainer = document.getElementById('quiz-cards');
-        quizContainer.innerHTML = "";
+    quizzes.forEach(quiz => {
+        const quizCard = document.createElement("div");
+        quizCard.classList.add("quiz-card");
 
-        if (quizzes.length === 0) {
-            quizContainer.innerHTML = "<p>Aucun quiz trouvé.</p>";
-            return;
-        }
+        // Utiliser une image par défaut si nécessaire
+        const imageUrl = quiz.imageUrl || '/api/placeholder/300/180';
 
-        quizzes.forEach(quiz => {
-            const quizCard = document.createElement("div");
-            quizCard.classList.add("quiz-card");
-
-            // Utiliser une image par défaut si nécessaire
-            const imageUrl = quiz.imageUrl || '/api/placeholder/300/180';
-
-            quizCard.innerHTML = `
-                <div class="quiz-card-tag"></div>
-                <img src="${imageUrl}" alt="${quiz.nom}" class="quiz-card-image">
-                <div class="quiz-card-content">
-                    <h3 class="quiz-card-title">${quiz.nom}</h3>
-                    <p class="quiz-card-description">${quiz.description || 'Aucune description disponible.'}</p>
-                    <div class="quiz-card-meta">
-                        <span>Par ${quiz.nomCreateur || 'Anonyme'}</span>
-                        <span class="quiz-card-category">${quiz.categorie || 'Divers'}</span>
-                    </div>
-                    <div class="quiz-card-info">
-                        <span class="quiz-questions-count">${quiz.nbQuestions || 0} questions</span>
-                        <span class="quiz-player-count">${quiz.nbJoueurs || 0} joueurs</span>
-                    </div>
-                    <div class="quiz-card-actions">
-                        <a href="quiz.html?id=${quiz.id_quiz}" class="quiz-card-btn">Jouer</a>
-                    </div>
+        quizCard.innerHTML = `
+            <div class="quiz-card-tag"></div>
+            <img src="${imageUrl}" alt="${quiz.nom}" class="quiz-card-image">
+            <div class="quiz-card-content">
+                <h3 class="quiz-card-title">${quiz.nom}</h3>
+                <p class="quiz-card-description">${quiz.description || 'Aucune description disponible.'}</p>
+                <div class="quiz-card-meta">
+                    <span>Par ${quiz.nomCreateur || 'Anonyme'}</span>
+                    <span class="quiz-card-category">${quiz.categorie || 'Divers'}</span>
                 </div>
-            `;
-            quizContainer.appendChild(quizCard);
-        });
-    }
+                <div class="quiz-card-info">
+                    <span class="quiz-questions-count">${quiz.nbQuestions || 0} questions</span>
+                    <span class="quiz-player-count">${quiz.nbJoueurs || 0} joueurs</span>
+                </div>
+                <div class="quiz-card-actions">
+                    <a href="quiz.html?id=${quiz.id_quiz}" class="quiz-card-btn">Jouer</a>
+                </div>
+            </div>
+        `;
+        quizContainer.appendChild(quizCard);
+    });
+}
 
-    function displayNoQuizMessage(message) {
-        const container = document.getElementById('quiz-cards');
-        if (container) {
-            container.innerHTML = `<p>${message}</p>`;
-        }
+function displayNoQuizMessage(message) {
+    const container = document.getElementById('quiz-cards');
+    if (container) {
+        container.innerHTML = `<p>${message}</p>`;
     }
+}
 
-    function displayErrorMessage(message) {
-        const container = document.getElementById('quiz-cards');
-        if (container) {
-            container.innerHTML = `<p style="color: red;">${message}</p>`;
-        }
+function displayErrorMessage(message) {
+    const container = document.getElementById('quiz-cards');
+    if (container) {
+        container.innerHTML = `<p style="color: red;">${message}</p>`;
     }
+}
 
-    // Initialiser le chargement des quiz si on est sur la page principale
-    if (window.location.pathname.includes("main.html") || document.getElementById('quiz-cards')) {
-        fetchQuizzes();
-    }
+// Initialiser le chargement des quiz si on est sur la page principale
+if (window.location.pathname.includes("main.html") || document.getElementById('quiz-cards')) {
+    fetchQuizzes();
+}
