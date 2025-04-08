@@ -8,6 +8,14 @@
     <link rel="stylesheet" href="search.css">
     <script src="search.js" async></script>
     <script src="script.js" defer></script>
+    <script>
+        const token = localStorage.getItem('jwt'); 
+      
+        if (!token) {
+          window.location.href = 'login.html';
+        }
+    </script>
+
 </head>
 <body>
     <header>

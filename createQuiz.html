@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Créer un Quiz - ThinkUp</title>
     <link rel="stylesheet" href="createQuiz.css">
+    <script>
+        const token = localStorage.getItem('jwt'); 
+      
+        if (!token) {
+          window.location.href = 'login.html';
+        }
+    </script>
+      
 </head>
 <body>
     <header>
@@ -36,12 +44,12 @@
                 <div class="input-group">
                     <label for="quiz-category">Catégorie</label>
                     <select id="quiz-category">
-                        <option value="education">Éducation</option>
-                        <option value="entertainment">Divertissement</option>
-                        <option value="sports">Sports</option>
-                        <option value="science">Science</option>
-                        <option value="history">Histoire</option>
-                        <option value="other">Autre</option>
+                        <option value="Éducation">Éducation</option>
+                        <option value="Divertissement">Divertissement</option>
+                        <option value="Sport">Sports</option>
+                        <option value="Sciences">Science</option>
+                        <option value="Histoire">Histoire</option>
+                        <option value="Autre">Autre</option>
                     </select>
                 </div>
             </div>

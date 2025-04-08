@@ -103,8 +103,9 @@ header {
     color: #444;
 }
 
-input[type="email"],
+input[type="text"],
 input[type="password"] {
+    margin: 5px;
     padding: 0.75rem;
     border: 1px solid #ddd;
     border-radius: 4px;

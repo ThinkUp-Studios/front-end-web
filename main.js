@@ -12,17 +12,31 @@ document.addEventListener('DOMContentLoaded', function() {
                     { text: 'Voir Profil', icon: '👤', href: 'profile.html' },
                     { text: 'Paramètres', icon: '⚙️', href: 'settings.html' },
                     { text: 'FAQ', icon: '❓', href: '#faq' },
-                    { text: 'Déconnexion', icon: '🚪', href: 'login.html' }
+                    { text: 'Déconnexion', icon: '🚪', href: '#' }
                 ];
                 
                 menuItems.forEach(item => {
                     const menuItem = document.createElement('a');
-                    menuItem.href = item.href;
+                        menuItem.href = item.href;
                     menuItem.innerHTML = `<span class="menu-icon">${item.icon}</span> ${item.text}`;
+                    
+                    if (item.text === 'Déconnexion') {
+                        menuItem.id = 'logout-link'; 
+                    }                
                     menu.appendChild(menuItem);
                 });
                 
                 document.querySelector('.profile').appendChild(menu);
+                const logoutLink = document.getElementById('logout-link');
+                if (logoutLink) {
+                    logoutLink.addEventListener('click', function(e) {
+                        e.preventDefault(); // Empêche le lien de rediriger immédiatement
+                        localStorage.removeItem('jwt'); // Supprime le token JWT
+                        window.location.href = 'login.html'; // Redirige vers la page de connexion
+                    });
+                }
+
+                
             }
         };
         
@@ -192,4 +206,14 @@ function displayErrorMessage(message) {
 if (window.location.pathname.includes("main.html") || document.getElementById('quiz-cards')) {
     fetchQuizzes();
     fetchPopularQuizzes();
+}
+
+
+const logoutLink = document.getElementById('logout-link');
+if (logoutLink) {
+    logoutLink.addEventListener('click', function(e) {
+        e.preventDefault(); // Empêche la redirection par défaut
+        localStorage.removeItem('jwt'); // Supprime le token
+        window.location.href = 'login.html'; // Redirige manuellement
+    });
 }

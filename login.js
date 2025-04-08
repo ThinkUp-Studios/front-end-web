@@ -3,21 +3,19 @@ async function login() {
     const password = document.getElementById('password').value;
 
     try {
-        // envoie login information au back-end
         const response = await fetch('http://localhost:8000/api/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ username, motDePasse: password })
+            body: JSON.stringify({ username, password }) 
         });
 
         const data = await response.json();
 
         if (response.ok) {
-            // Enregistre donnees utilisateur dans localStorage 
-            localStorage.setItem('user', JSON.stringify(data.utilisateur)); 
-            window.location.href = 'main.html'; 
+            localStorage.setItem('jwt', data.token); 
+            window.location.href = 'main.html'; // Rediriger vers la page principale
         } else {
             alert(data.error || 'Identifiants invalides');
         }
@@ -27,14 +25,10 @@ async function login() {
     }
 }
 
-function submitForm() {
-    document.getElementById('login-form').addEventListener('submit', function(event) {
-        event.preventDefault();  
-        login();  
-    });
-}
-
-
 document.addEventListener('DOMContentLoaded', function () {
-    submitForm();
+    const form = document.getElementById('login-form');
+    form.addEventListener('submit', function(event) {
+        event.preventDefault(); 
+        login(); 
+    });
 });

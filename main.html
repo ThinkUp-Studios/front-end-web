@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ThinkUp - Le monde des quiz</title>
     <link rel="stylesheet" href="main.css">
+    <script>
+        const token = localStorage.getItem('jwt'); 
+      
+        if (!token) {
+          window.location.href = 'login.html';
+        }
+    </script>
+
 </head>
 <body>
     <header>
