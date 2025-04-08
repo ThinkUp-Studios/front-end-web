@@ -14,9 +14,8 @@ function selectQuizDisplay() {
             if(e.key === 'Enter') {
                 searchInput = document.getElementById("search-input").value;
                 categoryInput = document.getElementById("category-select").value;
-                sortInput = document.getElementById("sort-select").value;
                 if (isEmpty(searchInput) && categoryInput === "all") { 
-                    fetchQuizzes();
+                    fetchQuizzesBySearch();
                     fetchUsers();
                 } else if (searchInput === "random" || searchInput === "hasard"){
                     fetchRandomQuiz();
@@ -30,7 +29,7 @@ function selectQuizDisplay() {
         document.getElementById("search-btn").addEventListener("click", function() {
             let searchInput = document.getElementById("search-input").value;
             let categoryInput = document.getElementById("category-select").value;
-            let sortInput = document.getElementById("sort-select").value;
+            // let sortInput = document.getElementById("sort-select").value;
             if (isEmpty(searchInput) && categoryInput === "all") {
                 fetchQuizzes();
                 fetchUsers();
@@ -54,7 +53,7 @@ function fetchQuizzes() {
             } else {
                 quizzes = data.quizzes;
                 count = data.count;
-                displayQuizzes();    
+                displayQuizzes();
             }
         })
         .catch(error => {
@@ -125,8 +124,9 @@ function displayQuizzes() {
 function fetchQuizzesBySearch() {
     let recherche = document.getElementById("search-input").value;
     let categorie = document.getElementById("category-select").value;
+    let sortInput = document.getElementById("sort-select").value;
     if (categorie === "all") {
-        fetch(`http://localhost:8000/api/quizzes/find?search=${recherche}&category=`)
+        fetch(`http://localhost:8000/api/quizzes/find?search=${recherche}&category=&sort=${sortInput}`)
         .then(response => {
             if(!response.ok) {
                 throw new Error('Erreur lors de la récupération des quiz');
@@ -143,7 +143,7 @@ function fetchQuizzesBySearch() {
             document.getElementById('quiz-results').innerHTML = "<p>Aucun quiz n'a été trouvé</p>";
         });
     } else {
-        fetch(`http://localhost:8000/api/quizzes/find?search=${recherche}&category=${categorie}`)
+        fetch(`http://localhost:8000/api/quizzes/find?search=${recherche}&category=${categorie}&sort=${sortInput}`)
         .then(response => {
             if(!response.ok) {
                 throw new Error('Erreur lors de la récupération des quiz');
@@ -153,6 +153,7 @@ function fetchQuizzesBySearch() {
         .then(data => {
             quizzes = data.quizzes;
             count = data.count;
+            console.log(sortInput);
             displayQuizzes();
         })
         .catch(error => {
