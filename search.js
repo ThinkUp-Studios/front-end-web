@@ -8,7 +8,8 @@ const isEmpty = str => !str.trim().length;
 
 function selectQuizDisplay() {
     if (window.location.pathname.includes("search.html")) {
-        fetchQuizzes();
+        console.log("test");
+        fetchQuizzes(); 
         fetchUsers();
         document.getElementById("search-input").addEventListener('keydown', function(e) {
             if(e.key === 'Enter') {
