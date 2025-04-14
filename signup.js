@@ -2,7 +2,6 @@ async function register() {
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirm-password').value;
-    const termsAccepted = document.getElementById('terms').checked;
 
     if (!username || !password || !confirmPassword) {
         alert('Tous les champs sont requis');
@@ -14,10 +13,6 @@ async function register() {
         return;
     }
 
-    if (!termsAccepted) {
-        alert("Vous devez accepter les conditions d'utilisation");
-        return;
-    }
 
     try {
         const response = await fetch('http://localhost:8000/api/register', {
@@ -25,7 +20,7 @@ async function register() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ username, motDePasse: password })
+            body: JSON.stringify({ username, password })
         });
 
         const data = await response.json();

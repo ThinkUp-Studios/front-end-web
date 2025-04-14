@@ -16,13 +16,13 @@ function selectQuizDisplay() {
                 categoryInput = document.getElementById("category-select").value;
                 if (isEmpty(searchInput) && categoryInput === "all") { 
                     fetchQuizzesBySearch();
-                    fetchUsers();
+                    fetchUsersBySearch();
                 } else if (searchInput === "random" || searchInput === "hasard"){
                     fetchRandomQuiz();
                     fetchUsers();
                 } else {
                     fetchQuizzesBySearch();
-                    // fetchUsersBySearch();
+                    fetchUsersBySearch();
                 }
             }
         });
@@ -38,8 +38,18 @@ function selectQuizDisplay() {
                 fetchUsers();
             } else {
                 fetchQuizzesBySearch();
+                fetchUsersBySearch();
             }
         });
+
+        document.getElementById("category-select").addEventListener("change", function() {
+            fetchQuizzesBySearch();
+        });
+        document.getElementById("sort-select").addEventListener("change", function() {
+            fetchQuizzesBySearch();
+        });
+
+
     }
 }
 
@@ -207,6 +217,7 @@ function fetchUsers() {
                 users = data.users;
                 userCount = data.count;
                 displayUsers();
+
             }
         })
         .catch(error => {
@@ -216,20 +227,20 @@ function fetchUsers() {
 
 function fetchUsersBySearch() {
     let recherche = document.getElementById("search-input").value;
-    fetch(`http://localhost:8000/api/users/find?search=${recherche}}`)
-        .then(response => {
+    fetch(`http://localhost:8000/api/users/find?search=${recherche}`)
+    .then(response => {
             if(!response.ok) {
                 throw new Error('Erreur lors de la récupération des utilisateurs');
             }
             return response.json();
         })
         .then(data => {
-            console.log(data);
             users = data.users;
             userCount = data.count;
             displayUsers();
         })
         .catch(error => {
+            console.log(recherche);
             console.error("Erreur: ", error);
         });
 }
