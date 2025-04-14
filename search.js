@@ -156,8 +156,8 @@ function displayQuizzes() {
         quizContainer.appendChild(quizElement);
         i++;
     })
-    document.getElementById("results-number").innerHTML = count + " resultats trouvés";
-    document.getElementById("search-term").innerHTML = searchInput;
+    document.getElementById("results-number").innerHTML = (count + userCount) + " resultats trouvés";
+    document.getElementById("search-term").innerHTML = document.getElementById("search-input").value;
 
     const viewMoreBtn = document.getElementById("view-more-btn");
     if (quizzes.length > 3) {
@@ -185,6 +185,8 @@ function fetchQuizzesBySearch() {
             quizzes = data.quizzes;
             count = data.count;
             displayQuizzes();
+            document.getElementById("results-number").innerHTML = (count + userCount) + " resultats trouvés";
+            document.getElementById("search-term").innerHTML = document.getElementById("search-input").value;        
         })
         .catch(error => {
             console.error("Erreur:", error);
@@ -224,6 +226,9 @@ function fetchRandomQuiz() {
         quizzes = [data.quiz];
         count = data.count;
         displayQuizzes();
+        document.getElementById("results-number").innerHTML = (count + userCount) + " resultats trouvés";
+        document.getElementById("search-term").innerHTML = document.getElementById("search-input").value;
+    
     })
     .catch(error => {
         console.error("Erreur:", error);
@@ -253,7 +258,9 @@ function fetchUsers() {
                 users = data.users;
                 userCount = data.count;
                 displayUsers();
-
+                document.getElementById("results-number").innerHTML = (count + userCount) + " resultats trouvés";
+                document.getElementById("search-term").innerHTML = document.getElementById("search-input").value;
+            
             }
         })
         .catch(error => {
@@ -274,6 +281,9 @@ function fetchUsersBySearch() {
             users = data.users;
             userCount = data.count;
             displayUsers();
+            document.getElementById("results-number").innerHTML = (count + userCount) + " resultats trouvés";
+            document.getElementById("search-term").innerHTML = document.getElementById("search-input").value;
+        
         })
         .catch(error => {
             console.error("Erreur: ", error);
