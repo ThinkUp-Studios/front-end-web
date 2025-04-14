@@ -44,9 +44,9 @@
                     <div class="filter-group">
                         <label>Type:</label>
                         <div class="filter-options">
-                            <button class="filter-btn active" data-filter="all">Tout</button>
-                            <button class="filter-btn" data-filter="quizzes">Quiz</button>
-                            <button class="filter-btn" data-filter="users">Utilisateurs</button>
+                            <button id="filter-btn-1" class="filter-btn active" data-filter="all">Tout</button>
+                            <button id="filter-btn-2" class="filter-btn" data-filter="quizzes">Quiz</button>
+                            <button id="filter-btn-3" class="filter-btn" data-filter="users">Utilisateurs</button>
                         </div>
                     </div>
                     <div class="filter-group" id="category-filter">
@@ -74,14 +74,14 @@
             </div>
 
             <div class="results-section active" id="all-results">
-                <div class="result-group">
+                <div id="result-group-quiz" class="result-group">
                     <h3>Quiz</h3>
                     <div class="quiz-results" id="quiz-results">
                     </div>
                     <a id="view-more-btn" class="view-more-btn">Voir plus de quiz</a>
                 </div>
 
-                <div class="result-group">
+                <div id="result-group-users" class="result-group">
                     <h3>Utilisateurs</h3>
                     <div id="user-results"></div>
                     <a class="view-more-btn" id="view-more-btn-user">Voir plus d'utilisateurs</a>

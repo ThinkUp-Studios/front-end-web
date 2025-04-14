@@ -50,6 +50,44 @@ function selectQuizDisplay() {
         });
 
 
+        const filterBtn1 = document.getElementById("filter-btn-1");
+        const filterBtn2 = document.getElementById("filter-btn-2");
+        const filterBtn3 = document.getElementById("filter-btn-3");
+
+        function resetSortButtons() {
+            filterBtn1.classList.remove("active");
+            filterBtn2.classList.remove("active");
+            filterBtn3.classList.remove("active");
+        }
+        filterBtn1.classList.add("active");
+
+        filterBtn1.addEventListener("click", () => {
+            resetSortButtons();
+            filterBtn1.classList.add("active");
+
+            document.getElementById("result-group-quiz").style.display = "block";
+            document.getElementById("result-group-users").style.display = "block";
+        
+        });
+
+        filterBtn2.addEventListener("click", () => {
+            resetSortButtons();
+            filterBtn2.classList.add("active");
+
+            document.getElementById("result-group-quiz").style.display = "block";
+            document.getElementById("result-group-users").style.display = "none";
+        
+        });
+
+        filterBtn3.addEventListener("click", () => {
+            resetSortButtons();
+            filterBtn3.classList.add("active");
+
+            document.getElementById("result-group-quiz").style.display = "none";
+            document.getElementById("result-group-users").style.display = "block";
+        
+        });
+
     }
 }
 
@@ -163,7 +201,6 @@ function fetchQuizzesBySearch() {
         .then(data => {
             quizzes = data.quizzes;
             count = data.count;
-            console.log(sortInput);
             displayQuizzes();
         })
         .catch(error => {
@@ -184,7 +221,6 @@ function fetchRandomQuiz() {
         return response.json();
     })
     .then(data => {
-        console.log("Liste des quiz", data)
         quizzes = [data.quiz];
         count = data.count;
         displayQuizzes();
@@ -240,7 +276,6 @@ function fetchUsersBySearch() {
             displayUsers();
         })
         .catch(error => {
-            console.log(recherche);
             console.error("Erreur: ", error);
         });
 }
@@ -303,7 +338,6 @@ function hideUserResults() {
     viewMoreUserBtn.addEventListener("click", function () {
         const hiddenUsers = document.querySelectorAll(".user-result-card-hidden");
 
-        console.log(hiddenUsers);  
         const isHidden = hiddenUsers[0].style.display === "none" || hiddenUsers[0].style.display === "";
 
         hiddenUsers.forEach(user => {
