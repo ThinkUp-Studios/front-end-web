@@ -324,6 +324,16 @@ function displayUsers() {
         i++;
     })
 
+    document.getElementById("results-number").innerHTML = (count + userCount) + " resultats trouvés";
+    document.getElementById("search-term").innerHTML = document.getElementById("search-input").value;
+
+    const viewMoreUserBtn = document.getElementById("view-more-btn-user");
+    if (users.length > 2) {
+        viewMoreUserBtn.style.display = "block";
+    } else {
+        viewMoreUserBtn.style.display = "none";
+    }
+    viewMoreUserBtn.textContent = "Voir plus d'utilisateurs";
 }
 
 function hideQuizResults() {
