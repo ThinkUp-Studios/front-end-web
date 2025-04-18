@@ -1,3 +1,5 @@
+let quizId = null;
+
 document.addEventListener('DOMContentLoaded', function() {
     const profilePic = document.querySelector('.profile-pic');
     
@@ -73,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const initQuiz = () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const quizId = urlParams.get('id');
+            quizId = urlParams.get('id');
 
             fetch(`http://localhost:8000/api/quizzes/${quizId}`)
                 .then(response => {
@@ -246,6 +248,35 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         function endQuiz() {
+
+        
+            const token = localStorage.getItem('jwt');
+
+            fetch('http://localhost:8000/api/participation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({
+                    id_quiz: quizId,
+                    score: score
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Erreur lors de l'enregistrement du score");
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Participation enregistrée :', data);
+            })
+            .catch(error => {
+                console.error('Erreur participation :', error);
+            });
+
+
             document.querySelector('.timer-container').style.display = 'none';
             document.querySelector('.question-container').style.display = 'none';
 
@@ -257,6 +288,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     <button class="btn" onclick="window.location.href='main.html'">Retour à l'Accueil</button>
                 </div>
             `;
+
+            
         }
 
         // Initialisation de la page quiz si nous sommes sur cette page        
