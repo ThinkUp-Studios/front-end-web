@@ -224,7 +224,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'Authorization' : 'Bearer' + localStorage.getItem('jwt')
                     },
                     body: JSON.stringify(quizData)
                 })
