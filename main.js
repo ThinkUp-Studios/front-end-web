@@ -1,15 +1,32 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Gestion du menu du profil
     const profilePic = document.querySelector('.profile-pic');
-    
+
     if (profilePic) {
+        const parseJWT = (token) => {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+
+                return JSON.parse(jsonPayload);
+            } catch (e) {
+                return null;
+            }
+        };
+
         const createProfileMenu = () => {
             if (!document.querySelector('.profile-menu')) {
+                const token = localStorage.getItem('jwt');
+                const decoded = token ? parseJWT(token) : null;
+                const username = decoded?.username;
+
                 const menu = document.createElement('div');
                 menu.className = 'profile-menu';
                 
                 const menuItems = [
-                    { text: 'Voir Profil', icon: '👤', href: 'profile.html' },
+                    { text: 'Voir Profil', icon: '👤', href: username ? `profile.html?username=${username}` : 'profile.html' },
                     { text: 'Paramètres', icon: '⚙️', href: 'settings.html' },
                     { text: 'FAQ', icon: '❓', href: '#faq' },
                     { text: 'Déconnexion', icon: '🚪', href: '#' }
@@ -17,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 menuItems.forEach(item => {
                     const menuItem = document.createElement('a');
-                        menuItem.href = item.href;
+                    menuItem.href = item.href;
                     menuItem.innerHTML = `<span class="menu-icon">${item.icon}</span> ${item.text}`;
                     
                     if (item.text === 'Déconnexion') {
@@ -27,24 +44,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 
                 document.querySelector('.profile').appendChild(menu);
+
                 const logoutLink = document.getElementById('logout-link');
                 if (logoutLink) {
                     logoutLink.addEventListener('click', function(e) {
-                        e.preventDefault(); // Empêche le lien de rediriger immédiatement
-                        localStorage.removeItem('jwt'); // Supprime le token JWT
-                        window.location.href = 'login.html'; // Redirige vers la page de connexion
+                        e.preventDefault(); 
+                        localStorage.removeItem('jwt');
+                        window.location.href = 'login.html';
                     });
                 }
-
-                
             }
         };
-        
+
         const toggleProfileMenu = () => {
             createProfileMenu();
-            
             const menu = document.querySelector('.profile-menu');
-            
             menu.classList.toggle('active');
             
             if (menu.classList.contains('active')) {
@@ -53,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.removeEventListener('click', closeMenuOnClickOutside);
             }
         };
-        
+
         const closeMenuOnClickOutside = (event) => {
             const menu = document.querySelector('.profile-menu');
             const profile = document.querySelector('.profile');
@@ -63,13 +77,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.removeEventListener('click', closeMenuOnClickOutside);
             }
         };
-        
+
         profilePic.addEventListener('click', function(event) {
             event.stopPropagation();
             toggleProfileMenu();
         });
     }
 });
+
 
 // Gestion des quiz
 let quizzes = [];
