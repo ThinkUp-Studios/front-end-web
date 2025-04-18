@@ -188,7 +188,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     categorie: document.getElementById('quiz-category').value,
                     nbQuestions: document.querySelectorAll('.question-card').length,
                     difficulte: 'Facile',  // Valeur par défaut
-                    nomCreateur: 'Jawad2Bagnolet',  // Utilisateur existant dans la base
                     estPublic: 1,
                     tags: [document.getElementById('quiz-category').value],
                     questions: []
@@ -225,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                        'Authorization' : 'Bearer' + localStorage.getItem('jwt')
+                        'Authorization' : 'Bearer ' + localStorage.getItem('jwt')
                     },
                     body: JSON.stringify(quizData)
                 })
