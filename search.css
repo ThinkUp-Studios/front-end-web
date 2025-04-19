@@ -300,7 +300,7 @@ select:focus {
     color: #666;
 }
 
-.play-btn {
+.play-btn, .leaderboard-btn{
     display: inline-block;
     padding: 0.6rem 1.2rem;
     background: linear-gradient(90deg, #6366f1, #8b5cf6);
@@ -314,7 +314,9 @@ select:focus {
     flex-shrink: 0;
 }
 
-.play-btn:hover {
+
+
+.play-btn:hover, .leaderboard-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
 }

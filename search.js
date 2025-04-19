@@ -228,18 +228,21 @@ function displayQuizzes() {
         }
 
         quizElement.innerHTML = `
-            <div id="quiz-result-card" class=${classeDiv}>
-                <div class="result-details">
-                    <h4>${quiz.nom}</h4>
-                    <p>${quiz.description}</p>
-                    <div class="result-meta">
-                        <span class="result-category">${quiz.categorie}</span>
-                        <span class="result-author">Par ${quiz.nomCreateur}</span>
-                    </div>
-                </div>
-                <a href="quiz.html?id=${quiz.id_quiz}" class="play-btn" i="play-btn-${quiz.id_quiz}">Jouer</a>
+        <div id="quiz-result-card" class=${classeDiv}>
+          <div class="result-details">
+            <h4>${quiz.nom}</h4>
+            <p>${quiz.description}</p>
+            <div class="result-meta">
+              <span class="result-category">${quiz.categorie}</span>
+              <span class="result-author">Par ${quiz.nomCreateur}</span>
             </div>
-        `;
+          </div>
+          <div class="result-actions">
+            <a href="quiz.html?id=${quiz.id_quiz}" class="play-btn">Jouer</a>
+            <a href="leaderboard.html?id=${quiz.id_quiz}" class="leaderboard-btn">Classement</a>
+          </div>
+        </div>
+      `;
         quizContainer.appendChild(quizElement);
         i++;
     })
