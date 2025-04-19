@@ -1,62 +1,7 @@
 let quizId = null;
 
 document.addEventListener('DOMContentLoaded', function() {
-    const profilePic = document.querySelector('.profile-pic');
     
-    if (profilePic) {
-        const createProfileMenu = () => {
-            if (!document.querySelector('.profile-menu')) {
-                const menu = document.createElement('div');
-                menu.className = 'profile-menu';
-                
-                const menuItems = [
-                    { text: 'Voir Profil', icon: '👤', href: 'profile.html' },
-                    { text: 'Paramètres', icon: '⚙️', href: 'settings.html' },
-                    { text: 'FAQ', icon: '❓', href: '#faq' },
-                    { text: 'Se connecter', icon: '🚪', href: 'login.html' }
-                ];
-                
-                menuItems.forEach(item => {
-                    const menuItem = document.createElement('a');
-                    menuItem.href = item.href;
-                    menuItem.innerHTML = `<span class="menu-icon">${item.icon}</span> ${item.text}`;
-                    menu.appendChild(menuItem);
-                });
-                
-                document.querySelector('.profile').appendChild(menu);
-            }
-        };
-        
-        const toggleProfileMenu = () => {
-            createProfileMenu();
-            
-            const menu = document.querySelector('.profile-menu');
-            
-            menu.classList.toggle('active');
-            
-            if (menu.classList.contains('active')) {
-                document.addEventListener('click', closeMenuOnClickOutside);
-            } else {
-                document.removeEventListener('click', closeMenuOnClickOutside);
-            }
-        };
-        
-        const closeMenuOnClickOutside = (event) => {
-            const menu = document.querySelector('.profile-menu');
-            const profile = document.querySelector('.profile');
-            
-            if (!profile.contains(event.target)) {
-                menu.classList.remove('active');
-                document.removeEventListener('click', closeMenuOnClickOutside);
-            }
-        };
-        
-        profilePic.addEventListener('click', function(event) {
-            event.stopPropagation();
-            toggleProfileMenu();
-        });
-    }
-
     if (document.querySelector('.quiz-container')) {
         let currentQuestionIndex = 0;
         let score = 0;

@@ -26,7 +26,7 @@ header {
     justify-content: space-between;
     align-items: center;
     padding: 0.7rem 2rem;
-    max-width: 1200px;
+    /* max-width: 1200px; */
     margin: 0 auto;
 }
 
@@ -321,6 +321,23 @@ header {
     width: 100%;
     text-align: center;
     border: 2px solid #6366f1;
+    margin-bottom: 5px;
+}
+
+#leaderboard-btn {
+    display: inline-block;
+    background-color: #6366f1;
+    color: white;
+    padding: 0.8rem 0;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3 ease;
+    font-size: 1rem;
+    font-weight: 600;
+    width: 100%;
+    text-align: center;
+    border: 2px solid black;
+    margin-bottom: 5px;
 }
 
 .quiz-card-btn:hover {
@@ -328,6 +345,10 @@ header {
     color: white;
 }
 
+#leaderboard-btn:hover {
+    background: linear-gradient(90deg, #ffffff, #f0f0f0);
+    color: #6366f1;
+}
 .recommended-quizzes {
     margin-bottom: 4rem;
 }

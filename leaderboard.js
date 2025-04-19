@@ -1,3 +1,6 @@
+let participations = [];
+
+
 document.addEventListener('DOMContentLoaded', function() {
     const profilePic = document.querySelector('.profile-pic');
 
@@ -83,34 +86,49 @@ document.addEventListener('DOMContentLoaded', function() {
             toggleProfileMenu();
         });
     }
+
+    fetchQuizData();
+    fetchQuizLeaderboard();
+
 });
 
 
-function fetchUserData() {
+function fetchQuizData() {
     const urlParams = new URLSearchParams(window.location.search);
-    const username = urlParams.get('username');
+    const quizId = urlParams.get('id');
 
-    fetch(`http://localhost:8000/api/users/${username}`)
+    fetch (`http://localhost:8000/api/quizzes/${quizId}`)
         .then(response => {
             if (!response.ok) {
-                throw new Error('Utilisateur non trouvé');
+                throw new Error('Quiz non trouvé');
             }
             return response.json();
         })
         .then(data => {
-            let user = data;
-            updateProfile(user);
+            let quiz = data;
+            updateQuizData(quiz);
         })
         .catch(error => {
             console.error('Erreur réseau ou serveur: ', error);
         });
 }
 
-function fetchUserQuizzes() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const username = urlParams.get('username');
+function updateQuizData(quiz) {
+    document.getElementById("quiz-title").innerHTML = quiz.nom_quiz + "";
+    document.getElementById("quiz-description").innerHTML = quiz.description + "";
+    document.getElementById("quiz-category").innerHTML = quiz.description + "";
+    document.getElementById("quiz-author").innerHTML = quiz.nomCreateur + "";
+    document.getElementById("quiz-questions").innerHTML = quiz.nbQuestions + "";
+    document.getElementById("quiz-players").innerHTML = quiz.nbJoueurs + "";
+    // document.getElementById("quiz-tags").innerHTML = 
+    document.getElementById("play-btn").href = "quiz.html?id=" + quiz.id_quiz;
+}
 
-    fetch(`http://localhost:8000/api/quizzes/user/${username}`)
+function fetchQuizLeaderboard() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const quizId = urlParams.get('id');
+
+    fetch (`http://localhost:8000/api/quizzes/${quizId}/leaderboard`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Utilisateur non trouvé');
@@ -118,52 +136,37 @@ function fetchUserQuizzes() {
             return response.json();
         })
         .then(data => {
-            let quizzes = data.quizzes;
-            displayCreatedQuizzes(quizzes)
+            let players = data;
+            displayLeaderboard(players);
         })
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    fetchUserData();
-    fetchUserQuizzes();
-});
+function displayLeaderboard(players) {
+    const tbody = document.getElementById('leaderboard-body');
+    tbody.innerHTML = '';
 
-function updateProfile(user) {
-    document.getElementById("profile-name").innerHTML = user.username + "";
-    document.getElementById("stat-quiz-cree").innerHTML = user.nombreQuiz + "";
-    document.getElementById("stat-quiz-complete").innerHTML = user.nombreParties + "";
-    document.getElementById("stat-pts-total").innerHTML = user.scoreTotal + "";
-}
-
-function displayCreatedQuizzes(quizzes) {
-    const quizContainer = document.getElementById('created-quizzes');
-    quizContainer.innerHTML = "";
-
-    if (quizzes.length === 0) {
-        quizContainer.innerHTML = "<p>Aucun quiz crée.</p>";
+    if (!players || players.length === 0) {
+        const emptyRow = document.createElement('tr');
+        emptyRow.innerHTML = `<td colspan="3" style="text-align: center; padding: 1rem;">Aucune participation pour le moment.</td>`;
+        tbody.appendChild(emptyRow);
         return;
     }
 
-    quizzes.forEach(quiz => {
-        const quizCard = document.createElement("div");
-        quizCard.classList.add("quiz-card");
+    players
+        .sort((a, b) => b.score - a.score)
+        .forEach((player, index) => {
+            const tr = document.createElement('tr');
 
-        quizCard.innerHTML = `
-        <div class="quiz-card">
-            <img src="" alt="Quiz" class="quiz-card-image">
-            <div class="quiz-card-content">
-                <h3 class="quiz-card-title">${quiz.nom}</h3>
-                <p class="quiz-card-description">${quiz.description}.</p>
-                <div class="quiz-card-meta">
-                    <span>${quiz.nbQuestions} questions</span>
-                    <span class="quiz-card-category">${quiz.categorie}</span>
-                </div>
-                <div class="quiz-card-actions">
-                    <a href="quiz.html?id=${quiz.id_quiz}" class="quiz-card-btn">Jouer</a>
-                </div>
-            </div>
-        </div>
-        `;
-        quizContainer.appendChild(quizCard);
-    })
+            if (index === 0) tr.classList.add('gold-row');
+            else if (index === 1) tr.classList.add('silver-row');
+            else if (index === 2) tr.classList.add('bronze-row');
+
+            tr.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${player.username}</td>
+                <td>${player.score}</td>
+            `;
+
+            tbody.appendChild(tr);
+        });
 }

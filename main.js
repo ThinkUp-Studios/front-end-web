@@ -161,6 +161,10 @@ function displayRecommendedQuizzes() {
                 <div class="quiz-card-actions">
                     <a href="quiz.html?id=${quiz.id_quiz}" class="quiz-card-btn">Jouer</a>
                 </div>
+                <div class="quiz-card-actions">
+                    <a href="leaderboard.html?id=${quiz.id_quiz}" id="leaderboard-btn">Classement</a>
+                </div>
+
             </div>
         `;
         quizContainer.appendChild(quizCard);
@@ -196,6 +200,9 @@ function displayPopularQuizzes() {
                 </div>
                 <div class="quiz-card-actions">
                     <a href="quiz.html?id=${quiz.id_quiz}" class="quiz-card-btn">Jouer</a>
+                </div>
+                <div class="quiz-card-actions">
+                    <a href="leaderboard.html?id=${quiz.id_quiz}" id="leaderboard-btn">Classement</a>
                 </div>
             </div>
         `;

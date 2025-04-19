@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ThinkUp - Leaderboard</title>
+  <link rel="stylesheet" href="main.css" />
+  <link rel="stylesheet" href="leaderboard.css" />
+  <script>
+    const token = localStorage.getItem('jwt');
+    if (!token) {
+      window.location.href = 'login.html';
+    }
+  </script>
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <a href="main.html" class="logo">ThinkUp</a>
+      <div class="nav-links">
+        <a href="main.html">Accueil</a>
+        <a href="createQuiz.html">Créer</a>
+        <a href="search.html">Rechercher</a>
+      </div>
+      <div class="profile">
+        <img src="" alt="Photo de Profil" class="profile-pic">
+      </div>
+    </nav>
+  </header>
+
+  <main class="main-content">
+    <section class="quiz-info">
+      <h1 id="quiz-title">Nom du Quiz</h1>
+      <p><h3 id="quiz-description">Description du quiz</h1></p>
+      <div class="quiz-meta-wrapper">
+        <div class="quiz-meta">
+          <div><strong>Catégorie :</strong> <span id="quiz-category">—</span></div>
+          <div><strong>Créateur :</strong> <span id="quiz-author">—</span></div>
+          <div><strong>Questions :</strong> <span id="quiz-questions">—</span></div>
+          <div><strong>Joueurs :</strong> <span id="quiz-players">—</span></div>
+          <div><strong>Tags :</strong> <span id="quiz-tags"></span></div>
+        </div>
+      
+        <div class="play-button-wrapper">
+          <a href="#" id="play-btn" class="play-btn">Jouer le Quiz</a>
+        </div>
+      </div>
+          
+    </section>
+
+    <section class="leaderboard-section">
+      <h2 class="leaderboard-title">Classement</h2>
+      <div class="leaderboard-container">
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Utilisateur</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-body">
+            <!-- à remplir dynamiquement -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="leaderboard.js"></script>
+</body>
+</html>
