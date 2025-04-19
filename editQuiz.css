@@ -1,0 +1,133 @@
+/* Styles pour la page d'édition et le bouton d'édition */
+
+/* Stylisation du bouton d'édition sur les cartes de quiz */
+.edit-btn {
+    background-color: #4CAF50 !important;
+    margin-left: 8px;
+}
+
+.edit-btn:hover {
+    background-color: #3d8b40 !important;
+}
+
+.quiz-card-actions {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Stylisation pour la page d'édition */
+#loading-indicator {
+    text-align: center;
+    padding: 20px;
+    font-size: 1.2rem;
+    color: #666;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding-left: 30px;
+}
+
+.loading:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 24px;
+    height: 24px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Ajuster le style du bouton Annuler */
+#cancel-update {
+    background-color: #f44336;
+    color: white;
+}
+
+#cancel-update:hover {
+    background-color: #d32f2f;
+}
+
+/* Amélioration visuelle des choix de réponses */
+.answer-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.answer-choice {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.answer-choice input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.correct-toggle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: transparent;
+    font-weight: bold;
+}
+
+.correct-toggle.active {
+    border-color: #4CAF50;
+    background-color: #4CAF50;
+    color: white;
+}
+
+/* Style de confirmation pour les mises à jour */
+.update-success {
+    background-color: rgba(76, 175, 80, 0.1);
+    border-left: 4px solid #4CAF50;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+/* Réorganiser les boutons d'action sur mobile */
+@media (max-width: 768px) {
+    .quiz-card-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .quiz-card-btn {
+        width: 100%;
+        margin-bottom: 8px;
+        margin-left: 0 !important;
+    }
+    
+    .quiz-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier un Quiz - ThinkUp</title>
+    <link rel="stylesheet" href="createQuiz.css">
+    <link rel="stylesheet" href="editQuiz.css">
+    <script>
+        const token = localStorage.getItem('jwt'); 
+      
+        if (!token) {
+          window.location.href = 'login.html';
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="main.html" class="logo">ThinkUp</a>
+            <div class="nav-links">
+                <a href="main.html">Accueil</a>
+                <a href="createQuiz.html">Créer</a>
+                <a href="search.html">Rechercher</a>
+            </div>
+            <div class="profile">
+                <img src="/api/placeholder/150/150" alt="Photo de Profil" class="profile-pic">
+            </div>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <section class="quiz-header">
+            <h1>Modifier un Quiz</h1>
+            <div id="loading-indicator" class="loading">Chargement du quiz...</div>
+            <div class="quiz-details">
+                <div class="input-group">
+                    <label for="quiz-title">Titre du Quiz</label>
+                    <input type="text" id="quiz-title" placeholder="Entrez le titre du quiz" required>
+                </div>
+                <div class="input-group">
+                    <label for="quiz-description">Description (Optionnel)</label>
+                    <textarea id="quiz-description" placeholder="Entrez une description pour votre quiz"></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="quiz-category">Catégorie</label>
+                    <select id="quiz-category">
+                        <option value="Éducation">Éducation</option>
+                        <option value="Divertissement">Divertissement</option>
+                        <option value="Sport">Sports</option>
+                        <option value="Sciences">Science</option>
+                        <option value="Histoire">Histoire</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <section class="questions-container">
+            <!-- Les questions seront chargées dynamiquement ici -->
+        </section>
+
+        <section class="quiz-actions">
+            <button id="add-question" class="btn btn-secondary">Ajouter une autre question</button>
+            <button id="update-quiz" class="btn btn-primary">Mettre à jour le Quiz</button>
+            <button id="cancel-update" class="btn btn-secondary">Annuler</button>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 ThinkUp. Tous droits réservés.</p>
+            <div class="footer-links">
+                <a href="#">À propos</a>
+                <a href="#">Confidentialité</a>
+                <a href="#">Conditions</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="editQuiz.js" type="module"></script>
+</body>
+</html>

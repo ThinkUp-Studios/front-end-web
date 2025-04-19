@@ -1,4 +1,30 @@
 import { getAllQuizzes, getQuiz } from './api.js';
+
+// Fonction pour vérifier si l'utilisateur connecté est le créateur du quiz
+function isUserQuizCreator(creatorName) {
+    const token = localStorage.getItem('jwt');
+    if (!token) return false;
+    
+    try {
+        // Décoder le JWT pour obtenir le nom d'utilisateur
+        const parseJWT = (token) => {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+
+            return JSON.parse(jsonPayload);
+        };
+        
+        const decoded = parseJWT(token);
+        return decoded && decoded.username === creatorName;
+    } catch (e) {
+        console.error('Erreur lors du décodage du token:', e);
+        return false;
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const profilePic = document.querySelector('.profile-pic');
     
@@ -56,351 +82,402 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Au début du fichier script.js, ajoutez cet import
-// Import the required functions from the API module
-
-
-// ... rest of the code
-
-// Puis remplacez les fonctions renderQuizCards et renderRecommendedQuizzes
-
-const renderQuizCards = () => {
-    const quizCardsContainer = document.getElementById('quiz-cards');
-    
-    if (quizCardsContainer) {
-        quizCardsContainer.innerHTML = '<div class="loading">Chargement des quiz...</div>';
+    // Fonction pour afficher les cartes de quiz
+    const renderQuizCards = () => {
+        const quizCardsContainer = document.getElementById('quiz-cards');
         
-        fetch('http://localhost:8000/api/quizzes')
-            .then(response => response.json())
-            .then(data => {
-                quizCardsContainer.innerHTML = '';
+        if (quizCardsContainer) {
+            quizCardsContainer.innerHTML = '<div class="loading">Chargement des quiz...</div>';
+            
+            fetch('http://localhost:8000/api/quizzes')
+                .then(response => response.json())
+                .then(data => {
+                    quizCardsContainer.innerHTML = '';
+                    
+                    if (data.count === 0) {
+                        quizCardsContainer.innerHTML = `<p>${data.message || 'Aucun quiz disponible'}</p>`;
+                        return;
+                    }
+                    
+                    data.quizzes.forEach(quiz => {
+                        const quizCard = document.createElement('div');
+                        quizCard.className = 'quiz-card';
+                        
+                        const imageUrl = quiz.imageUrl || '/api/placeholder/300/180';
+                        
+                        // Vérifier si l'utilisateur est le créateur du quiz
+                        const isCreator = isUserQuizCreator(quiz.nomCreateur);
+                        
+                        quizCard.innerHTML = `
+                            <img src="${imageUrl}" alt="${quiz.nom}" class="quiz-card-image">
+                            <div class="quiz-card-content">
+                                <h3 class="quiz-card-title">${quiz.nom}</h3>
+                                <p class="quiz-card-description">${quiz.description || 'Aucune description disponible.'}</p>
+                                <div class="quiz-card-meta">
+                                    <span>Par ${quiz.nomCreateur || 'Anonyme'}</span>
+                                    <span class="quiz-card-category">${quiz.categorie || 'Divers'}</span>
+                                </div>
+                                <div class="quiz-card-actions">
+                                    <a href="quiz.html?id=${quiz.id_quiz}" class="quiz-card-btn">Jouer</a>
+                                    ${isCreator ? `<a href="editQuiz.html?id=${quiz.id_quiz}" class="quiz-card-btn edit-btn">Modifier</a>` : ''}
+                                </div>
+                            </div>
+                        `;
+                        quizCardsContainer.appendChild(quizCard);
+                    });
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    quizCardsContainer.innerHTML = '<p>Erreur de chargement</p>';
+                });
+        }
+    };
+
+    const renderRecommendedQuizzes = async () => {
+        const recommendedContainer = document.getElementById('recommended-quiz-cards');
+        
+        if (recommendedContainer) {
+            try {
+                // Afficher un indicateur de chargement
+                recommendedContainer.innerHTML = '<div class="loading">Chargement des recommandations...</div>';
                 
-                if (data.count === 0) {
-                    quizCardsContainer.innerHTML = `<p>${data.message || 'Aucun quiz disponible'}</p>`;
+                // Récupérer les quiz depuis l'API
+                const quizzes = await getAllQuizzes();
+                
+                // Vider le conteneur
+                recommendedContainer.innerHTML = '';
+                
+                // Si aucun quiz n'est trouvé
+                if (quizzes.length === 0) {
+                    recommendedContainer.innerHTML = '<p>Aucune recommandation disponible.</p>';
                     return;
                 }
                 
-                data.quizzes.forEach(quiz => {
+                // Afficher jusqu'à 3 quiz recommandés
+                const numberOfQuizzesToShow = Math.min(3, quizzes.length);
+                
+                for (let i = 0; i < numberOfQuizzesToShow; i++) {
+                    const quiz = quizzes[i];
                     const quizCard = document.createElement('div');
                     quizCard.className = 'quiz-card';
                     
+                    let tagName = "";
+                    let tagClass = "";
+                    
+                    if (i === 0) {
+                        tagName = "Populaire";
+                        tagClass = "popular-tag";
+                    } else if (i === 1) {
+                        tagName = "Nouveau"; 
+                        tagClass = "new-tag";
+                    } else if (i === 2) {
+                        tagName = "Recommandé";
+                        tagClass = "recommended-tag";
+                    }
+                    
+                    // Vérifier si l'utilisateur est le créateur du quiz
+                    const isCreator = isUserQuizCreator(quiz.nomCreateur);
+                    
+                    // Utiliser une image par défaut si imageUrl n'est pas défini
                     const imageUrl = quiz.imageUrl || '/api/placeholder/300/180';
+                    
                     quizCard.innerHTML = `
-                        <img src="${imageUrl}" alt="${quiz.title}" class="quiz-card-image">
+                        <div class="quiz-card-tag ${tagClass}">${tagName}</div>
+                        <img src="${imageUrl}" alt="${quiz.nom}" class="quiz-card-image">
                         <div class="quiz-card-content">
-                            <h3 class="quiz-card-title">${quiz.title}</h3>
+                            <h3 class="quiz-card-title">${quiz.nom}</h3>
                             <p class="quiz-card-description">${quiz.description || 'Aucune description disponible.'}</p>
                             <div class="quiz-card-meta">
-                                <span>Par ${quiz.author || 'Anonyme'}</span>
-                                <span class="quiz-card-category">${quiz.category || 'Divers'}</span>
+                                <span>Par ${quiz.nomCreateur || 'Anonyme'}</span>
+                                <span class="quiz-card-category">${quiz.categorie || 'Divers'}</span>
+                            </div>
+                            <div class="quiz-card-info">
+                                <span class="quiz-questions-count">${quiz.nbQuestions || 0} questions</span>
+                                <span class="quiz-time-estimate">${quiz.estimatedTime || 5} min</span>
                             </div>
                             <div class="quiz-card-actions">
-                                <a href="quiz.html?id=${quiz.id}" class="quiz-card-btn">Jouer</a>
+                                <a href="quiz.html?id=${quiz.id_quiz}" class="quiz-card-btn">Jouer</a>
+                                ${isCreator ? `<a href="editQuiz.html?id=${quiz.id_quiz}" class="quiz-card-btn edit-btn">Modifier</a>` : ''}
                             </div>
                         </div>
                     `;
-                    quizCardsContainer.appendChild(quizCard);
-                });
-            })
-            .catch(error => {
-                console.error('Erreur:', error);
-                quizCardsContainer.innerHTML = '<p>Erreur de chargement</p>';
-            });
-    }
-};
-
-
-const renderRecommendedQuizzes = async () => {
-    const recommendedContainer = document.getElementById('recommended-quiz-cards');
-    
-    if (recommendedContainer) {
-        try {
-            // Afficher un indicateur de chargement
-            recommendedContainer.innerHTML = '<div class="loading">Chargement des recommandations...</div>';
-            
-            // Récupérer les quiz depuis l'API
-            const quizzes = await getAllQuizzes();
-            
-            // Vider le conteneur
-            recommendedContainer.innerHTML = '';
-            
-            // Si aucun quiz n'est trouvé
-            if (quizzes.length === 0) {
-                recommendedContainer.innerHTML = '<p>Aucune recommandation disponible.</p>';
-                return;
-            }
-            
-            // Afficher jusqu'à 3 quiz recommandés
-            const numberOfQuizzesToShow = Math.min(3, quizzes.length);
-            
-            for (let i = 0; i < numberOfQuizzesToShow; i++) {
-                const quiz = quizzes[i];
-                const quizCard = document.createElement('div');
-                quizCard.className = 'quiz-card';
-                
-                let tagName = "";
-                let tagClass = "";
-                
-                if (i === 0) {
-                    tagName = "Populaire";
-                    tagClass = "popular-tag";
-                } else if (i === 1) {
-                    tagName = "Nouveau"; 
-                    tagClass = "new-tag";
-                } else if (i === 2) {
-                    tagName = "Recommandé";
-                    tagClass = "recommended-tag";
+                    recommendedContainer.appendChild(quizCard);
                 }
-                
-                // Utiliser une image par défaut si imageUrl n'est pas défini
-                const imageUrl = quiz.imageUrl || '/api/placeholder/300/180';
-                
-                quizCard.innerHTML = `
-                    <div class="quiz-card-tag ${tagClass}">${tagName}</div>
-                    <img src="${imageUrl}" alt="${quiz.title}" class="quiz-card-image">
-                    <div class="quiz-card-content">
-                        <h3 class="quiz-card-title">${quiz.title}</h3>
-                        <p class="quiz-card-description">${quiz.description || 'Aucune description disponible.'}</p>
-                        <div class="quiz-card-meta">
-                            <span>Par ${quiz.author || 'Anonyme'}</span>
-                            <span class="quiz-card-category">${quiz.category || 'Divers'}</span>
-                        </div>
-                        <div class="quiz-card-info">
-                            <span class="quiz-questions-count">${quiz.questionCount || 0} questions</span>
-                            <span class="quiz-time-estimate">${quiz.estimatedTime || 5} min</span>
-                        </div>
-                        <div class="quiz-card-actions">
-                            <a href="quiz.html?id=${quiz.id}" class="quiz-card-btn">Jouer</a>
-                        </div>
-                    </div>
-                `;
-                recommendedContainer.appendChild(quizCard);
+            } catch (error) {
+                console.error('Erreur lors du chargement des recommandations:', error);
+                recommendedContainer.innerHTML = '<p>Impossible de charger les recommandations. Veuillez réessayer plus tard.</p>';
             }
-        } catch (error) {
-            console.error('Erreur lors du chargement des recommandations:', error);
-            recommendedContainer.innerHTML = '<p>Impossible de charger les recommandations. Veuillez réessayer plus tard.</p>';
         }
-    }
-};
+    };
     
-const initQuiz = async () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const quizId = urlParams.get('id');
-    
-    if (!quizId) {
-        window.location.href = 'main.html';
-        return;
-    }
-    
-    try {
-        // Afficher un indicateur de chargement
-        const quizContainer = document.querySelector('.quiz-container');
-        if (quizContainer) {
-            quizContainer.innerHTML = '<div class="loading">Chargement du quiz...</div>';
-        }
+    const initQuiz = async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const quizId = urlParams.get('id');
         
-        // Récupérer le quiz depuis l'API
-        const currentQuizData = await getQuiz(quizId);
-        
-        if (!currentQuizData) {
+        if (!quizId) {
             window.location.href = 'main.html';
             return;
         }
         
-        // Restaurer le contenu du quiz
-        if (quizContainer) {
-            quizContainer.innerHTML = `
-                <h1 id="quiz-title"></h1>
-                <div class="timer-container">
-                    <div class="timer">
-                        <div class="timer-bar" id="timer-bar"></div>
-                        <div class="timer-count"><span id="timer-seconds">30</span>s</div>
-                    </div>
-                </div>
-                <div class="question-container">
-                    <div class="question-header">
-                        <span>Question <span id="current-question">1</span>/<span id="total-questions">10</span></span>
-                    </div>
-                    <h2 id="question-text"></h2>
-                </div>
-                <div class="answers-grid">
-                    <div class="answer-card" data-option="0">
-                        <div class="answer-content">
-                            <span class="answer-letter">A</span>
-                            <span class="answer-text"></span>
-                        </div>
-                    </div>
-                    <div class="answer-card" data-option="1">
-                        <div class="answer-content">
-                            <span class="answer-letter">B</span>
-                            <span class="answer-text"></span>
-                        </div>
-                    </div>
-                    <div class="answer-card" data-option="2">
-                        <div class="answer-content">
-                            <span class="answer-letter">C</span>
-                            <span class="answer-text"></span>
-                        </div>
-                    </div>
-                    <div class="answer-card" data-option="3">
-                        <div class="answer-content">
-                            <span class="answer-letter">D</span>
-                            <span class="answer-text"></span>
-                        </div>
-                    </div>
-                </div>
-                <div id="feedback-overlay" class="feedback-overlay">
-                    <div id="feedback-modal" class="feedback-modal">
-                        <div class="feedback-icon">✓</div>
-                        <div class="feedback-text">Correct!</div>
-                        <div class="points">+100 points</div>
-                        <div class="waiting-text">Prochaine question dans <span class="countdown">3</span>...</div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        let currentQuestionIndex = 0;
-        let score = 0;
-        let timer;
-        let timeLeft;
-        let isAnswered = false;
-        
-        const timerBar = document.getElementById('timer-bar');
-        const timerSeconds = document.getElementById('timer-seconds');
-        const questionText = document.getElementById('question-text');
-        const currentQuestionSpan = document.getElementById('current-question');
-        const totalQuestionsSpan = document.getElementById('total-questions');
-        const answerCards = document.querySelectorAll('.answer-card');
-        const feedbackOverlay = document.getElementById('feedback-overlay');
-        const feedbackModal = document.getElementById('feedback-modal');
-        
-        function init() {
-            document.title = `${currentQuizData.title} - ThinkUp`;
-            
-            document.getElementById('quiz-title').textContent = currentQuizData.title;
-            
-            // S'assurer que questions existe et est un tableau
-            if (!currentQuizData.questions || !Array.isArray(currentQuizData.questions)) {
-                currentQuizData.questions = [];
+        try {
+            // Afficher un indicateur de chargement
+            const quizContainer = document.querySelector('.quiz-container');
+            if (quizContainer) {
+                quizContainer.innerHTML = '<div class="loading">Chargement du quiz...</div>';
             }
             
-            totalQuestionsSpan.textContent = currentQuizData.questions.length;
+            // Récupérer le quiz depuis l'API
+            const currentQuizData = await getQuiz(quizId);
             
-            loadQuestion(0);
-            
-            answerCards.forEach(card => {
-                card.addEventListener('click', handleAnswerClick);
-            });
-        }
-        
-        function loadQuestion(index) {
-            if (index >= currentQuizData.questions.length) {
-                endQuiz();
+            if (!currentQuizData) {
+                window.location.href = 'main.html';
                 return;
             }
             
-            isAnswered = false;
-            currentQuestionIndex = index;
-            const question = currentQuizData.questions[index];
-            
-            questionText.textContent = question.text;
-            currentQuestionSpan.textContent = index + 1;
-            
-            // S'assurer que options existe et est un tableau
-            if (!question.options || !Array.isArray(question.options)) {
-                question.options = ['Option A', 'Option B', 'Option C', 'Option D'];
+            // Restaurer le contenu du quiz
+            if (quizContainer) {
+                quizContainer.innerHTML = `
+                    <h1 id="quiz-title"></h1>
+                    <div class="timer-container">
+                        <div class="timer">
+                            <div class="timer-bar" id="timer-bar"></div>
+                            <div class="timer-count"><span id="timer-seconds">30</span>s</div>
+                        </div>
+                    </div>
+                    <div class="question-container">
+                        <div class="question-header">
+                            <span>Question <span id="current-question">1</span>/<span id="total-questions">10</span></span>
+                        </div>
+                        <h2 id="question-text"></h2>
+                    </div>
+                    <div class="answers-grid">
+                        <div class="answer-card" data-option="0">
+                            <div class="answer-content">
+                                <span class="answer-letter">A</span>
+                                <span class="answer-text"></span>
+                            </div>
+                        </div>
+                        <div class="answer-card" data-option="1">
+                            <div class="answer-content">
+                                <span class="answer-letter">B</span>
+                                <span class="answer-text"></span>
+                            </div>
+                        </div>
+                        <div class="answer-card" data-option="2">
+                            <div class="answer-content">
+                                <span class="answer-letter">C</span>
+                                <span class="answer-text"></span>
+                            </div>
+                        </div>
+                        <div class="answer-card" data-option="3">
+                            <div class="answer-content">
+                                <span class="answer-letter">D</span>
+                                <span class="answer-text"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="feedback-overlay" class="feedback-overlay">
+                        <div id="feedback-modal" class="feedback-modal">
+                            <div class="feedback-icon">✓</div>
+                            <div class="feedback-text">Correct!</div>
+                            <div class="points">+100 points</div>
+                            <div class="waiting-text">Prochaine question dans <span class="countdown">3</span>...</div>
+                        </div>
+                    </div>
+                `;
             }
             
-            answerCards.forEach((card, i) => {
-                if (i < question.options.length) {
-                    card.style.display = 'block';
-                    card.querySelector('.answer-text').textContent = question.options[i];
-                    card.classList.remove('disabled');
-                } else {
-                    card.style.display = 'none'; // Cacher les options supplémentaires si moins de 4 options
+            let currentQuestionIndex = 0;
+            let score = 0;
+            let timer;
+            let timeLeft;
+            let isAnswered = false;
+            
+            const timerBar = document.getElementById('timer-bar');
+            const timerSeconds = document.getElementById('timer-seconds');
+            const questionText = document.getElementById('question-text');
+            const currentQuestionSpan = document.getElementById('current-question');
+            const totalQuestionsSpan = document.getElementById('total-questions');
+            const answerCards = document.querySelectorAll('.answer-card');
+            const feedbackOverlay = document.getElementById('feedback-overlay');
+            const feedbackModal = document.getElementById('feedback-modal');
+            
+            function init() {
+                document.title = `${currentQuizData.title} - ThinkUp`;
+                
+                document.getElementById('quiz-title').textContent = currentQuizData.title;
+                
+                // S'assurer que questions existe et est un tableau
+                if (!currentQuizData.questions || !Array.isArray(currentQuizData.questions)) {
+                    currentQuizData.questions = [];
                 }
-            });
+                
+                totalQuestionsSpan.textContent = currentQuizData.questions.length;
+                
+                loadQuestion(0);
+                
+                answerCards.forEach(card => {
+                    card.addEventListener('click', handleAnswerClick);
+                });
+            }
             
-            // Utiliser timeLimit s'il existe, sinon 30 secondes par défaut
-            const timeLimit = question.timeLimit || 30;
-            startTimer(timeLimit);
-        }
-        
-        function startTimer(seconds) {
-            clearInterval(timer);
-            timeLeft = seconds;
-            timerSeconds.textContent = timeLeft;
-            timerBar.style.transition = 'none';
-            timerBar.style.width = '100%';
-            timerBar.style.backgroundColor = '#4CAF50';
+            function loadQuestion(index) {
+                if (index >= currentQuizData.questions.length) {
+                    endQuiz();
+                    return;
+                }
+                
+                isAnswered = false;
+                currentQuestionIndex = index;
+                const question = currentQuizData.questions[index];
+                
+                questionText.textContent = question.text;
+                currentQuestionSpan.textContent = index + 1;
+                
+                // S'assurer que options existe et est un tableau
+                if (!question.options || !Array.isArray(question.options)) {
+                    question.options = ['Option A', 'Option B', 'Option C', 'Option D'];
+                }
+                
+                answerCards.forEach((card, i) => {
+                    if (i < question.options.length) {
+                        card.style.display = 'block';
+                        card.querySelector('.answer-text').textContent = question.options[i];
+                        card.classList.remove('disabled');
+                    } else {
+                        card.style.display = 'none'; // Cacher les options supplémentaires si moins de 4 options
+                    }
+                });
+                
+                // Utiliser timeLimit s'il existe, sinon 30 secondes par défaut
+                const timeLimit = question.timeLimit || 30;
+                startTimer(timeLimit);
+            }
             
-            // Force reflow
-            void timerBar.offsetWidth;
-            
-            timerBar.style.transition = `width ${seconds}s linear`;
-            timerBar.style.width = '0%';
-            
-            const warningThreshold = Math.ceil(seconds * 0.2);
-            
-            timer = setInterval(() => {
-                timeLeft--;
+            function startTimer(seconds) {
+                clearInterval(timer);
+                timeLeft = seconds;
                 timerSeconds.textContent = timeLeft;
+                timerBar.style.transition = 'none';
+                timerBar.style.width = '100%';
+                timerBar.style.backgroundColor = '#4CAF50';
                 
-                if (timeLeft <= warningThreshold && timerBar.style.backgroundColor !== 'red') {
-                    timerBar.style.backgroundColor = 'red';
-                }
+                // Force reflow
+                void timerBar.offsetWidth;
                 
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    if (!isAnswered) {
-                        handleTimeout();
+                timerBar.style.transition = `width ${seconds}s linear`;
+                timerBar.style.width = '0%';
+                
+                const warningThreshold = Math.ceil(seconds * 0.2);
+                
+                timer = setInterval(() => {
+                    timeLeft--;
+                    timerSeconds.textContent = timeLeft;
+                    
+                    if (timeLeft <= warningThreshold && timerBar.style.backgroundColor !== 'red') {
+                        timerBar.style.backgroundColor = 'red';
+                    }
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        if (!isAnswered) {
+                            handleTimeout();
+                        }
+                    }
+                }, 1000);
+            }
+            
+            function handleAnswerClick() {
+                if (isAnswered) return;
+                
+                isAnswered = true;
+                clearInterval(timer);
+                
+                const selectedOption = parseInt(this.dataset.option);
+                const correctOption = currentQuizData.questions[currentQuestionIndex].correctOption;
+                const totalTime = currentQuizData.questions[currentQuestionIndex].timeLimit || 30;
+                
+                answerCards.forEach(card => {
+                    card.classList.add('disabled');
+                });
+                
+                if (selectedOption === correctOption) {
+                    const pointsEarned = 100 + Math.round(100 * (timeLeft / totalTime));
+                    
+                    feedbackModal.className = 'feedback-modal correct';
+                    feedbackModal.querySelector('.feedback-icon').textContent = '✓';
+                    feedbackModal.querySelector('.feedback-text').textContent = 'Correct!';
+                    feedbackModal.querySelector('.points').textContent = `+${pointsEarned} points`;
+                    score += pointsEarned;
+                    
+                    let timeBonus = feedbackModal.querySelector('.time-bonus');
+                    if (!timeBonus) {
+                        timeBonus = document.createElement('div');
+                        timeBonus.className = 'time-bonus';
+                        feedbackModal.insertBefore(timeBonus, feedbackModal.querySelector('.waiting-text'));
+                    }
+                    timeBonus.textContent = `Bonus de rapidité: ${Math.round((timeLeft/totalTime) * 100)}%`;
+                    
+                    const existingCorrectAnswer = feedbackModal.querySelector('.correct-answer');
+                    if (existingCorrectAnswer) {
+                        feedbackModal.removeChild(existingCorrectAnswer);
+                    }
+                } else {
+                    feedbackModal.className = 'feedback-modal incorrect';
+                    feedbackModal.querySelector('.feedback-icon').textContent = '✗';
+                    feedbackModal.querySelector('.feedback-text').textContent = 'Incorrect!';
+                    feedbackModal.querySelector('.points').textContent = '+0 points';
+                    
+                    const correctAnswerText = currentQuizData.questions[currentQuestionIndex].options[correctOption];
+                    let correctAnswer = feedbackModal.querySelector('.correct-answer');
+                    if (!correctAnswer) {
+                        correctAnswer = document.createElement('div');
+                        correctAnswer.className = 'correct-answer';
+                        feedbackModal.insertBefore(correctAnswer, feedbackModal.querySelector('.waiting-text'));
+                    }
+                    correctAnswer.textContent = `Réponse correcte: ${correctAnswerText}`;
+                    
+                    const existingTimeBonus = feedbackModal.querySelector('.time-bonus');
+                    if (existingTimeBonus) {
+                        feedbackModal.removeChild(existingTimeBonus);
                     }
                 }
-            }, 1000);
-        }
-        
-        function handleAnswerClick() {
-            if (isAnswered) return;
-            
-            isAnswered = true;
-            clearInterval(timer);
-            
-            const selectedOption = parseInt(this.dataset.option);
-            const correctOption = currentQuizData.questions[currentQuestionIndex].correctOption;
-            const totalTime = currentQuizData.questions[currentQuestionIndex].timeLimit || 30;
-            
-            answerCards.forEach(card => {
-                card.classList.add('disabled');
-            });
-            
-            if (selectedOption === correctOption) {
-                const pointsEarned = 100 + Math.round(100 * (timeLeft / totalTime));
                 
-                feedbackModal.className = 'feedback-modal correct';
-                feedbackModal.querySelector('.feedback-icon').textContent = '✓';
-                feedbackModal.querySelector('.feedback-text').textContent = 'Correct!';
-                feedbackModal.querySelector('.points').textContent = `+${pointsEarned} points`;
-                score += pointsEarned;
+                feedbackOverlay.classList.add('active');
                 
-                let timeBonus = feedbackModal.querySelector('.time-bonus');
-                if (!timeBonus) {
-                    timeBonus = document.createElement('div');
-                    timeBonus.className = 'time-bonus';
-                    feedbackModal.insertBefore(timeBonus, feedbackModal.querySelector('.waiting-text'));
-                }
-                timeBonus.textContent = `Bonus de rapidité: ${Math.round((timeLeft/totalTime) * 100)}%`;
+                // Mise à jour du compte à rebours
+                const countdownElement = feedbackModal.querySelector('.countdown');
+                let countdown = 3;
+                countdownElement.textContent = countdown;
                 
-                const existingCorrectAnswer = feedbackModal.querySelector('.correct-answer');
-                if (existingCorrectAnswer) {
-                    feedbackModal.removeChild(existingCorrectAnswer);
-                }
-            } else {
-                feedbackModal.className = 'feedback-modal incorrect';
-                feedbackModal.querySelector('.feedback-icon').textContent = '✗';
-                feedbackModal.querySelector('.feedback-text').textContent = 'Incorrect!';
+                const countdownTimer = setInterval(() => {
+                    countdown--;
+                    countdownElement.textContent = countdown;
+                    
+                    if (countdown <= 0) {
+                        clearInterval(countdownTimer);
+                    }
+                }, 1000);
+                
+                setTimeout(() => {
+                    feedbackOverlay.classList.remove('active');
+                    loadQuestion(currentQuestionIndex + 1);
+                }, 3000);
+            }
+            
+            function handleTimeout() {
+                isAnswered = true;
+                
+                answerCards.forEach(card => {
+                    card.classList.add('disabled');
+                });
+
+                feedbackModal.className = 'feedback-modal timeout';
+                feedbackModal.querySelector('.feedback-icon').textContent = '⏱';
+                feedbackModal.querySelector('.feedback-text').textContent = 'Temps écoulé!';
                 feedbackModal.querySelector('.points').textContent = '+0 points';
                 
+                const correctOption = currentQuizData.questions[currentQuestionIndex].correctOption;
                 const correctAnswerText = currentQuizData.questions[currentQuestionIndex].options[correctOption];
                 let correctAnswer = feedbackModal.querySelector('.correct-answer');
                 if (!correctAnswer) {
@@ -414,109 +491,59 @@ const initQuiz = async () => {
                 if (existingTimeBonus) {
                     feedbackModal.removeChild(existingTimeBonus);
                 }
-            }
-            
-            feedbackOverlay.classList.add('active');
-            
-            // Mise à jour du compte à rebours
-            const countdownElement = feedbackModal.querySelector('.countdown');
-            let countdown = 3;
-            countdownElement.textContent = countdown;
-            
-            const countdownTimer = setInterval(() => {
-                countdown--;
+                
+                feedbackOverlay.classList.add('active');
+                
+                // Mise à jour du compte à rebours
+                const countdownElement = feedbackModal.querySelector('.countdown');
+                let countdown = 3;
                 countdownElement.textContent = countdown;
                 
-                if (countdown <= 0) {
-                    clearInterval(countdownTimer);
-                }
-            }, 1000);
-            
-            setTimeout(() => {
-                feedbackOverlay.classList.remove('active');
-                loadQuestion(currentQuestionIndex + 1);
-            }, 3000);
-        }
-        
-        function handleTimeout() {
-            isAnswered = true;
-            
-            answerCards.forEach(card => {
-                card.classList.add('disabled');
-            });
-
-            feedbackModal.className = 'feedback-modal timeout';
-            feedbackModal.querySelector('.feedback-icon').textContent = '⏱';
-            feedbackModal.querySelector('.feedback-text').textContent = 'Temps écoulé!';
-            feedbackModal.querySelector('.points').textContent = '+0 points';
-            
-            const correctOption = currentQuizData.questions[currentQuestionIndex].correctOption;
-            const correctAnswerText = currentQuizData.questions[currentQuestionIndex].options[correctOption];
-            let correctAnswer = feedbackModal.querySelector('.correct-answer');
-            if (!correctAnswer) {
-                correctAnswer = document.createElement('div');
-                correctAnswer.className = 'correct-answer';
-                feedbackModal.insertBefore(correctAnswer, feedbackModal.querySelector('.waiting-text'));
-            }
-            correctAnswer.textContent = `Réponse correcte: ${correctAnswerText}`;
-            
-            const existingTimeBonus = feedbackModal.querySelector('.time-bonus');
-            if (existingTimeBonus) {
-                feedbackModal.removeChild(existingTimeBonus);
-            }
-            
-            feedbackOverlay.classList.add('active');
-            
-            // Mise à jour du compte à rebours
-            const countdownElement = feedbackModal.querySelector('.countdown');
-            let countdown = 3;
-            countdownElement.textContent = countdown;
-            
-            const countdownTimer = setInterval(() => {
-                countdown--;
-                countdownElement.textContent = countdown;
+                const countdownTimer = setInterval(() => {
+                    countdown--;
+                    countdownElement.textContent = countdown;
+                    
+                    if (countdown <= 0) {
+                        clearInterval(countdownTimer);
+                    }
+                }, 1000);
                 
-                if (countdown <= 0) {
-                    clearInterval(countdownTimer);
-                }
-            }, 1000);
+                setTimeout(() => {
+                    feedbackOverlay.classList.remove('active');
+                    loadQuestion(currentQuestionIndex + 1);
+                }, 3000);
+            }
             
-            setTimeout(() => {
-                feedbackOverlay.classList.remove('active');
-                loadQuestion(currentQuestionIndex + 1);
-            }, 3000);
-        }
-        
-        function endQuiz() {
-            document.querySelector('.timer-container').style.display = 'none';
-            document.querySelector('.question-container').style.display = 'none';
+            function endQuiz() {
+                document.querySelector('.timer-container').style.display = 'none';
+                document.querySelector('.question-container').style.display = 'none';
+                
+                const answersGrid = document.querySelector('.answers-grid');
+                answersGrid.innerHTML = `
+                    <div class="results-container">
+                        <h2>Quiz Terminé!</h2>
+                        <p class="final-score">Votre score: ${score}</p>
+                        <button class="btn" onclick="window.location.href='main.html'">Retour à l'Accueil</button>
+                    </div>
+                `;
+            }
             
-            const answersGrid = document.querySelector('.answers-grid');
-            answersGrid.innerHTML = `
-                <div class="results-container">
-                    <h2>Quiz Terminé!</h2>
-                    <p class="final-score">Votre score: ${score}</p>
-                    <button class="btn" onclick="window.location.href='main.html'">Retour à l'Accueil</button>
-                </div>
-            `;
+            init();
+        } catch (error) {
+            console.error('Erreur lors du chargement du quiz:', error);
+            // Afficher un message d'erreur à l'utilisateur
+            const quizContainer = document.querySelector('.quiz-container');
+            if (quizContainer) {
+                quizContainer.innerHTML = `
+                    <div class="error-message">
+                        <h2>Impossible de charger le quiz</h2>
+                        <p>Une erreur est survenue lors du chargement du quiz. Veuillez réessayer plus tard.</p>
+                        <a href="main.html" class="btn">Retourner à l'accueil</a>
+                    </div>
+                `;
+            }
         }
-        
-        init();
-    } catch (error) {
-        console.error('Erreur lors du chargement du quiz:', error);
-        // Afficher un message d'erreur à l'utilisateur
-        const quizContainer = document.querySelector('.quiz-container');
-        if (quizContainer) {
-            quizContainer.innerHTML = `
-                <div class="error-message">
-                    <h2>Impossible de charger le quiz</h2>
-                    <p>Une erreur est survenue lors du chargement du quiz. Veuillez réessayer plus tard.</p>
-                    <a href="main.html" class="btn">Retourner à l'accueil</a>
-                </div>
-            `;
-        }
-    }
-};
+    };
     
     const initCreateQuiz = () => {
         let questionCount = 1;
@@ -1090,6 +1117,4 @@ const initQuiz = async () => {
     } else if (document.querySelector('.profile-container')) {
         initProfilePage();
     }
-
-    
 });
