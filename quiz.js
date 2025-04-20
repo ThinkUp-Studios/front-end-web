@@ -43,8 +43,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 id: data.id_quiz,
                 title: data.nom_quiz,
                 questions: data.questions.map(q => ({
+                    id_question: q.id_question,
                     text: q.texte_question,
-                    options: q.reponses.map(r => r.texte_reponse),
+                    options: q.reponses.map(r => ({
+                        id_reponse: r.id_reponse,
+                        texte: r.texte_reponse
+                    })),
                     correctOption: q.reponses.findIndex(r => r.bonne_reponse === 1),
                     timeLimit: 15
                 }))
@@ -59,10 +63,14 @@ document.addEventListener('DOMContentLoaded', function() {
             
             answerCards.forEach(card => {
                 card.addEventListener('click', function() {
-                    handleAnswerClick(currentQuizData, parseInt(this.dataset.option));
+                    handleAnswerClick(
+                        currentQuizData,
+                        parseInt(this.dataset.option),
+                        parseInt(this.dataset.idReponse)
+                    );
                 });
             });
-        }
+                                }
 
         function loadQuestion(quizData, index) {
             if (index >= quizData.questions.length) {
@@ -78,10 +86,14 @@ document.addEventListener('DOMContentLoaded', function() {
             currentQuestionSpan.textContent = index + 1;
 
             answerCards.forEach((card, i) => {
-                card.querySelector('.answer-text').textContent = question.options[i];
+                const option = question.options[i];
+            
+                card.querySelector('.answer-text').textContent = option.texte;
+                card.dataset.option = i;
+                card.dataset.idReponse = option.id_reponse;
+            
                 card.classList.remove('disabled', 'correct', 'incorrect');
             });
-
             startTimer(question.timeLimit, quizData);
         }
 
@@ -117,11 +129,24 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 1000);
         }
 
-        function handleAnswerClick(quizData, selectedOption) {
+        function handleAnswerClick(quizData, selectedOption, selectedAnswerId) {
             if (isAnswered) return;
 
             isAnswered = true;
             clearInterval(timer);
+
+            fetch('http://localhost:8000/api/choix-reponse', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('jwt')
+                },
+                body: JSON.stringify({
+                    id_reponse: selectedAnswerId,
+                    id_question: quizData.questions[currentQuestionIndex].id_question 
+                })
+            });
+            
 
             const correctOption = quizData.questions[currentQuestionIndex].correctOption;
             const totalTime = quizData.questions[currentQuestionIndex].timeLimit;
