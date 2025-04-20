@@ -402,3 +402,118 @@
         grid-template-columns: 1fr;
     }
 }
+
+.profile-header {
+    background-color: #1f1f1f;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.profile-avatar img {
+    border: 5px solid #1f1f1f;
+}
+
+.change-avatar-btn {
+    background-color: #2a2a2a;
+    border: 2px solid #6366f1;
+    color: #f3f4f6;
+}
+
+.change-avatar-btn:hover {
+    background-color: #6366f1;
+    color: white;
+}
+
+.profile-name {
+    color: #f3f4f6;
+}
+
+.profile-username {
+    color: #9ca3af;
+}
+
+.stat-value {
+    color: #f3f4f6;
+}
+
+.stat-label {
+    color: #9ca3af;
+}
+
+.profile-content {
+    background-color: #1f1f1f;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.profile-tabs {
+    border-bottom: 1px solid #2e2e2e;
+}
+
+.tab-btn {
+    color: #9ca3af;
+}
+
+.tab-btn.active,
+.tab-btn:hover {
+    color: #6366f1;
+}
+
+.tab-content h2 {
+    color: #f3f4f6;
+}
+
+.quiz-history .history-item {
+    background-color: #2a2a2a;
+}
+
+.quiz-history .history-item:hover {
+    background-color: #2f2f2f;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.history-quiz-info h3 {
+    color: #f3f4f6;
+}
+
+.history-category {
+    background: linear-gradient(90deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
+    color: #8b5cf6;
+}
+
+.history-date {
+    color: #9ca3af;
+}
+
+.replay-btn {
+    background-color: transparent;
+    color: #8b5cf6;
+    border: 2px solid #6366f1;
+}
+
+.replay-btn:hover {
+    background-color: #6366f1;
+    color: white;
+}
+
+.badge-item {
+    background-color: #2a2a2a;
+}
+
+.badge-item.achieved {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.badge-icon {
+    background-color: #1f1f1f;
+}
+
+.badge-item.achieved .badge-icon {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+}
+
+.badge-info h3 {
+    color: #f3f4f6;
+}
+
+.badge-info p {
+    color: #9ca3af;
+}

@@ -251,11 +251,6 @@ select:focus {
     transition: all 0.3s ease;
 }
 
-.quiz-result-card:hover, .quiz-results-card-hidden:hover  {
-    background-color: #f1f3f5;
-    transform: translateY(-3px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-}
 
 .result-thumb {
     width: 120px;
@@ -316,7 +311,7 @@ select:focus {
 
 
 
-.play-btn:hover, .leaderboard-btn:hover {
+.play-btn:hover, .leaderboard-btn {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
 }
@@ -339,10 +334,13 @@ select:focus {
     transition: all 0.3s ease;
 }
 
-#user-result-card:hover {
-    background-color: #f1f3f5;
+.quiz-result-card:hover,
+.quiz-results-card-hidden:hover,
+.user-result-card:hover,
+.user-result-card-hidden:hover {
+    background-color: #2a2a2a;
     transform: translateY(-3px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
 }
 
 .user-avatar {
@@ -675,4 +673,125 @@ footer {
     border-radius: 10px;
     transition: all 0.3s ease;
 
+}
+
+
+/* DARK THEME COLORS APPLIQUÉS SEULEMENT */
+.search-header h1,
+.results-count h2,
+.result-details h4,
+.user-details h4,
+.user-card-name {
+    color: #f3f4f6;
+}
+
+.search-bar-container,
+.search-results,
+.user-card,
+.quiz-result-card,
+.quiz-results-card-hidden,
+.user-result-card,
+.user-result-card-hidden {
+    background-color: #1f1f1f;
+    color: #e5e7eb;
+}
+
+.search-bar input {
+    background-color: transparent;
+    color: #f3f4f6;
+}
+
+.search-bar {
+    border: 2px solid #2e2e2e;
+}
+
+.search-bar:focus-within {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.search-filters {
+    border-top: 1px solid #2e2e2e;
+}
+
+.filter-btn {
+    background-color: #2e2e2e;
+    color: #f3f4f6;
+}
+
+select {
+    background-color: #2e2e2e;
+    color: #f3f4f6;
+    border: 1px solid #3a3a3a;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ccc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
+.search-tab {
+    color: #9ca3af;
+}
+
+.search-tab.active,
+.search-tab:hover {
+    color: #6366f1;
+}
+
+.result-group h3 {
+    color: #f3f4f6;
+}
+
+.result-details p,
+.username,
+.result-author,
+.user-stats,
+.stat-label,
+#results-number,
+.page-ellipsis {
+    color: #9ca3af;
+}
+
+.result-category {
+    background: linear-gradient(90deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+    color: #8b5cf6;
+}
+
+.page-btn,
+.page-num {
+    background-color: #1f1f1f;
+    color: #f3f4f6;
+    border: 1px solid #2e2e2e;
+}
+
+.page-btn:hover:not([disabled]),
+.page-num:hover:not(.active) {
+    border-color: #6366f1;
+    color: #6366f1;
+}
+
+.stat-value {
+    color: #8b5cf6;
+}
+
+.user-card-username {
+    color: #a1a1aa;
+}
+
+.profile-btn,
+.user-card-btn {
+    background-color: #1f1f1f;
+    color: #8b5cf6;
+    border-color: #6366f1;
+}
+
+.profile-btn:hover,
+.user-card-btn:hover {
+    background-color: #6366f1;
+    color: white;
+}
+
+.view-more-btn {
+    color: #8b5cf6;
+}
+
+.view-more-btn:hover {
+    background-color: rgba(139, 92, 246, 0.1);
 }

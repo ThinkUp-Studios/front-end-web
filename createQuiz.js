@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Afficher les données envoyées dans la console pour débogage
                 console.log('Données du quiz à envoyer:', quizData);
-                
+                console.log(localStorage.getItem('jwt'));
                 // Envoi des données à l'API
                 fetch('http://localhost:8000/api/quizzes/complete', {
                     method: 'POST',

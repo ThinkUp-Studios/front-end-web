@@ -163,7 +163,7 @@ function displayLeaderboard(players) {
 
             tr.innerHTML = `
                 <td>${index + 1}</td>
-                <td>${player.username}</td>
+                <td> <a href="profile.html?username=${player.username}">${player.username} </a> </td>
                 <td>${player.score}</td>
             `;
 
