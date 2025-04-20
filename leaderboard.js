@@ -165,6 +165,7 @@ function displayLeaderboard(players) {
                 <td>${index + 1}</td>
                 <td> <a href="profile.html?username=${player.username}">${player.username} </a> </td>
                 <td>${player.score}</td>
+                <td>${player.date_participation}
             `;
 
             tbody.appendChild(tr);

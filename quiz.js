@@ -169,6 +169,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 showFeedback('incorrect', '✗', 'Incorrect!', 0, 0, 0, quizData.questions[currentQuestionIndex].options[correctOption].texte);
             }
 
+            loadStats(
+                quizData.questions[currentQuestionIndex].id_question,
+                selectedAnswerId,
+                selectedOption === correctOption // isCorrect
+            );
+            
+
             setTimeout(() => {
                 feedbackOverlay.classList.remove('active');
                 loadQuestion(quizData, currentQuestionIndex + 1);
@@ -198,6 +205,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 correctAnswerElement.textContent = `Réponse correcte: ${correctAnswer}`;
                 feedbackModal.insertBefore(correctAnswerElement, feedbackModal.querySelector('.waiting-text'));
             }
+            // Ajouter conteneur stats vide (rempli plus tard)
+            const statsContainer = document.createElement('div');
+            statsContainer.id = 'stats-container';
+            statsContainer.classList.add('stats-section');
+            feedbackModal.insertBefore(statsContainer, feedbackModal.querySelector('.waiting-text'));
 
             feedbackOverlay.classList.add('active');
         }
@@ -215,6 +227,45 @@ document.addEventListener('DOMContentLoaded', function() {
                 loadQuestion(quizData, currentQuestionIndex + 1);
             }, 3000);
 
+        }
+
+        function loadStats(id_question, selectedAnswerId, isCorrect) {
+            fetch(`http://localhost:8000/api/quizzes/questions/${id_question}/stats`)
+                .then(res => res.json())
+                .then(stats => {
+                    const container = document.getElementById('stats-container');
+                    container.innerHTML = '';
+
+                    const totalVotes = stats.reponses.reduce((acc, r) => acc + parseInt(r.nb_selections || 0), 0);
+
+                    stats.reponses.forEach(rep => {
+                        const pourcentage = totalVotes > 0
+                        ? Math.round((parseInt(rep.nb_selections || 0) / totalVotes) * 100)
+                        : 0;
+                    
+                        const bar = document.createElement('div');
+                        bar.classList.add('stats-bar');
+                        bar.innerHTML = `
+                            <span class="bar-label">${rep.texte}</span>
+                            <div class="bar-track">
+                            <div class="bar-fill${rep.id_reponse === selectedAnswerId ? ' selected' : ''}" style="width: ${pourcentage}%"></div>
+                            </div>
+                            <span class="bar-percent">${pourcentage}%</span>
+                        `;
+                        container.appendChild(bar);
+                    });
+
+                    const nb_gagnants = stats.nb_gagnants + (isCorrect ? 1 : 0);
+                    const nb_perdants = stats.nb_perdants + (!isCorrect ? 1 : 0);        
+
+                    const summary = document.createElement('div');
+                    summary.classList.add('win-stats');
+                    summary.textContent = `✅ ${nb_gagnants} bonnes réponses | ❌ ${nb_perdants} mauvaises`;
+                    container.appendChild(summary);
+                })
+                .catch(err => {
+                    console.error("Erreur chargement stats: ", err);
+                });
         }
 
         function endQuiz() {

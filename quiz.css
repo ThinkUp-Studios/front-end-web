@@ -499,3 +499,50 @@ body {
     color: #fbbf24;
   }
   
+
+  .stats-section {
+    margin-top: 1rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #444;
+}
+
+.stats-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.bar-label {
+    width: 120px;
+    font-size: 0.9rem;
+}
+
+.bar-track {
+    flex: 1;
+    height: 10px;
+    background: #ccc;
+    margin: 0 8px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    background: #6c6;
+}
+
+.bar-fill.selected {
+    background: #3b82f6;
+}
+
+.bar-percent {
+    width: 50px;
+    text-align: right;
+}
+
+.win-stats {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    font-style: italic;
+    color: #aaa;
+}

@@ -186,18 +186,17 @@ td a {
   text-decoration: none;
 }
 
-/* KEEP AS IS */
 .gold-row {
-  background: linear-gradient(90deg, #ffd70033, #fff8dc33);
+  background: linear-gradient(90deg, #ffd000cc, #fff8dc33);
   font-weight: 600;
 }
 
 .silver-row {
-  background: linear-gradient(90deg, #c0c0c033, #f5f5f533);
+  background: linear-gradient(90deg, #c0c0c0cc, #f5f5f533);
   font-weight: 600;
 }
 
 .bronze-row {
-  background: linear-gradient(90deg, #cd7f3233, #f0e0d033);
+  background: linear-gradient(90deg, #cd7f32cc, #f0e0d033);
   font-weight: 600;
 }
