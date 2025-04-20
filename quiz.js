@@ -256,6 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <h2>Quiz Terminé!</h2>
                     <p class="final-score">Votre score: ${score}</p>
                     <button class="btn" onclick="window.location.href='main.html'">Retour à l'Accueil</button>
+                    <button class="btn" onclick="window.location.href='leaderboard.html?id=${quizId}'">Classement</button>
                 </div>
             `;
 
