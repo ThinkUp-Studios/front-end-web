@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 showFeedback('correct', '✓', 'Correct!', pointsEarned, timeLeft, totalTime);
                 score += pointsEarned;
             } else {
-                showFeedback('incorrect', '✗', 'Incorrect!', 0, 0, 0, quizData.questions[currentQuestionIndex].options[correctOption]);
+                showFeedback('incorrect', '✗', 'Incorrect!', 0, 0, 0, quizData.questions[currentQuestionIndex].options[correctOption].texte);
             }
 
             setTimeout(() => {
@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
             answerCards.forEach(card => card.classList.add('disabled'));
 
             const correctOption = quizData.questions[currentQuestionIndex].correctOption;
-            const correctAnswerText = quizData.questions[currentQuestionIndex].options[correctOption];
+            const correctAnswerText = quizData.questions[currentQuestionIndex].options[correctOption].texte;
             
             showFeedback('timeout', '⏱', 'Temps écoulé!', 0, 0, 0, correctAnswerText);
             setTimeout(() => {
