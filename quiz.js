@@ -43,8 +43,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 id: data.id_quiz,
                 title: data.nom_quiz,
                 questions: data.questions.map(q => ({
+                    id_question: q.id_question,
                     text: q.texte_question,
-                    options: q.reponses.map(r => r.texte_reponse),
+                    options: q.reponses.map(r => ({
+                        id_reponse: r.id_reponse,
+                        texte: r.texte_reponse
+                    })),
                     correctOption: q.reponses.findIndex(r => r.bonne_reponse === 1),
                     timeLimit: 15
                 }))
@@ -59,10 +63,14 @@ document.addEventListener('DOMContentLoaded', function() {
             
             answerCards.forEach(card => {
                 card.addEventListener('click', function() {
-                    handleAnswerClick(currentQuizData, parseInt(this.dataset.option));
+                    handleAnswerClick(
+                        currentQuizData,
+                        parseInt(this.dataset.option),
+                        parseInt(this.dataset.idReponse)
+                    );
                 });
             });
-        }
+                                }
 
         function loadQuestion(quizData, index) {
             if (index >= quizData.questions.length) {
@@ -78,10 +86,14 @@ document.addEventListener('DOMContentLoaded', function() {
             currentQuestionSpan.textContent = index + 1;
 
             answerCards.forEach((card, i) => {
-                card.querySelector('.answer-text').textContent = question.options[i];
+                const option = question.options[i];
+            
+                card.querySelector('.answer-text').textContent = option.texte;
+                card.dataset.option = i;
+                card.dataset.idReponse = option.id_reponse;
+            
                 card.classList.remove('disabled', 'correct', 'incorrect');
             });
-
             startTimer(question.timeLimit, quizData);
         }
 
@@ -117,11 +129,24 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 1000);
         }
 
-        function handleAnswerClick(quizData, selectedOption) {
+        function handleAnswerClick(quizData, selectedOption, selectedAnswerId) {
             if (isAnswered) return;
 
             isAnswered = true;
             clearInterval(timer);
+
+            fetch('http://localhost:8000/api/choix-reponse', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('jwt')
+                },
+                body: JSON.stringify({
+                    id_reponse: selectedAnswerId,
+                    id_question: quizData.questions[currentQuestionIndex].id_question 
+                })
+            });
+            
 
             const correctOption = quizData.questions[currentQuestionIndex].correctOption;
             const totalTime = quizData.questions[currentQuestionIndex].timeLimit;
@@ -141,8 +166,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 showFeedback('correct', '✓', 'Correct!', pointsEarned, timeLeft, totalTime);
                 score += pointsEarned;
             } else {
-                showFeedback('incorrect', '✗', 'Incorrect!', 0, 0, 0, quizData.questions[currentQuestionIndex].options[correctOption]);
+                showFeedback('incorrect', '✗', 'Incorrect!', 0, 0, 0, quizData.questions[currentQuestionIndex].options[correctOption].texte);
             }
+
+            loadStats(
+                quizData.questions[currentQuestionIndex].id_question,
+                selectedAnswerId,
+                selectedOption === correctOption // isCorrect
+            );
+            
 
             setTimeout(() => {
                 feedbackOverlay.classList.remove('active');
@@ -173,6 +205,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 correctAnswerElement.textContent = `Réponse correcte: ${correctAnswer}`;
                 feedbackModal.insertBefore(correctAnswerElement, feedbackModal.querySelector('.waiting-text'));
             }
+            // Ajouter conteneur stats vide (rempli plus tard)
+            const statsContainer = document.createElement('div');
+            statsContainer.id = 'stats-container';
+            statsContainer.classList.add('stats-section');
+            feedbackModal.insertBefore(statsContainer, feedbackModal.querySelector('.waiting-text'));
 
             feedbackOverlay.classList.add('active');
         }
@@ -182,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function() {
             answerCards.forEach(card => card.classList.add('disabled'));
 
             const correctOption = quizData.questions[currentQuestionIndex].correctOption;
-            const correctAnswerText = quizData.questions[currentQuestionIndex].options[correctOption];
+            const correctAnswerText = quizData.questions[currentQuestionIndex].options[correctOption].texte;
             
             showFeedback('timeout', '⏱', 'Temps écoulé!', 0, 0, 0, correctAnswerText);
             setTimeout(() => {
@@ -190,6 +227,45 @@ document.addEventListener('DOMContentLoaded', function() {
                 loadQuestion(quizData, currentQuestionIndex + 1);
             }, 3000);
 
+        }
+
+        function loadStats(id_question, selectedAnswerId, isCorrect) {
+            fetch(`http://localhost:8000/api/quizzes/questions/${id_question}/stats`)
+                .then(res => res.json())
+                .then(stats => {
+                    const container = document.getElementById('stats-container');
+                    container.innerHTML = '';
+
+                    const totalVotes = stats.reponses.reduce((acc, r) => acc + parseInt(r.nb_selections || 0), 0);
+
+                    stats.reponses.forEach(rep => {
+                        const pourcentage = totalVotes > 0
+                        ? Math.round((parseInt(rep.nb_selections || 0) / totalVotes) * 100)
+                        : 0;
+                    
+                        const bar = document.createElement('div');
+                        bar.classList.add('stats-bar');
+                        bar.innerHTML = `
+                            <span class="bar-label">${rep.texte}</span>
+                            <div class="bar-track">
+                            <div class="bar-fill${rep.id_reponse === selectedAnswerId ? ' selected' : ''}" style="width: ${pourcentage}%"></div>
+                            </div>
+                            <span class="bar-percent">${pourcentage}%</span>
+                        `;
+                        container.appendChild(bar);
+                    });
+
+                    const nb_gagnants = stats.nb_gagnants + (isCorrect ? 1 : 0);
+                    const nb_perdants = stats.nb_perdants + (!isCorrect ? 1 : 0);        
+
+                    const summary = document.createElement('div');
+                    summary.classList.add('win-stats');
+                    summary.textContent = `✅ ${nb_gagnants} bonnes réponses | ❌ ${nb_perdants} mauvaises`;
+                    container.appendChild(summary);
+                })
+                .catch(err => {
+                    console.error("Erreur chargement stats: ", err);
+                });
         }
 
         function endQuiz() {
@@ -231,6 +307,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <h2>Quiz Terminé!</h2>
                     <p class="final-score">Votre score: ${score}</p>
                     <button class="btn" onclick="window.location.href='main.html'">Retour à l'Accueil</button>
+                    <button class="btn" onclick="window.location.href='leaderboard.html?id=${quizId}'">Classement</button>
                 </div>
             `;
 

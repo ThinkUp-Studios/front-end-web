@@ -397,3 +397,152 @@ header {
         grid-column: span 1;
     }
 }
+
+body {
+    background-color: #121212;
+    color: #e5e7eb;
+  }
+  
+  header {
+    background-color: #1f1f1f;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+  }
+  
+  .logo {
+    color: #f3f4f6;
+  }
+  
+  .question-counter {
+    color: #9ca3af;
+  }
+  
+  .profile-pic {
+    border: 2px solid #2e2e2e;
+  }
+  
+  .quiz-container {
+    background-color: transparent;
+  }
+  
+  .timer-container {
+    background-color: #1e1e1e;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+  }
+  
+  .timer-text {
+    color: #f3f4f6;
+  }
+  
+  .question-container {
+    background-color: #1f1f1f;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  }
+  
+  .answer-card {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  }
+  
+  .feedback-overlay {
+    background-color: rgba(0, 0, 0, 0.7);
+  }
+  
+  .feedback-modal {
+    background-color: #1f1f1f;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    color: #f3f4f6;
+  }
+  
+  .feedback-modal.correct {
+    border-top: 10px solid #0f9d58;
+  }
+  
+  .feedback-modal.incorrect {
+    background-color: #2e1e1e;
+  }
+  
+  .feedback-modal.incorrect .feedback-text {
+    color: #f87171;
+  }
+  
+  .feedback-modal.timeout {
+    background-color: #3a2f16;
+  }
+  
+  .feedback-modal.timeout .feedback-text {
+    color: #ffb700;
+  }
+  
+  .correct-answer {
+    background-color: #1c2f26;
+    color: #34d399;
+  }
+  
+  .results-container {
+    background-color: #1f1f1f;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  }
+  
+  .btn {
+    background-color: #6366f1;
+    color: white;
+  }
+  
+  .btn:hover {
+    background-color: #4f46e5;
+  }
+  
+  .feedback-modal.incorrect .feedback-icon::before {
+    color: #f87171;
+  }
+  
+  .feedback-modal.timeout .feedback-icon::before {
+    color: #fbbf24;
+  }
+  
+
+  .stats-section {
+    margin-top: 1rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #444;
+}
+
+.stats-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.bar-label {
+    width: 120px;
+    font-size: 0.9rem;
+}
+
+.bar-track {
+    flex: 1;
+    height: 10px;
+    background: #ccc;
+    margin: 0 8px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    background: #6c6;
+}
+
+.bar-fill.selected {
+    background: #3b82f6;
+}
+
+.bar-percent {
+    width: 50px;
+    text-align: right;
+}
+
+.win-stats {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    font-style: italic;
+    color: #aaa;
+}
