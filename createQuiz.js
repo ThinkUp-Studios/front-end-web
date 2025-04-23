@@ -2,23 +2,26 @@
 import { getAllQuizzes } from './api.js';
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Fonction de décodage JWT déplacée hors de la portée conditionnelle
+    // pour être accessible partout dans le script
+    const parseJWT = (token) => {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            console.error('Erreur lors du décodage du token:', e);
+            return null;
+        }
+    };
+
     const profilePic = document.querySelector('.profile-pic');
 
     if (profilePic) {
-        const parseJWT = (token) => {
-            try {
-                const base64Url = token.split('.')[1];
-                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
-
-                return JSON.parse(jsonPayload);
-            } catch (e) {
-                return null;
-            }
-        };
-
         const createProfileMenu = () => {
             if (!document.querySelector('.profile-menu')) {
                 const token = localStorage.getItem('jwt');
@@ -122,6 +125,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 newQuestion.querySelectorAll('input[type="text"]').forEach(input => {
                     input.value = '';
+                    
+                    // S'assurer que l'input dans answer-choice a la classe answer-input
+                    if (input.closest('.answer-choice')) {
+                        input.classList.add('answer-input');
+                    }
                 });
                 
                 newQuestion.querySelectorAll('.correct-toggle').forEach(toggle => {
@@ -135,12 +143,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.querySelector('.questions-container').appendChild(newQuestion);
                 
                 setupCorrectToggles();
-                
                 setupDeleteButtons();
                 
                 newQuestion.scrollIntoView({ behavior: 'smooth' });
             });
         }
+        
+        // Ajouter la classe answer-input à tous les inputs de réponse existants
+        document.querySelectorAll('.answer-choice input').forEach(input => {
+            input.classList.add('answer-input');
+        });
         
         // Configuration des boutons de suppression de question
         const setupDeleteButtons = () => {
@@ -170,115 +182,133 @@ document.addEventListener('DOMContentLoaded', function() {
         // Gestion du bouton pour terminer le quiz
         const completeQuizBtn = document.getElementById('complete-quiz');
         if (completeQuizBtn) {
-            completeQuizBtn.addEventListener('click', function() {
-                // Validations de base
-                const title = document.getElementById('quiz-title').value.trim();
-                if (!title) {
-                    alert('Veuillez entrer un titre pour votre quiz.');
-                    return;
-                }
-                
-                // Vérifier si chaque question a une réponse correcte sélectionnée
-                let allQuestionsValid = true;
-                document.querySelectorAll('.question-card').forEach(card => {
-                    const questionText = card.querySelector('[id^="question-text-"]').value.trim();
-                    if (!questionText) {
-                        alert('Veuillez entrer un texte pour chaque question.');
-                        allQuestionsValid = false;
+            completeQuizBtn.addEventListener('click', async function() {
+                try {
+                    // Vérification de l'authentification
+                    const token = localStorage.getItem('jwt');
+                    if (!token) {
+                        alert('Vous devez être connecté pour créer un quiz.');
+                        window.location.href = 'login.html';
                         return;
                     }
                     
-                    const hasCorrectAnswer = card.querySelector('.correct-toggle.active');
-                    if (!hasCorrectAnswer) {
-                        alert('Veuillez sélectionner une réponse correcte pour chaque question.');
-                        allQuestionsValid = false;
+                    // Decode le token pour obtenir le username
+                    const decoded = parseJWT(token);
+                    if (!decoded || !decoded.username) {
+                        alert('Session expirée ou invalide. Veuillez vous reconnecter.');
+                        window.location.href = 'login.html';
                         return;
                     }
                     
-                    // Vérifier si tous les choix ont été remplis
-                    const emptyChoices = Array.from(card.querySelectorAll('.answer-choice input')).some(input => !input.value.trim());
-                    if (emptyChoices) {
-                        alert('Veuillez remplir tous les choix de réponse pour chaque question.');
-                        allQuestionsValid = false;
+                    // Validations de base
+                    const title = document.getElementById('quiz-title').value.trim();
+                    if (!title) {
+                        alert('Veuillez entrer un titre pour votre quiz.');
                         return;
                     }
-                });
-                
-                if (!allQuestionsValid) {
-                    return;
-                }
-                
-                // Préparation des données du quiz pour l'envoi au format attendu par l'API
-                // Pour la démonstration, nous utilisons un utilisateur existant dans la base de données
-                const quizData = {
-                    nom: title,  // Changé de 'titre' à 'nom' pour correspondre à la structure en base
-                    description: document.getElementById('quiz-description').value.trim(),
-                    categorie: document.getElementById('quiz-category').value,
-                    nbQuestions: document.querySelectorAll('.question-card').length,
-                    difficulte: 'Facile',  // Valeur par défaut
-                    estPublic: 1,
-                    tags: [document.getElementById('quiz-category').value],
-                    questions: []
-                };
-                
-                document.querySelectorAll('.question-card').forEach(card => {
-                    const questionText = card.querySelector('[id^="question-text-"]').value.trim();
-                    const timeLimit = parseInt(card.querySelector('[id^="question-time-"]').value);
                     
-                    const options = [];
-                    let correctOption = 0;
-                    
-                    card.querySelectorAll('.answer-choice').forEach((choice, index) => {
-                        options.push(choice.querySelector('input').value.trim());
-                        if (choice.querySelector('.correct-toggle').getAttribute('data-correct') === 'true') {
-                            correctOption = index;
+                    // Vérifier si chaque question a une réponse correcte sélectionnée
+                    let allQuestionsValid = true;
+                    document.querySelectorAll('.question-card').forEach((card, idx) => {
+                        const questionText = card.querySelector('[id^="question-text-"]').value.trim();
+                        if (!questionText) {
+                            alert(`Veuillez entrer un texte pour la question ${idx + 1}.`);
+                            allQuestionsValid = false;
+                            return;
+                        }
+                        
+                        const hasCorrectAnswer = card.querySelector('.correct-toggle.active');
+                        if (!hasCorrectAnswer) {
+                            alert(`Veuillez sélectionner une réponse correcte pour la question ${idx + 1}.`);
+                            allQuestionsValid = false;
+                            return;
+                        }
+                        
+                        // Vérifier si tous les choix ont été remplis
+                        const emptyChoices = Array.from(card.querySelectorAll('.answer-choice input')).some(input => !input.value.trim());
+                        if (emptyChoices) {
+                            alert(`Veuillez remplir tous les choix de réponse pour la question ${idx + 1}.`);
+                            allQuestionsValid = false;
+                            return;
                         }
                     });
                     
-                    quizData.questions.push({
-                        texte_question: questionText,
-                        reponses: options,
-                        bonneReponse: correctOption,
-                        tempsReponse: timeLimit
-                    });
-                });
-                
-                // Afficher les données envoyées dans la console pour débogage
-                console.log('Données du quiz à envoyer:', quizData);
-                
-                // Envoi des données à l'API
-                fetch('http://localhost:8000/api/quizzes/complete', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'Authorization' : 'Bearer ' + localStorage.getItem('jwt')
-                    },
-                    body: JSON.stringify(quizData)
-                })
-                .then(response => {
-                    console.log('Status de la réponse:', response.status);
-                    if (!response.ok) {
-                        return response.text().then(text => {
-                            console.error('Réponse d\'erreur:', text);
-                            throw new Error('Erreur lors de la création du quiz: ' + response.status);
-                        });
+                    if (!allQuestionsValid) {
+                        return;
                     }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Quiz créé avec succès:', data);
-                    alert('Quiz créé avec succès! Redirection vers la page d\'accueil...');
                     
-                    // Redirection vers la page d'accueil
+                    // Préparation des données du quiz pour l'envoi
+                    const quizData = {
+                        nom: title,
+                        description: document.getElementById('quiz-description').value.trim(),
+                        categorie: document.getElementById('quiz-category').value,
+                        nbQuestions: document.querySelectorAll('.question-card').length,
+                        difficulte: 'Facile',
+                        estPublic: 1,
+                        nomCreateur: decoded.username, // Utiliser le username du token JWT
+                        questions: []
+                    };
+                    
+                    // Construire les questions et réponses dans le format attendu par la base de données
+                    let questionCounter = 0;
+                    document.querySelectorAll('.question-card').forEach(card => {
+                        questionCounter++;
+                        const questionText = card.querySelector('[id^="question-text-"]').value.trim();
+                        
+                        // Créer l'objet question
+                        const questionObj = {
+                            texte_question: questionText,
+                            reponses: []
+                        };
+                        
+                        // Récupérer les réponses et identifier la bonne réponse
+                        card.querySelectorAll('.answer-choice').forEach((choice, idx) => {
+                            const responseText = choice.querySelector('input').value.trim();
+                            const isCorrect = choice.querySelector('.correct-toggle').getAttribute('data-correct') === 'true';
+                            
+                            // Ajouter la réponse au format attendu par la base de données
+                            questionObj.reponses.push({
+                                texte_reponse: responseText,
+                                bonne_reponse: isCorrect ? 1 : 0
+                            });
+                        });
+                        
+                        quizData.questions.push(questionObj);
+                    });
+                    
+                    console.log('Données du quiz à envoyer:', quizData);
+                    
+                    // Envoi des données à l'API
+                    const response = await fetch('http://localhost:8000/api/quizzes/complete', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(quizData)
+                    });
+                    
+                    console.log('Status de la réponse:', response.status);
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('Réponse d\'erreur:', errorText);
+                        throw new Error(`Erreur lors de la création du quiz (${response.status}): ${errorText}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('Quiz créé avec succès:', data);
+                    
+                    alert('Quiz créé avec succès! Redirection vers la page d\'accueil...');
                     setTimeout(() => {
                         window.location.href = 'main.html';
                     }, 1000);
-                })
-                .catch(error => {
+                    
+                } catch (error) {
                     console.error('Erreur:', error);
-                    alert('Erreur lors de la création du quiz: ' + error.message);
-                });
+                    alert(`Erreur lors de la création du quiz: ${error.message}`);
+                }
             });
         }
     };

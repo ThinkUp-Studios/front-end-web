@@ -25,6 +25,25 @@ function isUserQuizCreator(creatorName) {
     }
 }
 
+// Fonction pour obtenir le token d'authentification
+function getAuthToken() {
+    return localStorage.getItem('jwt');
+}
+
+// Fonction pour créer les headers d'authentification
+function createAuthHeaders() {
+    const token = getAuthToken();
+    const headers = {
+        'Content-Type': 'application/json'
+    };
+    
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    return headers;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const profilePic = document.querySelector('.profile-pic');
     
@@ -89,7 +108,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (quizCardsContainer) {
             quizCardsContainer.innerHTML = '<div class="loading">Chargement des quiz...</div>';
             
-            fetch('http://localhost:8000/api/quizzes')
+            fetch('http://localhost:8000/api/quizzes', {
+                headers: createAuthHeaders()
+            })
                 .then(response => response.json())
                 .then(data => {
                     quizCardsContainer.innerHTML = '';
@@ -215,9 +236,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const quizId = urlParams.get('id');
         
         if (!quizId) {
+            console.error("ID de quiz manquant dans l'URL");
             window.location.href = 'main.html';
             return;
         }
+        
+        console.log("Chargement du quiz avec l'ID:", quizId);
         
         try {
             // Afficher un indicateur de chargement
@@ -226,18 +250,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 quizContainer.innerHTML = '<div class="loading">Chargement du quiz...</div>';
             }
             
-            // Récupérer le quiz depuis l'API
-            const currentQuizData = await getQuiz(quizId);
+            // Appel direct à l'API pour récupérer le quiz avec authentification
+            const response = await fetch(`http://localhost:8000/api/quizzes/${quizId}`, {
+                headers: createAuthHeaders()
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error("Erreur API:", errorText);
+                throw new Error(`Erreur HTTP: ${response.status}`);
+            }
+            
+            const currentQuizData = await response.json();
+            console.log("Données du quiz reçues:", currentQuizData);
             
             if (!currentQuizData) {
-                window.location.href = 'main.html';
-                return;
+                console.error("Données du quiz vides");
+                throw new Error("Données du quiz vides");
             }
             
             // Restaurer le contenu du quiz
             if (quizContainer) {
                 quizContainer.innerHTML = `
-                    <h1 id="quiz-title"></h1>
+                    <h1 id="quiz-title">${currentQuizData.nom || currentQuizData.title || "Quiz sans titre"}</h1>
                     <div class="timer-container">
                         <div class="timer">
                             <div class="timer-bar" id="timer-bar"></div>
@@ -246,7 +281,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     <div class="question-container">
                         <div class="question-header">
-                            <span>Question <span id="current-question">1</span>/<span id="total-questions">10</span></span>
+                            <span>Question <span id="current-question">1</span>/<span id="total-questions">${currentQuizData.questions ? currentQuizData.questions.length : 0}</span></span>
                         </div>
                         <h2 id="question-text"></h2>
                     </div>
@@ -303,9 +338,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const feedbackModal = document.getElementById('feedback-modal');
             
             function init() {
-                document.title = `${currentQuizData.title} - ThinkUp`;
+                document.title = `${currentQuizData.nom || currentQuizData.title || "Quiz"} - ThinkUp`;
                 
-                document.getElementById('quiz-title').textContent = currentQuizData.title;
+                document.getElementById('quiz-title').textContent = currentQuizData.nom || currentQuizData.title || "Quiz";
                 
                 // S'assurer que questions existe et est un tableau
                 if (!currentQuizData.questions || !Array.isArray(currentQuizData.questions)) {
@@ -331,26 +366,60 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentQuestionIndex = index;
                 const question = currentQuizData.questions[index];
                 
-                questionText.textContent = question.text;
+                // Afficher les détails de la question dans la console
+                console.log("Question en cours de chargement:", question);
+                
+                // Déterminer le texte de la question (compatibilité avec différentes structures)
+                questionText.textContent = question.texte_question || question.text || "Question sans texte";
                 currentQuestionSpan.textContent = index + 1;
                 
-                // S'assurer que options existe et est un tableau
-                if (!question.options || !Array.isArray(question.options)) {
-                    question.options = ['Option A', 'Option B', 'Option C', 'Option D'];
+                // Extraire et formater les options de réponses selon la structure des données
+                let options = [];
+                let correctOption = 0;
+                
+                // Vérifier comment sont structurées les réponses et extraire les bonnes données
+                if (Array.isArray(question.reponses)) {
+                    // Format avec reponses comme objets (texte_reponse et bonne_reponse)
+                    if (typeof question.reponses[0] === 'object') {
+                        options = question.reponses.map(rep => rep.texte_reponse || "");
+                        question.reponses.forEach((rep, idx) => {
+                            if (rep.bonne_reponse === 1) correctOption = idx;
+                        });
+                    } 
+                    // Format avec reponses comme tableau de chaînes
+                    else if (typeof question.reponses[0] === 'string') {
+                        options = question.reponses;
+                        correctOption = question.bonneReponse || 0;
+                    }
+                } else if (Array.isArray(question.options)) {
+                    // Format avec options et correctOption séparés
+                    options = question.options;
+                    correctOption = question.correctOption || 0;
                 }
                 
+                console.log("Options chargées:", options);
+                console.log("Option correcte:", correctOption);
+                
+                // S'assurer qu'on a au moins quatre options (compléter avec des vides si nécessaire)
+                while (options.length < 4) {
+                    options.push("");
+                }
+                
+                // Affichage des options (maximum 4)
+                options = options.slice(0, 4);
+                
                 answerCards.forEach((card, i) => {
-                    if (i < question.options.length) {
+                    if (i < options.length) {
                         card.style.display = 'block';
-                        card.querySelector('.answer-text').textContent = question.options[i];
+                        card.querySelector('.answer-text').textContent = options[i];
                         card.classList.remove('disabled');
                     } else {
                         card.style.display = 'none'; // Cacher les options supplémentaires si moins de 4 options
                     }
                 });
                 
-                // Utiliser timeLimit s'il existe, sinon 30 secondes par défaut
-                const timeLimit = question.timeLimit || 30;
+                // Définir la limite de temps
+                const timeLimit = question.tempsReponse || question.timeLimit || 30;
                 startTimer(timeLimit);
             }
             
@@ -394,8 +463,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 clearInterval(timer);
                 
                 const selectedOption = parseInt(this.dataset.option);
-                const correctOption = currentQuizData.questions[currentQuestionIndex].correctOption;
-                const totalTime = currentQuizData.questions[currentQuestionIndex].timeLimit || 30;
+                const question = currentQuizData.questions[currentQuestionIndex];
+                
+                // Déterminer l'option correcte selon la structure des données
+                let correctOption = 0;
+                if (Array.isArray(question.reponses) && typeof question.reponses[0] === 'object') {
+                    question.reponses.forEach((rep, idx) => {
+                        if (rep.bonne_reponse === 1) correctOption = idx;
+                    });
+                } else if (question.bonneReponse !== undefined) {
+                    correctOption = question.bonneReponse;
+                } else if (question.correctOption !== undefined) {
+                    correctOption = question.correctOption;
+                }
+                
+                const totalTime = question.tempsReponse || question.timeLimit || 30;
                 
                 answerCards.forEach(card => {
                     card.classList.add('disabled');
@@ -428,7 +510,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     feedbackModal.querySelector('.feedback-text').textContent = 'Incorrect!';
                     feedbackModal.querySelector('.points').textContent = '+0 points';
                     
-                    const correctAnswerText = currentQuizData.questions[currentQuestionIndex].options[correctOption];
+                    // Récupérer le texte de la bonne réponse selon la structure
+                    let correctAnswerText = "";
+                    if (Array.isArray(question.reponses) && typeof question.reponses[0] === 'object') {
+                        question.reponses.forEach(rep => {
+                            if (rep.bonne_reponse === 1) correctAnswerText = rep.texte_reponse;
+                        });
+                    } else if (Array.isArray(question.reponses) && typeof question.reponses[0] === 'string') {
+                        correctAnswerText = question.reponses[correctOption];
+                    } else if (Array.isArray(question.options)) {
+                        correctAnswerText = question.options[correctOption];
+                    }
+                    
                     let correctAnswer = feedbackModal.querySelector('.correct-answer');
                     if (!correctAnswer) {
                         correctAnswer = document.createElement('div');
@@ -477,8 +570,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 feedbackModal.querySelector('.feedback-text').textContent = 'Temps écoulé!';
                 feedbackModal.querySelector('.points').textContent = '+0 points';
                 
-                const correctOption = currentQuizData.questions[currentQuestionIndex].correctOption;
-                const correctAnswerText = currentQuizData.questions[currentQuestionIndex].options[correctOption];
+                // Récupérer le texte de la bonne réponse
+                const question = currentQuizData.questions[currentQuestionIndex];
+                let correctOption = 0;
+                let correctAnswerText = "";
+                
+                if (Array.isArray(question.reponses) && typeof question.reponses[0] === 'object') {
+                    question.reponses.forEach((rep, idx) => {
+                        if (rep.bonne_reponse === 1) {
+                            correctOption = idx;
+                            correctAnswerText = rep.texte_reponse;
+                        }
+                    });
+                } else if (question.bonneReponse !== undefined && Array.isArray(question.reponses)) {
+                    correctOption = question.bonneReponse;
+                    correctAnswerText = question.reponses[correctOption];
+                } else if (question.correctOption !== undefined && Array.isArray(question.options)) {
+                    correctOption = question.correctOption;
+                    correctAnswerText = question.options[correctOption];
+                }
+                
                 let correctAnswer = feedbackModal.querySelector('.correct-answer');
                 if (!correctAnswer) {
                     correctAnswer = document.createElement('div');
@@ -537,13 +648,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 quizContainer.innerHTML = `
                     <div class="error-message">
                         <h2>Impossible de charger le quiz</h2>
-                        <p>Une erreur est survenue lors du chargement du quiz. Veuillez réessayer plus tard.</p>
+                        <p>Une erreur est survenue lors du chargement du quiz: ${error.message}</p>
                         <a href="main.html" class="btn">Retourner à l'accueil</a>
                     </div>
                 `;
             }
         }
     };
+    
+    // Fonction pour mettre à jour un quiz avec authentification
+    async function updateQuiz(quizId, quizData) {
+        try {
+            const response = await fetch(`http://localhost:8000/api/quizzes/${quizId}`, {
+                method: 'PUT',
+                headers: createAuthHeaders(),
+                body: JSON.stringify(quizData)
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Erreur lors de la mise à jour du quiz: ${errorText}`);
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.error('Erreur updateQuiz:', error);
+            alert(error.message);
+            throw error;
+        }
+    }
     
     const initCreateQuiz = () => {
         let questionCount = 1;
@@ -622,8 +755,109 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const completeQuizBtn = document.getElementById('complete-quiz');
         if (completeQuizBtn) {
-            completeQuizBtn.addEventListener('click', function() {
-                alert('Quiz terminé! Dans une application réelle, cela enregistrerait votre quiz.');
+            completeQuizBtn.addEventListener('click', async function() {
+                try {
+                    // Vérification de l'authentification
+                    const token = getAuthToken();
+                    if (!token) {
+                        alert('Vous devez être connecté pour créer ou modifier un quiz.');
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const quizId = urlParams.get('id');
+                    
+                    const quizTitle = document.getElementById('quiz-title').value.trim();
+                    const quizDescription = document.getElementById('quiz-description').value.trim();
+                    const quizCategory = document.getElementById('quiz-category').value;
+                    
+                    if (!quizTitle) {
+                        alert('Veuillez entrer un titre pour votre quiz.');
+                        return;
+                    }
+                    
+                    // Récupérer les questions
+                    const questions = [];
+                    document.querySelectorAll('.question-card').forEach((card, index) => {
+                        const questionText = card.querySelector('[id^="question-text-"]').value.trim();
+                        if (!questionText) {
+                            alert(`Veuillez entrer un texte pour la question ${index + 1}.`);
+                            return;
+                        }
+                        
+                        const options = [];
+                        let correctOption = -1;
+                        
+                        card.querySelectorAll('.answer-input').forEach((input, i) => {
+                            const optionText = input.value.trim();
+                            if (!optionText) {
+                                alert(`Veuillez entrer un texte pour l'option ${i + 1} de la question ${index + 1}.`);
+                                return;
+                            }
+                            
+                            options.push(optionText);
+                            
+                            const isCorrect = card.querySelectorAll('.correct-toggle')[i].getAttribute('data-correct') === 'true';
+                            if (isCorrect) {
+                                correctOption = i;
+                            }
+                        });
+                        
+                        if (correctOption === -1) {
+                            alert(`Veuillez sélectionner une réponse correcte pour la question ${index + 1}.`);
+                            return;
+                        }
+                        
+                        const timeLimit = parseInt(card.querySelector('[id^="question-time-"]').value || '30', 10);
+                        
+                        questions.push({
+                            text: questionText,
+                            options: options,
+                            correctOption: correctOption,
+                            timeLimit: timeLimit
+                        });
+                    });
+                    
+                    if (questions.length === 0) {
+                        alert('Votre quiz doit contenir au moins une question.');
+                        return;
+                    }
+                    
+                    // Construire l'objet quiz
+                    const quizData = {
+                        title: quizTitle,
+                        description: quizDescription,
+                        category: quizCategory,
+                        questions: questions
+                    };
+                    
+                    // Mode édition ou création
+                    if (quizId) {
+                        // Mise à jour du quiz existant
+                        await updateQuiz(quizId, quizData);
+                        alert('Quiz mis à jour avec succès!');
+                    } else {
+                        // Création d'un nouveau quiz
+                        const response = await fetch('http://localhost:8000/api/quizzes', {
+                            method: 'POST',
+                            headers: createAuthHeaders(),
+                            body: JSON.stringify(quizData)
+                        });
+                        
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(`Erreur lors de la création du quiz: ${errorText}`);
+                        }
+                        
+                        alert('Quiz créé avec succès!');
+                    }
+                    
+                    window.location.href = 'main.html';
+                } catch (error) {
+                    console.error('Erreur lors de la sauvegarde du quiz:', error);
+                    alert(`Une erreur est survenue: ${error.message}`);
+                }
             });
         }
     };
@@ -644,14 +878,129 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const loginForm = document.querySelector('.login-form');
         if (loginForm) {
-            loginForm.addEventListener('submit', function(e) {
+            loginForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
-                alert('Connexion réussie! Redirection vers la page d\'accueil...');
+                // Récupérer les valeurs du formulaire
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value;
                 
-                setTimeout(() => {
-                    window.location.href = 'main.html';
-                }, 500);
+                if (!username || !password) {
+                    alert('Veuillez remplir tous les champs.');
+                    return;
+                }
+                
+                try {
+                    // Simuler une requête d'authentification (à remplacer par votre vrai API)
+                    const response = await fetch('http://localhost:8000/api/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            username,
+                            password
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`Erreur d'authentification: ${errorText}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Stocker le token dans le localStorage
+                    localStorage.setItem('jwt', data.token);
+                    
+                    alert('Connexion réussie! Redirection vers la page d\'accueil...');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'main.html';
+                    }, 500);
+                } catch (error) {
+                    console.error('Erreur de connexion:', error);
+                    alert(`Échec de la connexion: ${error.message}`);
+                }
+            });
+        }
+        
+        // Gestion du formulaire d'inscription
+        const registerForm = document.querySelector('.register-form');
+        if (registerForm) {
+            registerForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Récupérer les valeurs du formulaire
+                const firstname = document.getElementById('firstname').value.trim();
+                const lastname = document.getElementById('lastname').value.trim();
+                const username = document.getElementById('reg-username').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('reg-password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
+                
+                if (!firstname || !lastname || !username || !email || !password || !confirmPassword) {
+                    alert('Veuillez remplir tous les champs.');
+                    return;
+                }
+                
+                if (password !== confirmPassword) {
+                    alert('Les mots de passe ne correspondent pas.');
+                    return;
+                }
+                
+                try {
+                    // Simuler une requête d'inscription (à remplacer par votre vrai API)
+                    const response = await fetch('http://localhost:8000/api/auth/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            firstname,
+                            lastname,
+                            username,
+                            email,
+                            password
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`Erreur d'inscription: ${errorText}`);
+                    }
+                    
+                    alert('Inscription réussie! Vous pouvez maintenant vous connecter.');
+                    
+                    // Rediriger vers la page de connexion ou afficher le formulaire de connexion
+                    if (document.querySelector('.login-container') && document.querySelector('.register-container')) {
+                        document.querySelector('.login-container').style.display = 'block';
+                        document.querySelector('.register-container').style.display = 'none';
+                    } else {
+                        window.location.href = 'login.html';
+                    }
+                } catch (error) {
+                    console.error('Erreur d\'inscription:', error);
+                    alert(`Échec de l'inscription: ${error.message}`);
+                }
+            });
+        }
+        
+        // Basculer entre les formulaires de connexion et d'inscription
+        const toggleForms = document.querySelectorAll('.toggle-form');
+        if (toggleForms.length > 0) {
+            toggleForms.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const loginContainer = document.querySelector('.login-container');
+                    const registerContainer = document.querySelector('.register-container');
+                    
+                    if (loginContainer && registerContainer) {
+                        loginContainer.style.display = loginContainer.style.display === 'none' ? 'block' : 'none';
+                        registerContainer.style.display = registerContainer.style.display === 'none' ? 'block' : 'none';
+                    }
+                });
             });
         }
     };
@@ -730,13 +1079,84 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const editForm = document.getElementById('edit-form');
         if (editForm) {
-            editForm.addEventListener('submit', function(e) {
+            editForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
-                setTimeout(() => {
-                    alert('Modifications enregistrées avec succès!');
-                    closeModal();
-                }, 500);
+                try {
+                    // Récupérer le token JWT
+                    const token = getAuthToken();
+                    if (!token) {
+                        alert('Vous devez être connecté pour modifier vos informations.');
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    
+                    // Déterminer le type de mise à jour
+                    const updateType = modalTitle.textContent.toLowerCase();
+                    let endpoint = '';
+                    let updateData = {};
+                    
+                    if (updateType.includes('informations')) {
+                        endpoint = 'profile';
+                        updateData = {
+                            firstname: document.getElementById('edit-firstname').value.trim(),
+                            lastname: document.getElementById('edit-lastname').value.trim()
+                        };
+                    } else if (updateType.includes('nom d\'utilisateur')) {
+                        endpoint = 'username';
+                        updateData = {
+                            username: document.getElementById('edit-username').value.trim()
+                        };
+                    } else if (updateType.includes('bio')) {
+                        endpoint = 'bio';
+                        updateData = {
+                            bio: document.getElementById('edit-bio').value.trim()
+                        };
+                    } else if (updateType.includes('e-mail')) {
+                        endpoint = 'email';
+                        updateData = {
+                            email: document.getElementById('edit-email').value.trim(),
+                            password: document.getElementById('confirm-password').value
+                        };
+                    } else if (updateType.includes('mot de passe')) {
+                        endpoint = 'password';
+                        updateData = {
+                            currentPassword: document.getElementById('current-password').value,
+                            newPassword: document.getElementById('new-password').value,
+                            confirmPassword: document.getElementById('confirm-new-password').value
+                        };
+                        
+                        if (updateData.newPassword !== updateData.confirmPassword) {
+                            alert('Les nouveaux mots de passe ne correspondent pas.');
+                            return;
+                        }
+                    }
+                    
+                    if (endpoint) {
+                        // Faire la requête API
+                        const response = await fetch(`http://localhost:8000/api/users/${endpoint}`, {
+                            method: 'PUT',
+                            headers: createAuthHeaders(),
+                            body: JSON.stringify(updateData)
+                        });
+                        
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(`Erreur lors de la mise à jour: ${errorText}`);
+                        }
+                        
+                        alert('Modifications enregistrées avec succès!');
+                        closeModal();
+                        
+                        // Recharger la page si nécessaire
+                        if (endpoint === 'username' || endpoint === 'email') {
+                            location.reload();
+                        }
+                    }
+                } catch (error) {
+                    console.error('Erreur lors de la mise à jour:', error);
+                    alert(`Une erreur est survenue: ${error.message}`);
+                }
             });
         }
         
@@ -850,9 +1270,36 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 
                 if (confirmBtn) {
-                    confirmBtn.addEventListener('click', function() {
-                        alert('Votre compte a été supprimé définitivement.');
-                        window.location.href = 'main.html';
+                    confirmBtn.addEventListener('click', async function() {
+                        try {
+                            // Récupérer le token JWT
+                            const token = getAuthToken();
+                            if (!token) {
+                                alert('Vous devez être connecté pour supprimer votre compte.');
+                                window.location.href = 'login.html';
+                                return;
+                            }
+                            
+                            // Faire la requête API
+                            const response = await fetch('http://localhost:8000/api/users', {
+                                method: 'DELETE',
+                                headers: createAuthHeaders()
+                            });
+                            
+                            if (!response.ok) {
+                                const errorText = await response.text();
+                                throw new Error(`Erreur lors de la suppression du compte: ${errorText}`);
+                            }
+                            
+                            // Supprimer le token JWT
+                            localStorage.removeItem('jwt');
+                            
+                            alert('Votre compte a été supprimé définitivement.');
+                            window.location.href = 'main.html';
+                        } catch (error) {
+                            console.error('Erreur lors de la suppression du compte:', error);
+                            alert(`Une erreur est survenue: ${error.message}`);
+                        }
                     });
                 }
             }
@@ -864,10 +1311,44 @@ document.addEventListener('DOMContentLoaded', function() {
         const cancelSettingsBtn = document.getElementById('cancel-settings');
         
         if (saveSettingsBtn) {
-            saveSettingsBtn.addEventListener('click', function() {
-                setTimeout(() => {
+            saveSettingsBtn.addEventListener('click', async function() {
+                try {
+                    // Récupérer le token JWT
+                    const token = getAuthToken();
+                    if (!token) {
+                        alert('Vous devez être connecté pour modifier vos paramètres.');
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    
+                    // Récupérer les paramètres
+                    const theme = document.querySelector('.theme-btn.active')?.getAttribute('data-theme') || 'system';
+                    const textSize = document.querySelector('.text-size-btn.active')?.getAttribute('data-size') || 'medium';
+                    const notifications = document.getElementById('notifications-toggle')?.classList.contains('active') || false;
+                    const emailUpdates = document.getElementById('email-toggle')?.classList.contains('active') || false;
+                    
+                    // Faire la requête API
+                    const response = await fetch('http://localhost:8000/api/users/settings', {
+                        method: 'PUT',
+                        headers: createAuthHeaders(),
+                        body: JSON.stringify({
+                            theme,
+                            textSize,
+                            notifications,
+                            emailUpdates
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`Erreur lors de la mise à jour des paramètres: ${errorText}`);
+                    }
+                    
                     alert('Paramètres enregistrés avec succès!');
-                }, 500);
+                } catch (error) {
+                    console.error('Erreur lors de la sauvegarde des paramètres:', error);
+                    alert(`Une erreur est survenue: ${error.message}`);
+                }
             });
         }
         
@@ -994,13 +1475,127 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        function performSearch() {
+        async function performSearch() {
             const searchTerm = searchInput.value.trim();
             const searchTermDisplay = document.getElementById('search-term');
+            const resultsNumber = document.getElementById('results-number');
+            const resultsContainer = document.querySelector('.results-section.active .results-grid');
             
-            if (searchTerm && searchTermDisplay) {
+            if (!searchTerm) {
+                alert('Veuillez entrer un terme de recherche.');
+                return;
+            }
+            
+            if (searchTermDisplay) {
                 searchTermDisplay.textContent = searchTerm;
-                document.getElementById('results-number').textContent = '5 résultats trouvés';
+            }
+            
+            if (resultsContainer) {
+                resultsContainer.innerHTML = '<div class="loading">Recherche en cours...</div>';
+                
+                try {
+                    // Déterminer le type de recherche
+                    const activeTab = document.querySelector('.search-tab.active');
+                    const searchType = activeTab ? activeTab.getAttribute('data-tab') : 'quizzes';
+                    
+                    // Filtres supplémentaires
+                    const activeFilter = document.querySelector('.filter-btn.active');
+                    const filterType = activeFilter ? activeFilter.getAttribute('data-filter') : 'all';
+                    
+                    // Catégorie (pour les quiz)
+                    const categorySelect = document.getElementById('category-select');
+                    const category = categorySelect && categorySelect.style.display !== 'none' ? categorySelect.value : '';
+                    
+                    // Construire l'URL de recherche
+                    let searchUrl = `http://localhost:8000/api/search/${searchType}?q=${encodeURIComponent(searchTerm)}`;
+                    
+                    if (filterType !== 'all') {
+                        searchUrl += `&filter=${filterType}`;
+                    }
+                    
+                    if (category && searchType === 'quizzes') {
+                        searchUrl += `&category=${encodeURIComponent(category)}`;
+                    }
+                    
+                    // Faire la requête API
+                    const response = await fetch(searchUrl, {
+                        headers: createAuthHeaders()
+                    });
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`Erreur lors de la recherche: ${errorText}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Mettre à jour le nombre de résultats
+                    if (resultsNumber) {
+                        resultsNumber.textContent = `${data.results.length} résultat${data.results.length !== 1 ? 's' : ''} trouvé${data.results.length !== 1 ? 's' : ''}`;
+                    }
+                    
+                    // Afficher les résultats
+                    resultsContainer.innerHTML = '';
+                    
+                    if (data.results.length === 0) {
+                        resultsContainer.innerHTML = '<p class="no-results">Aucun résultat trouvé pour votre recherche.</p>';
+                        return;
+                    }
+                    
+                    // Afficher les résultats selon le type
+                    if (searchType === 'quizzes') {
+                        data.results.forEach(quiz => {
+                            const imageUrl = quiz.imageUrl || '/api/placeholder/300/180';
+                            const isCreator = isUserQuizCreator(quiz.nomCreateur);
+                            
+                            const quizCard = document.createElement('div');
+                            quizCard.className = 'quiz-card';
+                            quizCard.innerHTML = `
+                                <img src="${imageUrl}" alt="${quiz.nom}" class="quiz-card-image">
+                                <div class="quiz-card-content">
+                                    <h3 class="quiz-card-title">${quiz.nom}</h3>
+                                    <p class="quiz-card-description">${quiz.description || 'Aucune description disponible.'}</p>
+                                    <div class="quiz-card-meta">
+                                        <span>Par ${quiz.nomCreateur || 'Anonyme'}</span>
+                                        <span class="quiz-card-category">${quiz.categorie || 'Divers'}</span>
+                                    </div>
+                                    <div class="quiz-card-info">
+                                        <span class="quiz-questions-count">${quiz.nbQuestions || 0} questions</span>
+                                        <span class="quiz-time-estimate">${quiz.estimatedTime || 5} min</span>
+                                    </div>
+                                    <div class="quiz-card-actions">
+                                        <a href="quiz.html?id=${quiz.id_quiz}" class="quiz-card-btn">Jouer</a>
+                                        ${isCreator ? `<a href="editQuiz.html?id=${quiz.id_quiz}" class="quiz-card-btn edit-btn">Modifier</a>` : ''}
+                                    </div>
+                                </div>
+                            `;
+                            resultsContainer.appendChild(quizCard);
+                        });
+                    } else if (searchType === 'users') {
+                        data.results.forEach(user => {
+                            const userCard = document.createElement('div');
+                            userCard.className = 'user-card';
+                            userCard.innerHTML = `
+                                <div class="user-avatar">
+                                    <img src="${user.avatar || '/api/placeholder/100/100'}" alt="${user.username}">
+                                </div>
+                                <div class="user-info">
+                                    <h3 class="user-name">${user.firstname} ${user.lastname}</h3>
+                                    <p class="user-username">@${user.username}</p>
+                                    <p class="user-bio">${user.bio || 'Cet utilisateur n\'a pas encore ajouté de bio.'}</p>
+                                    <div class="user-stats">
+                                        <span>${user.quizCount || 0} quiz créés</span>
+                                    </div>
+                                    <a href="profile.html?user=${user.username}" class="view-profile-btn">Voir le profil</a>
+                                </div>
+                            `;
+                            resultsContainer.appendChild(userCard);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Erreur lors de la recherche:', error);
+                    resultsContainer.innerHTML = `<p class="error-message">Erreur lors de la recherche: ${error.message}</p>`;
+                }
             }
         }
         
@@ -1096,8 +1691,174 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById(`${tabName}-content`).classList.add('active');
             });
         });
+        
+        // Charger les quiz de l'utilisateur
+        loadUserQuizzes();
+        
+        async function loadUserQuizzes() {
+            const quizzesContainer = document.getElementById('quizzes-content');
+            if (!quizzesContainer) return;
+            
+            try {
+                // Récupérer le nom d'utilisateur du profil
+                const urlParams = new URLSearchParams(window.location.search);
+                const username = urlParams.get('user');
+                
+                let apiUrl = 'http://localhost:8000/api/quizzes';
+                
+                if (username) {
+                    apiUrl += `/user/${username}`;
+                } else {
+                    // Profil de l'utilisateur connecté
+                    const token = getAuthToken();
+                    if (!token) {
+                        quizzesContainer.innerHTML = '<p>Vous devez être connecté pour voir vos quiz.</p>';
+                        return;
+                    }
+                    
+                    apiUrl += '/me';
+                }
+                
+                // Afficher l'indicateur de chargement
+                quizzesContainer.innerHTML = '<div class="loading">Chargement des quiz...</div>';
+                
+                // Faire la requête API
+                const response = await fetch(apiUrl, {
+                    headers: createAuthHeaders()
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Erreur lors du chargement des quiz: ${errorText}`);
+                }
+                
+                const data = await response.json();
+                
+                // Afficher les quiz
+                if (data.quizzes && data.quizzes.length > 0) {
+                    quizzesContainer.innerHTML = '';
+                    
+                    data.quizzes.forEach(quiz => {
+                        const quizCard = document.createElement('div');
+                        quizCard.className = 'quiz-card';
+                        
+                        const imageUrl = quiz.imageUrl || '/api/placeholder/300/180';
+                        
+                        // Vérifier si l'utilisateur est le créateur du quiz
+                        const isCreator = isUserQuizCreator(quiz.nomCreateur);
+                        
+                        quizCard.innerHTML = `
+                            <img src="${imageUrl}" alt="${quiz.nom}" class="quiz-card-image">
+                            <div class="quiz-card-content">
+                                <h3 class="quiz-card-title">${quiz.nom}</h3>
+                                <p class="quiz-card-description">${quiz.description || 'Aucune description disponible.'}</p>
+                                <div class="quiz-card-meta">
+                                    <span>Par ${quiz.nomCreateur || 'Anonyme'}</span>
+                                    <span class="quiz-card-category">${quiz.categorie || 'Divers'}</span>
+                                </div>
+                                <div class="quiz-card-info">
+                                    <span class="quiz-questions-count">${quiz.nbQuestions || 0} questions</span>
+                                    <span class="quiz-time-estimate">${quiz.estimatedTime || 5} min</span>
+                                </div>
+                                <div class="quiz-card-actions">
+                                    <a href="quiz.html?id=${quiz.id_quiz}" class="quiz-card-btn">Jouer</a>
+                                    ${isCreator ? `<a href="editQuiz.html?id=${quiz.id_quiz}" class="quiz-card-btn edit-btn">Modifier</a>` : ''}
+                                </div>
+                            </div>
+                        `;
+                        quizzesContainer.appendChild(quizCard);
+                    });
+                } else {
+                    quizzesContainer.innerHTML = '<p>Aucun quiz disponible.</p>';
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement des quiz:', error);
+                quizzesContainer.innerHTML = `<p class="error-message">Erreur lors du chargement des quiz: ${error.message}</p>`;
+            }
+        }
+        
+        // Charger l'historique des quiz joués
+        loadPlayedQuizzes();
+        
+        async function loadPlayedQuizzes() {
+            const historyContainer = document.getElementById('history-content');
+            if (!historyContainer) return;
+            
+            try {
+                // Récupérer le token JWT
+                const token = getAuthToken();
+                if (!token) {
+                    historyContainer.innerHTML = '<p>Vous devez être connecté pour voir votre historique.</p>';
+                    return;
+                }
+                
+                // Afficher l'indicateur de chargement
+                historyContainer.innerHTML = '<div class="loading">Chargement de l\'historique...</div>';
+                
+                // Faire la requête API
+                const response = await fetch('http://localhost:8000/api/history', {
+                    headers: createAuthHeaders()
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Erreur lors du chargement de l'historique: ${errorText}`);
+                }
+                
+                const data = await response.json();
+                
+                // Afficher l'historique
+                if (data.history && data.history.length > 0) {
+                    historyContainer.innerHTML = '';
+                    
+                    data.history.forEach(item => {
+                        const historyItem = document.createElement('div');
+                        historyItem.className = 'history-item';
+                        
+                        const date = new Date(item.played_at);
+                        const formattedDate = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                        
+                        historyItem.innerHTML = `
+                            <div class="history-item-info">
+                                <h3 class="history-item-title">${item.quiz_name}</h3>
+                                <p class="history-item-date">Joué le ${formattedDate}</p>
+                                <p class="history-item-score">Score: ${item.score} points</p>
+                            </div>
+                            <div class="history-item-actions">
+                                <a href="quiz.html?id=${item.quiz_id}" class="quiz-card-btn">Rejouer</a>
+                            </div>
+                        `;
+                        historyContainer.appendChild(historyItem);
+                    });
+                } else {
+                    historyContainer.innerHTML = '<p>Aucun quiz joué pour le moment.</p>';
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement de l\'historique:', error);
+                historyContainer.innerHTML = `<p class="error-message">Erreur lors du chargement de l'historique: ${error.message}</p>`;
+            }
+        }
     }
 
+    // Vérifier si l'utilisateur est connecté et mettre à jour l'interface en conséquence
+    function updateAuthUI() {
+        const token = getAuthToken();
+        const authLinks = document.querySelector('.auth-links');
+        const profile = document.querySelector('.profile');
+        
+        if (token && authLinks && profile) {
+            authLinks.style.display = 'none';
+            profile.style.display = 'flex';
+        } else if (authLinks && profile) {
+            authLinks.style.display = 'flex';
+            profile.style.display = 'none';
+        }
+    }
+    
+    // Mettre à jour l'interface selon l'état d'authentification
+    updateAuthUI();
+
+    // Initialiser la page en fonction de son type
     if (document.querySelector('.quiz-container')) {
         initQuiz();
     } else if (document.getElementById('quiz-cards')) {
@@ -1108,7 +1869,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     } else if (document.querySelector('.questions-container')) {
         initCreateQuiz();
-    } else if (document.querySelector('.login-form')) {
+    } else if (document.querySelector('.login-form') || document.querySelector('.register-form')) {
         initLoginPage();
     } else if (document.querySelector('.settings-container')) {
         initSettingsPage();

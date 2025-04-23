@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="editQuiz.css">
     <script>
         const token = localStorage.getItem('jwt'); 
-      
+        
         if (!token) {
           window.location.href = 'login.html';
         }
@@ -31,15 +31,14 @@
 
     <main class="main-content">
         <section class="quiz-header">
-            <h1>Modifier un Quiz</h1>
-            <div id="loading-indicator" class="loading">Chargement du quiz...</div>
+            <h1>Modifier le Quiz</h1>
             <div class="quiz-details">
                 <div class="input-group">
                     <label for="quiz-title">Titre du Quiz</label>
                     <input type="text" id="quiz-title" placeholder="Entrez le titre du quiz" required>
                 </div>
                 <div class="input-group">
-                    <label for="quiz-description">Description (Optionnel)</label>
+                    <label for="quiz-description">Description</label>
                     <textarea id="quiz-description" placeholder="Entrez une description pour votre quiz"></textarea>
                 </div>
                 <div class="input-group">
@@ -48,15 +47,16 @@
                         <option value="Éducation">Éducation</option>
                         <option value="Divertissement">Divertissement</option>
                         <option value="Sport">Sports</option>
-                        <option value="Sciences">Science</option>
+                        <option value="Sciences">Sciences</option>
                         <option value="Histoire">Histoire</option>
+                        <option value="Littérature">Littérature</option>
                         <option value="Autre">Autre</option>
                     </select>
                 </div>
             </div>
         </section>
 
-        <section class="questions-container">
+        <section class="questions-container" id="questions-container">
             <!-- Les questions seront chargées dynamiquement ici -->
         </section>
 

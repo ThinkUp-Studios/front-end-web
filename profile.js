@@ -85,6 +85,30 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Fonction pour vérifier si l'utilisateur connecté est le créateur du quiz
+function isUserQuizCreator(creatorName) {
+    const token = localStorage.getItem('jwt');
+    if (!token) return false;
+    
+    try {
+        // Décoder le JWT pour obtenir le nom d'utilisateur
+        const parseJWT = (token) => {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+
+            return JSON.parse(jsonPayload);
+        };
+        
+        const decoded = parseJWT(token);
+        return decoded && decoded.username === creatorName;
+    } catch (e) {
+        console.error('Erreur lors du décodage du token:', e);
+        return false;
+    }
+}
 
 function fetchUserData() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -119,8 +143,15 @@ function fetchUserQuizzes() {
         })
         .then(data => {
             let quizzes = data.quizzes;
-            displayCreatedQuizzes(quizzes)
+            displayCreatedQuizzes(quizzes);
         })
+        .catch(error => {
+            console.error('Erreur lors de la récupération des quiz:', error);
+            const quizContainer = document.getElementById('created-quizzes');
+            if (quizContainer) {
+                quizContainer.innerHTML = '<p>Erreur lors du chargement des quiz. Veuillez réessayer.</p>';
+            }
+        });
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -139,31 +170,44 @@ function displayCreatedQuizzes(quizzes) {
     const quizContainer = document.getElementById('created-quizzes');
     quizContainer.innerHTML = "";
 
-    if (quizzes.length === 0) {
-        quizContainer.innerHTML = "<p>Aucun quiz crée.</p>";
+    if (!quizzes || quizzes.length === 0) {
+        quizContainer.innerHTML = "<p>Aucun quiz créé.</p>";
         return;
     }
 
+    console.log("Quizzes récupérés:", quizzes);
+
     quizzes.forEach(quiz => {
+        // Déterminer si l'utilisateur actuel est le créateur du quiz
+        const isCreator = isUserQuizCreator(quiz.nomCreateur);
+        
         const quizCard = document.createElement("div");
         quizCard.classList.add("quiz-card");
 
+        // S'assurer que l'ID du quiz est correctement défini
+        const quizId = quiz.id_quiz || quiz.id;
+        
+        if (!quizId) {
+            console.error("Quiz sans ID détecté:", quiz);
+        }
+
         quizCard.innerHTML = `
         <div class="quiz-card">
-            <img src="" alt="Quiz" class="quiz-card-image">
+            <img src="${quiz.imageUrl || ""}" alt="Quiz" class="quiz-card-image">
             <div class="quiz-card-content">
-                <h3 class="quiz-card-title">${quiz.nom}</h3>
-                <p class="quiz-card-description">${quiz.description}.</p>
+                <h3 class="quiz-card-title">${quiz.nom || "Sans titre"}</h3>
+                <p class="quiz-card-description">${quiz.description || "Aucune description disponible"}</p>
                 <div class="quiz-card-meta">
-                    <span>${quiz.nbQuestions} questions</span>
-                    <span class="quiz-card-category">${quiz.categorie}</span>
+                    <span>${quiz.nbQuestions || 0} questions</span>
+                    <span class="quiz-card-category">${quiz.categorie || "Non catégorisé"}</span>
                 </div>
                 <div class="quiz-card-actions">
-                    <a href="quiz.html?id=${quiz.id_quiz}" class="quiz-card-btn">Jouer</a>
+                    <a href="quiz.html?id=${quizId}" class="quiz-card-btn">Jouer</a>
+                    ${isCreator ? `<a href="editQuiz.html?id=${quizId}" class="quiz-card-btn edit-btn">Modifier</a>` : ''}
                 </div>
             </div>
         </div>
         `;
         quizContainer.appendChild(quizCard);
-    })
+    });
 }

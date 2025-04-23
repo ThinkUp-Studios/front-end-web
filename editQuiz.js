@@ -4,24 +4,27 @@ import { getQuiz, updateQuiz } from './api.js';
 document.addEventListener('DOMContentLoaded', function() {
     const profilePic = document.querySelector('.profile-pic');
     let quizId;
-    let quizData;
+    let quizData = null;
+
+    // Définir parseJWT au niveau global pour éviter les erreurs "not defined"
+    const parseJWT = (token) => {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            console.error('Erreur lors du décodage du token:', e);
+            return null;
+        }
+    };
 
     // Gestion du profil utilisateur
     if (profilePic) {
-        const parseJWT = (token) => {
-            try {
-                const base64Url = token.split('.')[1];
-                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
-
-                return JSON.parse(jsonPayload);
-            } catch (e) {
-                return null;
-            }
-        };
-
+        // Code pour la gestion du menu de profil (inchangé)
         const createProfileMenu = () => {
             if (!document.querySelector('.profile-menu')) {
                 const token = localStorage.getItem('jwt');
@@ -95,30 +98,43 @@ document.addEventListener('DOMContentLoaded', function() {
     quizId = urlParams.get('id');
 
     if (!quizId) {
+        alert('ID de quiz manquant dans l\'URL');
         window.location.href = 'main.html';
         return;
+    }
+
+    console.log(`ID du quiz à éditer: ${quizId}`);
+
+    // Ajout d'un indicateur de chargement
+    const questionsContainer = document.querySelector('.questions-container');
+    if (questionsContainer) {
+        questionsContainer.innerHTML = '<div id="loading-indicator" class="loading">Chargement du quiz...</div>';
     }
 
     // Charge les données du quiz pour l'édition
     async function loadQuizData() {
         try {
-            const loadingIndicator = document.getElementById('loading-indicator');
+            console.log("Tentative de récupération du quiz...");
             
-            quizData = await getQuiz(quizId);
+            // Appel direct à l'API (contournement temporaire si api.js a des problèmes)
+            const response = await fetch(`http://localhost:8000/api/quizzes/${quizId}`);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error("Erreur API:", errorText);
+                throw new Error(`Erreur HTTP: ${response.status}`);
+            }
+            
+            quizData = await response.json();
+            console.log("Données reçues:", quizData);
             
             if (!quizData) {
-                alert('Impossible de charger le quiz. Redirection vers la page d\'accueil...');
-                window.location.href = 'main.html';
-                return;
-            }
-
-            // Cacher l'indicateur de chargement
-            if (loadingIndicator) {
-                loadingIndicator.style.display = 'none';
+                throw new Error("Les données du quiz sont vides");
             }
 
             // Remplir les champs du formulaire avec les données du quiz
-            document.getElementById('quiz-title').value = quizData.nom_quiz || '';
+            // Correction ici: utiliser le bon nom de propriété (nom_quiz au lieu de nom)
+            document.getElementById('quiz-title').value = quizData.nom_quiz || quizData.nom || '';
             document.getElementById('quiz-description').value = quizData.description || '';
             
             // Sélectionner la catégorie
@@ -130,26 +146,104 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            // Charger les questions
-            const questionsContainer = document.querySelector('.questions-container');
+            // Vider le conteneur de questions
             questionsContainer.innerHTML = '';
 
-            if (quizData.questions && Array.isArray(quizData.questions)) {
+            // Traiter les questions et réponses selon votre structure de base de données
+            if (quizData.questions && Array.isArray(quizData.questions) && quizData.questions.length > 0) {
                 quizData.questions.forEach((question, index) => {
                     createQuestionCard(questionsContainer, question, index);
                 });
-                
-                // Configuration des boutons pour choisir la bonne réponse
-                setupCorrectToggles();
-                
-                // Configuration des boutons de suppression de question
-                setupDeleteButtons();
+            } else {
+                // Créer une question vide par défaut
+                createEmptyQuestionCard(questionsContainer, 0);
             }
-
+            
+            // Configuration des boutons
+            setupCorrectToggles();
+            setupDeleteButtons();
+            
         } catch (error) {
             console.error('Erreur lors du chargement du quiz:', error);
-            alert('Erreur lors du chargement du quiz: ' + error.message);
+            
+            // Afficher un message d'erreur
+            questionsContainer.innerHTML = `
+                <div class="error-message">
+                    <p>Erreur lors du chargement du quiz: ${error.message}</p>
+                    <p>Création d'un nouveau formulaire...</p>
+                </div>
+            `;
+            
+            // Créer un quiz vide pour l'édition
+            setTimeout(() => {
+                questionsContainer.innerHTML = '';
+                createEmptyQuestionCard(questionsContainer, 0);
+                setupCorrectToggles();
+                setupDeleteButtons();
+            }, 2000);
         }
+    }
+
+    // Créer une carte de question vide
+    function createEmptyQuestionCard(container, index) {
+        const questionCard = document.createElement('div');
+        questionCard.className = 'question-card';
+        questionCard.id = `question-${index + 1}`;
+
+        questionCard.innerHTML = `
+            <div class="question-header">
+                <h2>Question ${index + 1}</h2>
+                <div class="question-controls">
+                    <button class="btn-icon" title="Supprimer la question">🗑️</button>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="question-text-${index + 1}">Texte de la Question</label>
+                <input type="text" id="question-text-${index + 1}" placeholder="Entrez votre question" value="" required>
+            </div>
+            
+            <div class="input-group">
+                <label for="question-time-${index + 1}">Limite de Temps (secondes)</label>
+                <select id="question-time-${index + 1}">
+                    <option value="10">10 secondes</option>
+                    <option value="20" selected>20 secondes</option>
+                    <option value="30">30 secondes</option>
+                    <option value="60">60 secondes</option>
+                    <option value="90">90 secondes</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label>Choix de Réponses</label>
+                <div class="answer-choices">
+                    ${generateEmptyAnswerChoices()}
+                </div>
+            </div>
+        `;
+
+        container.appendChild(questionCard);
+    }
+
+    // Générer des choix de réponses vides
+    function generateEmptyAnswerChoices() {
+        const colors = ['color-red', 'color-blue', 'color-yellow', 'color-green'];
+        let html = '';
+
+        for (let i = 0; i < 4; i++) {
+            const isCorrect = i === 0; // Par défaut, la première réponse est correcte
+            html += `
+                <div class="answer-choice">
+                    <div class="color-block ${colors[i % colors.length]}"></div>
+                    <input type="text" class="answer-input" placeholder="Entrez un choix de réponse" value="" required>
+                    <div class="correct-toggle ${isCorrect ? 'active' : ''}" data-correct="${isCorrect ? 'true' : 'false'}">
+                        ✓
+                    </div>
+                </div>
+            `;
+        }
+
+        return html;
     }
 
     // Créer une carte de question pour l'affichage
@@ -158,17 +252,37 @@ document.addEventListener('DOMContentLoaded', function() {
         questionCard.className = 'question-card';
         questionCard.id = `question-${index + 1}`;
 
+        // Extraire les réponses
         let reponses = [];
-        let bonneReponseIndex = -1;
+        let bonneReponseIndex = 0;
 
         if (question.reponses && Array.isArray(question.reponses)) {
-            question.reponses.forEach((reponse, idx) => {
-                reponses.push(reponse.texte_reponse);
-                if (reponse.bonne_reponse === 1) {
+            reponses = question.reponses.map(rep => {
+                if (typeof rep === 'object') {
+                    // Structure où chaque réponse est un objet avec texte_reponse et bonne_reponse
+                    return rep.texte_reponse || '';
+                } else {
+                    // Structure où les réponses sont des chaînes de texte
+                    return rep || '';
+                }
+            });
+
+            // Trouver l'index de la bonne réponse
+            question.reponses.forEach((rep, idx) => {
+                if ((typeof rep === 'object' && rep.bonne_reponse === 1) || 
+                    (question.bonneReponse !== undefined && idx === question.bonneReponse)) {
                     bonneReponseIndex = idx;
                 }
             });
         }
+
+        // Assurer qu'on a toujours 4 réponses
+        while (reponses.length < 4) {
+            reponses.push('');
+        }
+
+        // Limite à 4 réponses
+        reponses = reponses.slice(0, 4);
 
         questionCard.innerHTML = `
             <div class="question-header">
@@ -210,20 +324,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const colors = ['color-red', 'color-blue', 'color-yellow', 'color-green'];
         let html = '';
 
-        // Assurez-vous d'avoir 4 réponses (compléter avec des chaînes vides si nécessaire)
-        while (reponses.length < 4) {
-            reponses.push('');
-        }
-
-        // Limiter à 4 réponses maximum
-        reponses = reponses.slice(0, 4);
-
         reponses.forEach((reponse, index) => {
             const isCorrect = index === bonneReponseIndex;
             html += `
                 <div class="answer-choice">
                     <div class="color-block ${colors[index % colors.length]}"></div>
-                    <input type="text" placeholder="Entrez un choix de réponse" value="${reponse}" required>
+                    <input type="text" class="answer-input" placeholder="Entrez un choix de réponse" value="${reponse || ''}" required>
                     <div class="correct-toggle ${isCorrect ? 'active' : ''}" data-correct="${isCorrect ? 'true' : 'false'}">
                         ✓
                     </div>
@@ -281,13 +387,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const questionsContainer = document.querySelector('.questions-container');
             
             // Créer une nouvelle question vide
-            const emptyQuestion = {
-                texte_question: '',
-                reponses: ['', '', '', ''],
-                bonneReponseIndex: 0
-            };
-            
-            createQuestionCard(questionsContainer, emptyQuestion, newIndex);
+            createEmptyQuestionCard(questionsContainer, newIndex);
             
             setupCorrectToggles();
             setupDeleteButtons();
@@ -310,17 +410,17 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Vérifier si chaque question a une réponse correcte sélectionnée
             let allQuestionsValid = true;
-            document.querySelectorAll('.question-card').forEach(card => {
+            document.querySelectorAll('.question-card').forEach((card, idx) => {
                 const questionText = card.querySelector('[id^="question-text-"]').value.trim();
                 if (!questionText) {
-                    alert('Veuillez entrer un texte pour chaque question.');
+                    alert(`Veuillez entrer un texte pour la question ${idx + 1}.`);
                     allQuestionsValid = false;
                     return;
                 }
                 
                 const hasCorrectAnswer = card.querySelector('.correct-toggle.active');
                 if (!hasCorrectAnswer) {
-                    alert('Veuillez sélectionner une réponse correcte pour chaque question.');
+                    alert(`Veuillez sélectionner une réponse correcte pour la question ${idx + 1}.`);
                     allQuestionsValid = false;
                     return;
                 }
@@ -328,7 +428,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Vérifier si tous les choix ont été remplis
                 const emptyChoices = Array.from(card.querySelectorAll('.answer-choice input')).some(input => !input.value.trim());
                 if (emptyChoices) {
-                    alert('Veuillez remplir tous les choix de réponse pour chaque question.');
+                    alert(`Veuillez remplir tous les choix de réponse pour la question ${idx + 1}.`);
                     allQuestionsValid = false;
                     return;
                 }
@@ -339,14 +439,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Préparation des données du quiz pour l'envoi
-            const quizData = {
+            const quizFormData = {
                 nom: title,
                 description: document.getElementById('quiz-description').value.trim(),
                 categorie: document.getElementById('quiz-category').value,
                 nbQuestions: document.querySelectorAll('.question-card').length,
                 difficulte: 'Facile',  // Valeur par défaut
                 estPublic: 1,
-                tags: [document.getElementById('quiz-category').value],
                 questions: []
             };
             
@@ -354,22 +453,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 const questionText = card.querySelector('[id^="question-text-"]').value.trim();
                 const timeLimit = parseInt(card.querySelector('[id^="question-time-"]').value);
                 
-                const options = [];
-                let correctOption = 0;
+                // Structure adaptée à votre base de données (questions et réponses séparées)
+                const questionData = {
+                    texte_question: questionText,
+                    reponses: []
+                };
                 
                 card.querySelectorAll('.answer-choice').forEach((choice, index) => {
-                    options.push(choice.querySelector('input').value.trim());
-                    if (choice.querySelector('.correct-toggle').getAttribute('data-correct') === 'true') {
-                        correctOption = index;
-                    }
+                    const reponseText = choice.querySelector('input').value.trim();
+                    const isCorrect = choice.querySelector('.correct-toggle').getAttribute('data-correct') === 'true';
+                    
+                    questionData.reponses.push({
+                        texte_reponse: reponseText,
+                        bonne_reponse: isCorrect ? 1 : 0
+                    });
                 });
                 
-                quizData.questions.push({
-                    texte_question: questionText,
-                    reponses: options,
-                    bonneReponse: correctOption,
-                    tempsReponse: timeLimit
-                });
+                quizFormData.questions.push(questionData);
             });
             
             try {
@@ -378,7 +478,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateQuizBtn.disabled = true;
                 
                 // Envoi des données à l'API
-                const result = await updateQuiz(quizId, quizData);
+                const response = await fetch(`http://localhost:8000/api/quizzes/${quizId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+                    },
+                    body: JSON.stringify(quizFormData)
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Réponse d\'erreur:', errorText);
+                    throw new Error(`Erreur lors de la mise à jour du quiz: ${response.status} ${errorText}`);
+                }
+                
+                const result = await response.json();
                 console.log('Quiz mis à jour avec succès:', result);
                 alert('Quiz mis à jour avec succès! Redirection...');
                 
