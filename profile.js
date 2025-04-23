@@ -1,6 +1,20 @@
 document.addEventListener('DOMContentLoaded', function() {
     const profilePic = document.querySelector('.profile-pic');
 
+    if (isUserQuizCreator(quiz.nomCreateur)) {
+        const editBtn = document.createElement('a');
+        editBtn.href = `editQuiz.html?id=${quiz.id_quiz}`;
+        editBtn.textContent = 'Modifier';
+        editBtn.classList.add('quiz-card-btn', 'edit-btn');
+    
+        const actionsContainer = document.createElement('div');
+        actionsContainer.classList.add('quiz-card-actions');
+        actionsContainer.appendChild(editBtn);
+    
+        quizCard.appendChild(actionsContainer);
+    }
+    
+
     if (profilePic) {
         const parseJWT = (token) => {
             try {
