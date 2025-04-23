@@ -1,6 +1,4 @@
 // editQuiz.js - Fichier JavaScript pour la page d'édition de quiz
-import { getQuiz, updateQuiz } from './api.js';
-
 document.addEventListener('DOMContentLoaded', function() {
     const profilePic = document.querySelector('.profile-pic');
     let quizId;
@@ -116,8 +114,19 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             console.log("Tentative de récupération du quiz...");
             
-            // Appel direct à l'API (contournement temporaire si api.js a des problèmes)
-            const response = await fetch(`http://localhost:8000/api/quizzes/${quizId}`);
+            // Récupérer le token JWT pour l'authentification
+            const token = localStorage.getItem('jwt');
+            if (!token) {
+                throw new Error("Vous devez être connecté pour modifier un quiz");
+            }
+
+            // Appel direct à l'API avec authentification
+            const response = await fetch(`http://localhost:8000/api/quizzes/${quizId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
             
             if (!response.ok) {
                 const errorText = await response.text();
@@ -132,8 +141,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error("Les données du quiz sont vides");
             }
 
+            // Vérifier que l'utilisateur actuel est bien le créateur du quiz
+            const decoded = parseJWT(token);
+            if (decoded && decoded.username !== quizData.nomCreateur) {
+                throw new Error("Vous n'êtes pas autorisé à modifier ce quiz");
+            }
+
             // Remplir les champs du formulaire avec les données du quiz
-            // Correction ici: utiliser le bon nom de propriété (nom_quiz au lieu de nom)
             document.getElementById('quiz-title').value = quizData.nom_quiz || quizData.nom || '';
             document.getElementById('quiz-description').value = quizData.description || '';
             
@@ -149,12 +163,14 @@ document.addEventListener('DOMContentLoaded', function() {
             // Vider le conteneur de questions
             questionsContainer.innerHTML = '';
 
-            // Traiter les questions et réponses selon votre structure de base de données
-            if (quizData.questions && Array.isArray(quizData.questions) && quizData.questions.length > 0) {
+            // Traiter les questions et réponses
+            if (quizData.questions && Array.isArray(quizData.questions)) {
+                console.log("Nombre de questions trouvées:", quizData.questions.length);
                 quizData.questions.forEach((question, index) => {
                     createQuestionCard(questionsContainer, question, index);
                 });
             } else {
+                console.error("Aucune question trouvée dans les données");
                 // Créer une question vide par défaut
                 createEmptyQuestionCard(questionsContainer, 0);
             }
@@ -248,33 +264,66 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Créer une carte de question pour l'affichage
     function createQuestionCard(container, question, index) {
+        console.log(`Création de la carte pour la question ${index + 1}:`, question);
+        
         const questionCard = document.createElement('div');
         questionCard.className = 'question-card';
         questionCard.id = `question-${index + 1}`;
 
-        // Extraire les réponses
+        // Extraire les réponses et trouver la bonne réponse
         let reponses = [];
-        let bonneReponseIndex = 0;
+        let bonneReponseIndex = -1;
 
         if (question.reponses && Array.isArray(question.reponses)) {
-            reponses = question.reponses.map(rep => {
+            // Analyser les réponses pour comprendre leur structure
+            console.log(`Structure des réponses pour la question ${index + 1}:`, JSON.stringify(question.reponses));
+            
+            // Extraire les textes des réponses selon leur format
+            reponses = question.reponses.map((rep, idx) => {
+                let texteReponse = '';
+                let estBonne = false;
+                
                 if (typeof rep === 'object') {
-                    // Structure où chaque réponse est un objet avec texte_reponse et bonne_reponse
-                    return rep.texte_reponse || '';
-                } else {
-                    // Structure où les réponses sont des chaînes de texte
-                    return rep || '';
+                    // Format où chaque réponse est un objet
+                    texteReponse = rep.texte_reponse || '';
+                    if (rep.bonne_reponse === 1) {
+                        estBonne = true;
+                        bonneReponseIndex = idx;
+                    }
+                } else if (typeof rep === 'string') {
+                    // Format où les réponses sont simplement des chaînes
+                    texteReponse = rep;
                 }
+                
+                return texteReponse;
             });
 
-            // Trouver l'index de la bonne réponse
-            question.reponses.forEach((rep, idx) => {
-                if ((typeof rep === 'object' && rep.bonne_reponse === 1) || 
-                    (question.bonneReponse !== undefined && idx === question.bonneReponse)) {
-                    bonneReponseIndex = idx;
+            // Si on n'a pas trouvé l'index de la bonne réponse via les objets
+            if (bonneReponseIndex === -1) {
+                // Essayer via le champ bonneReponse
+                if (question.bonneReponse !== undefined) {
+                    bonneReponseIndex = question.bonneReponse;
+                } else {
+                    // Parcourir à nouveau pour chercher un autre indicateur
+                    question.reponses.forEach((rep, idx) => {
+                        // Si c'est un objet avec bonne_reponse = 1
+                        if (typeof rep === 'object' && rep.bonne_reponse === 1) {
+                            bonneReponseIndex = idx;
+                        }
+                    });
                 }
-            });
+            }
+
+            // Si on n'a toujours pas trouvé, prendre la première par défaut
+            if (bonneReponseIndex === -1) {
+                bonneReponseIndex = 0;
+                console.warn(`Aucune bonne réponse identifiée pour la question ${index + 1}, première réponse sélectionnée par défaut`);
+            }
+        } else {
+            console.warn(`Format de réponses non reconnu pour la question ${index + 1}:`, question);
         }
+
+        console.log(`Question ${index + 1} - Texte: ${question.texte_question}, Réponses:`, reponses, `Bonne réponse: ${bonneReponseIndex}`);
 
         // Assurer qu'on a toujours 4 réponses
         while (reponses.length < 4) {
@@ -443,39 +492,49 @@ document.addEventListener('DOMContentLoaded', function() {
                 nom: title,
                 description: document.getElementById('quiz-description').value.trim(),
                 categorie: document.getElementById('quiz-category').value,
-                nbQuestions: document.querySelectorAll('.question-card').length,
-                difficulte: 'Facile',  // Valeur par défaut
-                estPublic: 1,
+                difficulte: quizData?.difficulte || 'Facile',
+                estPublic: quizData?.estPublic || 1,
                 questions: []
             };
             
+            // Récupérer toutes les questions et leurs réponses
             document.querySelectorAll('.question-card').forEach(card => {
                 const questionText = card.querySelector('[id^="question-text-"]').value.trim();
                 const timeLimit = parseInt(card.querySelector('[id^="question-time-"]').value);
                 
-                // Structure adaptée à votre base de données (questions et réponses séparées)
-                const questionData = {
-                    texte_question: questionText,
-                    reponses: []
-                };
+                // Tableau pour stocker les réponses
+                const reponses = [];
+                let bonneReponse = null;
                 
+                // Récupérer les réponses et identifier la bonne réponse
                 card.querySelectorAll('.answer-choice').forEach((choice, index) => {
                     const reponseText = choice.querySelector('input').value.trim();
-                    const isCorrect = choice.querySelector('.correct-toggle').getAttribute('data-correct') === 'true';
+                    reponses.push(reponseText);
                     
-                    questionData.reponses.push({
-                        texte_reponse: reponseText,
-                        bonne_reponse: isCorrect ? 1 : 0
-                    });
+                    if (choice.querySelector('.correct-toggle').getAttribute('data-correct') === 'true') {
+                        bonneReponse = index;
+                    }
                 });
                 
-                quizFormData.questions.push(questionData);
+                // S'assurer qu'une bonne réponse est sélectionnée
+                if (bonneReponse === null) {
+                    bonneReponse = 0;  // Par défaut, première réponse
+                }
+                
+                // Ajouter la question au tableau dans le format attendu par l'API
+                quizFormData.questions.push({
+                    texte_question: questionText,
+                    reponses: reponses,
+                    bonneReponse: bonneReponse
+                });
             });
             
             try {
                 // Afficher un indicateur de chargement
                 updateQuizBtn.textContent = 'Mise à jour en cours...';
                 updateQuizBtn.disabled = true;
+                
+                console.log('Données envoyées à l\'API:', quizFormData);
                 
                 // Envoi des données à l'API
                 const response = await fetch(`http://localhost:8000/api/quizzes/${quizId}`, {
@@ -488,14 +547,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     body: JSON.stringify(quizFormData)
                 });
                 
+                // Journaliser la réponse brute pour le débogage
+                const responseText = await response.text();
+                console.log('Réponse brute de l\'API:', responseText);
+                
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('Réponse d\'erreur:', errorText);
-                    throw new Error(`Erreur lors de la mise à jour du quiz: ${response.status} ${errorText}`);
+                    console.error('Réponse d\'erreur:', responseText);
+                    throw new Error(`Erreur lors de la mise à jour du quiz: ${response.status}`);
                 }
                 
-                const result = await response.json();
-                console.log('Quiz mis à jour avec succès:', result);
+                // Parser la réponse JSON si possible
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                    console.log('Quiz mis à jour avec succès:', result);
+                } catch (e) {
+                    console.warn('La réponse n\'est pas un JSON valide, mais la requête a réussi');
+                }
+                
                 alert('Quiz mis à jour avec succès! Redirection...');
                 
                 // Redirection vers la page d'accueil
