@@ -190,10 +190,33 @@ function displayCreatedQuizzes(quizzes) {
         if (!quizId) {
             console.error("Quiz sans ID détecté:", quiz);
         }
+        let imgSRC;
+        switch (quiz.categorie) {
+            case "Éducation" : 
+                imgSRC = '/images/imgEducation.jpg';
+                break;
+            case "Divertissements" :
+                imgSRC = '/images/imgDivertissements.jpg';
+                break;
+            case "Sport" : 
+                imgSRC = '/images/imgSports.jpg';
+                break;
+            case "Sciences" : 
+                imgSRC = '/images/imgScience.jpg';
+                break;
+            case "Histoire" :
+                imgSRC = '/images/imgHistoire.jpg';
+                break;
+            case "Littérature" : 
+                imgSRC = '/images/imgLitterature.jpg';
+                break;
+            default : 
+                imgSRC = 'imgAutres.jpg';
+        }
 
         quizCard.innerHTML = `
         <div class="quiz-card">
-            <img src="${quiz.imageUrl || ""}" alt="Quiz" class="quiz-card-image">
+            <img src="${imgSRC}" || ""}" alt="Quiz" class="quiz-card-image">
             <div class="quiz-card-content">
                 <h3 class="quiz-card-title">${quiz.nom || "Sans titre"}</h3>
                 <p class="quiz-card-description">${quiz.description || "Aucune description disponible"}</p>

@@ -144,9 +144,34 @@ function displayRecommendedQuizzes() {
     
         // const imageUrl = quiz.imageUrl || '/api/placeholder/300/180';
     
+        let imgSRC;
+        switch (quiz.categorie) {
+            case "Éducation" : 
+                imgSRC = '/images/imgEducation.jpg';
+                break;
+            case "Divertissements" :
+                imgSRC = '/images/imgDivertissements.jpg';
+                break;
+            case "Sport" : 
+                imgSRC = '/images/imgSports.jpg';
+                break;
+            case "Sciences" : 
+                imgSRC = '/images/imgScience.jpg';
+                break;
+            case "Histoire" :
+                imgSRC = '/images/imgHistoire.jpg';
+                break;
+            case "Littérature" : 
+                imgSRC = '/images/imgLitterature.jpg';
+                break;
+            default : 
+                imgSRC = '/images/imgAutres.jpg';
+        }
+
+
         quizCard.innerHTML = `
             <div class="quiz-card-tag"></div>
-            <img src="" alt="${quiz.nom}" class="quiz-card-image">
+            <img src="${imgSRC}" alt="${quiz.nom}" class="quiz-card-image">
             <div class="quiz-card-content">
                 <h3 class="quiz-card-title">${quiz.nom}</h3>
                 <p class="quiz-card-description">${quiz.description || 'Aucune description disponible.'}</p>
@@ -181,12 +206,39 @@ function displayPopularQuizzes() {
         return;
     }
 
+
+    
+
     quizzes.forEach(quiz => {
         const quizCard = document.createElement("div");
         quizCard.classList.add("quiz-card");
 
+        let imgSRC;
+        switch (quiz.categorie) {
+            case "Éducation" : 
+                imgSRC = '/images/imgEducation.jpg';
+                break;
+            case "Divertissements" :
+                imgSRC = '/images/imgDivertissements.jpg';
+                break;
+            case "Sport" : 
+                imgSRC = '/images/imgSports.jpg';
+                break;
+            case "Sciences" : 
+                imgSRC = '/images/imgScience.jpg';
+                break;
+            case "Histoire" :
+                imgSRC = '/images/imgHistoire.jpg';
+                break;
+            case "Littérature" : 
+                imgSRC = '/images/imgLitterature.jpg';
+                break;
+            default : 
+                imgSRC = 'imgAutres.jpg';
+        }
+
         quizCard.innerHTML = `<div class="quiz-card-tag"></div>
-            <img src="" alt="${quiz.nom}" class="quiz-card-image">
+            <img src="${imgSRC}" alt="${quiz.nom}" class="quiz-card-image">
             <div class="quiz-card-content">
                 <h3 class="quiz-card-title">${quiz.nom}</h3>
                 <p class="quiz-card-description">${quiz.description || 'Aucune description disponible.'}</p>
