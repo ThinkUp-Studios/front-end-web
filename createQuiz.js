@@ -19,8 +19,10 @@ import {
     setupProfileMenu(username);
     setProfilePicture(username); // ← affiche automatiquement l'avatar équipé
   }
-  
+
 document.addEventListener('DOMContentLoaded', function() {
+
+    
     // Fonction de décodage JWT déplacée hors de la portée conditionnelle
     // pour être accessible partout dans le script
     const parseJWT = (token) => {

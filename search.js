@@ -124,6 +124,8 @@ function fetchQuizzes() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+
+    
     if (username) {
         fetchUserCurrency(username).then(displayCurrency);
         setupProfileMenu(username);
