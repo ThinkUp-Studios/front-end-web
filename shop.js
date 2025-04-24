@@ -19,6 +19,73 @@ const token = localStorage.getItem('jwt');
 const decoded = parseJWT(token);
 const username = decoded?.username;
 
+const profilePic = document.querySelector('.profile-pic');
+
+if (profilePic) {
+    const createProfileMenu = () => {
+        if (!document.querySelector('.profile-menu')) {
+            const menu = document.createElement('div');
+            menu.className = 'profile-menu';
+
+            const menuItems = [
+                { text: 'Voir Profil', icon: '👤', href: username ? `profile.html?username=${username}` : 'profile.html' },
+                { text: 'Paramètres', icon: '⚙️', href: 'settings.html' },
+                { text: 'FAQ', icon: '❓', href: '#faq' },
+                { text: 'Déconnexion', icon: '🚪', href: '#' }
+            ];
+
+            menuItems.forEach(item => {
+                const menuItem = document.createElement('a');
+                menuItem.href = item.href;
+                menuItem.innerHTML = `<span class="menu-icon">${item.icon}</span> ${item.text}`;
+
+                if (item.text === 'Déconnexion') {
+                    menuItem.id = 'logout-link';
+                }
+                menu.appendChild(menuItem);
+            });
+
+            document.querySelector('.profile').appendChild(menu);
+
+            const logoutLink = document.getElementById('logout-link');
+            if (logoutLink) {
+                logoutLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    localStorage.removeItem('jwt');
+                    window.location.href = 'login.html';
+                });
+            }
+        }
+    };
+
+    const toggleProfileMenu = () => {
+        createProfileMenu();
+        const menu = document.querySelector('.profile-menu');
+        menu.classList.toggle('active');
+
+        if (menu.classList.contains('active')) {
+            document.addEventListener('click', closeMenuOnClickOutside);
+        } else {
+            document.removeEventListener('click', closeMenuOnClickOutside);
+        }
+    };
+
+    const closeMenuOnClickOutside = (event) => {
+        const menu = document.querySelector('.profile-menu');
+        const profile = document.querySelector('.profile');
+
+        if (!profile.contains(event.target)) {
+            menu.classList.remove('active');
+            document.removeEventListener('click', closeMenuOnClickOutside);
+        }
+    };
+
+    profilePic.addEventListener('click', function(event) {
+        event.stopPropagation();
+        toggleProfileMenu();
+    });
+}
+
 const main = document.querySelector('.main-content');
 
 async function fetchAvatars() {
@@ -36,7 +103,7 @@ async function fetchThemes() {
 async function fetchEquipped() {
     const res = await fetch(`${API_BASE}/equipped/${username}`);
     const data = await res.json();
-    return data.avatar?.[0]?.nomFichier || null;
+    return data;
 }
 
 function createCard(item, type) {
@@ -68,6 +135,20 @@ function createCard(item, type) {
     button.className = 'quiz-card-btn';
     button.textContent = 'Acheter';
     button.onclick = () => afficherPopupAchat(item);
+
+    if (theme?.couleurPrincipal && theme?.couleurSecondaire) {
+        button.style.border = `2px solid ${theme.couleurPrincipal}`;
+        button.style.background = 'transparent';
+        button.style.color = theme.couleurPrincipal;
+        button.addEventListener('mouseenter', () => {
+            button.style.background = `linear-gradient(90deg, ${theme.couleurPrincipal}, ${theme.couleurSecondaire})`;
+            button.style.color = theme.couleurTexteUn || '#ffffff';
+        });
+        button.addEventListener('mouseleave', () => {
+            button.style.background = 'transparent';
+            button.style.color = theme.couleurPrincipal;
+        });
+    }
 
     content.appendChild(title);
     content.appendChild(price);
@@ -125,14 +206,60 @@ function afficherPopupAchat(item) {
     document.body.appendChild(overlay);
 }
 
+let theme = null;
+
 async function afficherMagasin() {
     const avatars = await fetchAvatars();
     const themes = await fetchThemes();
-    const equippedAvatarFile = await fetchEquipped();
+    const equipped = await fetchEquipped();
+
+    const equippedAvatarFile = equipped.avatar?.[0]?.nomFichier;
+    theme = equipped.theme?.[0];
 
     const profileImg = document.querySelector('.profile-pic');
     if (profileImg && equippedAvatarFile) {
         profileImg.src = `ressources/avatars/${equippedAvatarFile}`;
+    }
+
+    if (theme && theme.couleurPrincipal && theme.couleurSecondaire) {
+        const header = document.querySelector('header');
+        if (header) {
+            header.style.background = `linear-gradient(135deg, ${theme.couleurPrincipal} 0%, ${theme.couleurSecondaire} 100%)`;
+            header.style.boxShadow = `0 4px 20px ${theme.couleurSecondaire}4D`; // 4D = 30% alpha en hex
+        }
+
+        document.body.style.color = theme.couleurTexteUn || '#ffffff';
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.style.background = `linear-gradient(90deg, ${theme.couleurPrincipal}, ${theme.couleurSecondaire})`;
+        });
+
+        document.querySelectorAll('.recommended-quizzes h2::after').forEach(elem => {
+            elem.style.background = `linear-gradient(90deg, ${theme.couleurPrincipal}, ${theme.couleurSecondaire})`;
+        });
+
+        const customStyle = document.createElement('style');
+        customStyle.innerHTML = `
+            .recommended-quizzes h2::after {
+                background: linear-gradient(90deg, ${theme.couleurPrincipal}, ${theme.couleurSecondaire});
+            }
+        `;
+        document.head.appendChild(customStyle);
+
+        const footer = document.querySelector('footer');
+        if (footer) {
+            footer.style.background = theme.couleurSecondaire;
+        }
+
+        const styleFooterHover = document.createElement('style');
+        styleFooterHover.innerHTML = `
+            .footer-links a {
+                color: ${theme.couleurTexteUn};
+            }
+            .footer-links a:hover {
+                color: #FFFFFF;
+            }
+        `;
+        document.head.appendChild(styleFooterHover);
     }
 
     const sectionAvatar = document.createElement('section');
