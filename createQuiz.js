@@ -1,24 +1,94 @@
-import {
-    parseJWT,
-    fetchUserCurrency,
-    displayCurrency,
-    setupProfileMenu,
-    setProfilePicture
-  } from './globalCurrencyProfile.js';
-  
-  const token = localStorage.getItem('jwt');
-  const decoded = parseJWT(token);
-  const username = decoded?.username;
-  
-  if (username) {
-    fetchUserCurrency(username).then(displayCurrency);
-    setupProfileMenu(username);
-    setProfilePicture(username);
-  }
-
+// createQuiz.js - Fichier JavaScript pour la page de création de quiz
 import { getAllQuizzes } from './api.js';
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Fonction de décodage JWT déplacée hors de la portée conditionnelle
+    // pour être accessible partout dans le script
+    const parseJWT = (token) => {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            console.error('Erreur lors du décodage du token:', e);
+            return null;
+        }
+    };
+
+    const profilePic = document.querySelector('.profile-pic');
+
+    if (profilePic) {
+        const createProfileMenu = () => {
+            if (!document.querySelector('.profile-menu')) {
+                const token = localStorage.getItem('jwt');
+                const decoded = token ? parseJWT(token) : null;
+                const username = decoded?.username;
+
+                const menu = document.createElement('div');
+                menu.className = 'profile-menu';
+                
+                const menuItems = [
+                    { text: 'Voir Profil', icon: '👤', href: username ? `profile.html?username=${username}` : 'profile.html' },
+                    { text: 'Paramètres', icon: '⚙️', href: 'settings.html' },
+                    { text: 'FAQ', icon: '❓', href: '#faq' },
+                    { text: 'Déconnexion', icon: '🚪', href: '#' }
+                ];
+                
+                menuItems.forEach(item => {
+                    const menuItem = document.createElement('a');
+                    menuItem.href = item.href;
+                    menuItem.innerHTML = `<span class="menu-icon">${item.icon}</span> ${item.text}`;
+                    
+                    if (item.text === 'Déconnexion') {
+                        menuItem.id = 'logout-link'; 
+                    }                
+                    menu.appendChild(menuItem);
+                });
+                
+                document.querySelector('.profile').appendChild(menu);
+
+                const logoutLink = document.getElementById('logout-link');
+                if (logoutLink) {
+                    logoutLink.addEventListener('click', function(e) {
+                        e.preventDefault(); 
+                        localStorage.removeItem('jwt');
+                        window.location.href = 'login.html';
+                    });
+                }
+            }
+        };
+
+        const toggleProfileMenu = () => {
+            createProfileMenu();
+            const menu = document.querySelector('.profile-menu');
+            menu.classList.toggle('active');
+            
+            if (menu.classList.contains('active')) {
+                document.addEventListener('click', closeMenuOnClickOutside);
+            } else {
+                document.removeEventListener('click', closeMenuOnClickOutside);
+            }
+        };
+
+        const closeMenuOnClickOutside = (event) => {
+            const menu = document.querySelector('.profile-menu');
+            const profile = document.querySelector('.profile');
+            
+            if (!profile.contains(event.target)) {
+                menu.classList.remove('active');
+                document.removeEventListener('click', closeMenuOnClickOutside);
+            }
+        };
+
+        profilePic.addEventListener('click', function(event) {
+            event.stopPropagation();
+            toggleProfileMenu();
+        });
+    }
 
     // Logique de création de quiz
     const initCreateQuiz = () => {
