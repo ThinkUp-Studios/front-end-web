@@ -28,6 +28,8 @@ if (username) {
     setupProfileMenu(username);
 }
 
+let currentTheme = null;
+
 async function fetchEquipped() {
     const res = await fetch(`${API_BASE}/equipped/${username}`);
     return await res.json();
@@ -37,6 +39,7 @@ async function afficherAvatarEquipe() {
     try {
         const equipped = await fetchEquipped();
         const avatarFile = equipped.avatar?.[0]?.nomFichier;
+        currentTheme = equipped.theme?.[0];
 
         if (avatarFile) {
             const img = document.querySelector('.profile-pic');
@@ -133,9 +136,51 @@ async function afficherInventaire() {
 
     sectionTheme.appendChild(gridTheme);
     main.appendChild(sectionTheme);
+
+    if (currentTheme && currentTheme.couleurPrincipal && currentTheme.couleurSecondaire) {
+        const header = document.querySelector('header');
+        if (header) {
+            header.style.background = `linear-gradient(135deg, ${currentTheme.couleurPrincipal} 0%, ${currentTheme.couleurSecondaire} 100%)`;
+            header.style.boxShadow = `0 4px 20px ${currentTheme.couleurSecondaire}4D`;
+        }
+    
+        document.body.style.color = currentTheme.couleurTexteUn || '#ffffff';
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.style.background = `linear-gradient(90deg, ${currentTheme.couleurPrincipal}, ${currentTheme.couleurSecondaire})`;
+        });
+    
+        const customStyle = document.createElement('style');
+        customStyle.innerHTML = `
+            .recommended-quizzes h2::after {
+                background: linear-gradient(90deg, ${currentTheme.couleurPrincipal}, ${currentTheme.couleurSecondaire});
+            }
+            .footer-links a {
+                color: ${currentTheme.couleurTexteUn};
+            }
+            .footer-links a:hover {
+                color: #ffffff;
+            }
+            .quiz-card-btn{
+                color: ${currentTheme.couleurPrincipal};
+                border: 2px solid ${currentTheme.couleurPrincipal};
+            }
+            .quiz-card-btn:hover{
+                background: linear-gradient(90deg, ${currentTheme.couleurPrincipal}, ${currentTheme.couleurSecondaire});
+            }
+        `;
+        document.head.appendChild(customStyle);
+    
+        const footer = document.querySelector('footer');
+        if (footer) {
+            footer.style.background = `linear-gradient(135deg, ${currentTheme.couleurPrincipal} 0%, ${currentTheme.couleurSecondaire} 100%)`;
+        }
+    }
+    
 }
 
-afficherInventaire();
+afficherAvatarEquipe().then(() => {
+    afficherInventaire(); // Appelé après que le thème soit chargé
+});
 
 async function equiperItem(idItem, type) {
     const route = type === 'avatar' ? 'equip/avatar' : 'equip/theme';
@@ -151,7 +196,6 @@ async function equiperItem(idItem, type) {
 
         const data = await res.json();
         if (res.ok) {
-            alert(data.message || 'Équipement mis à jour');
             location.reload(); // Recharge pour voir le changement (optionnel)
         } else {
             alert(data.error || 'Erreur lors de l’équipement');
