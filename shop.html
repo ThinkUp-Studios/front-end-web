@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThinkUp - Le monde des quiz</title>
+    <link rel="stylesheet" href="shop.css">
+    <script>
+        const token = localStorage.getItem('jwt'); 
+      
+        if (!token) {
+          window.location.href = 'login.html';
+        }
+    </script>
+
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="main.html" class="logo">ThinkUp</a>
+            <div class="nav-links">
+                <a href="main.html">Accueil</a>
+                <a href="createQuiz.html">Créer</a>
+                <a href="search.html">Rechercher</a>
+                <a href="shop.html">Magasin</a>
+            </div>
+            <div class="profile">
+                <img src="" alt="Photo de Profil" class="profile-pic">
+            </div>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 ThinkUp. Tous droits réservés.</p>
+            <div class="footer-links">
+                <a href="#">À propos</a>
+                <a href="#">Confidentialité</a>
+                <a href="#">Conditions</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="shop.js" type="module"></script>
+</body>
+</html>
