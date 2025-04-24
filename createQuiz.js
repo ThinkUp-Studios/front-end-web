@@ -1,6 +1,25 @@
 // createQuiz.js - Fichier JavaScript pour la page de création de quiz
 import { getAllQuizzes } from './api.js';
 
+
+import {
+    parseJWT,
+    fetchUserCurrency,
+    displayCurrency,
+    setupProfileMenu,
+    setProfilePicture
+  } from './globalCurrencyProfile.js';
+  
+  const token = localStorage.getItem('jwt');
+  const decoded = parseJWT(token);
+  const username = decoded?.username;
+  
+  if (username) {
+    fetchUserCurrency(username).then(displayCurrency);
+    setupProfileMenu(username);
+    setProfilePicture(username); // ← affiche automatiquement l'avatar équipé
+  }
+  
 document.addEventListener('DOMContentLoaded', function() {
     // Fonction de décodage JWT déplacée hors de la portée conditionnelle
     // pour être accessible partout dans le script
