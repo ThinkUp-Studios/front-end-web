@@ -62,8 +62,6 @@ export function setupProfileMenu(username) {
 
             const menuItems = [
                 { text: 'Voir Profil', icon: '👤', href: `profile.html?username=${username}` },
-                { text: 'Paramètres', icon: '⚙️', href: 'settings.html' },
-                { text: 'FAQ', icon: '❓', href: '#faq' },
                 { text: 'Déconnexion', icon: '🚪', href: '#' }
             ];
 

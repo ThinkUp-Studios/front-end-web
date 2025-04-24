@@ -33,8 +33,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 const menuItems = [
                     { text: 'Voir Profil', icon: '👤', href: username ? `profile.html?username=${username}` : 'profile.html' },
-                    { text: 'Paramètres', icon: '⚙️', href: 'settings.html' },
-                    { text: 'FAQ', icon: '❓', href: '#faq' },
                     { text: 'Déconnexion', icon: '🚪', href: '#' }
                 ];
                 
