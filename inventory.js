@@ -90,7 +90,13 @@ function createInventoryCard(item, type) {
     title.className = 'quiz-card-title';
     title.textContent = item.nom;
 
+    const equipBtn = document.createElement('button');
+    equipBtn.className = 'quiz-card-btn';
+    equipBtn.textContent = 'Équiper';
+    equipBtn.onclick = () => equiperItem(item.id_item, type);
+
     content.appendChild(title);
+    content.appendChild(equipBtn);
     card.appendChild(imageWrapper);
     card.appendChild(content);
 
@@ -130,3 +136,28 @@ async function afficherInventaire() {
 }
 
 afficherInventaire();
+
+async function equiperItem(idItem, type) {
+    const route = type === 'avatar' ? 'equip/avatar' : 'equip/theme';
+
+    try {
+        const res = await fetch(`${API_BASE}/${route}/${username}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id_item: idItem })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+            alert(data.message || 'Équipement mis à jour');
+            location.reload(); // Recharge pour voir le changement (optionnel)
+        } else {
+            alert(data.error || 'Erreur lors de l’équipement');
+        }
+    } catch (error) {
+        console.error('Erreur réseau:', error);
+        alert('Erreur réseau');
+    }
+}
