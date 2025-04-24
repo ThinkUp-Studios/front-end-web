@@ -27,7 +27,7 @@ import {
         profilePic.addEventListener('click', function (event) {
             event.stopPropagation();
 
-            // Crée le menu si nécessaire (setupProfileMenu l’a peut-être déjà fait)
+            // Crée le menu si nécessaire (setupProfileMenu l'a peut-être déjà fait)
             const menu = document.querySelector('.profile-menu');
             if (!menu) {
                 setupProfileMenu(username); // recrée si nécessaire
