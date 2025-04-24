@@ -1,103 +1,62 @@
-document.addEventListener('DOMContentLoaded', function() {
+import {
+    parseJWT,
+    fetchUserCurrency,
+    displayCurrency,
+    setupProfileMenu,
+    setProfilePicture
+  } from './globalCurrencyProfile.js';
+  
+  const token = localStorage.getItem('jwt');
+  const decoded = parseJWT(token);
+  const username = decoded?.username;
+  
+  if (username) {
+    fetchUserCurrency(username).then(displayCurrency);
+    setupProfileMenu(username);
+    setProfilePicture(username); // ← affiche automatiquement l'avatar équipé
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    fetchUserData();
+    fetchUserQuizzes();
+
+    // Sélectionner dynamiquement la photo de profil du header
     const profilePic = document.querySelector('.profile-pic');
 
-    if (isUserQuizCreator(quiz.nomCreateur)) {
-        const editBtn = document.createElement('a');
-        editBtn.href = `editQuiz.html?id=${quiz.id_quiz}`;
-        editBtn.textContent = 'Modifier';
-        editBtn.classList.add('quiz-card-btn', 'edit-btn');
-    
-        const actionsContainer = document.createElement('div');
-        actionsContainer.classList.add('quiz-card-actions');
-        actionsContainer.appendChild(editBtn);
-    
-        quizCard.appendChild(actionsContainer);
-    }
-    
-
     if (profilePic) {
-        const parseJWT = (token) => {
-            try {
-                const base64Url = token.split('.')[1];
-                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
+        profilePic.addEventListener('click', function (event) {
+            event.stopPropagation();
 
-                return JSON.parse(jsonPayload);
-            } catch (e) {
-                return null;
+            // Crée le menu si nécessaire (setupProfileMenu l’a peut-être déjà fait)
+            const menu = document.querySelector('.profile-menu');
+            if (!menu) {
+                setupProfileMenu(username); // recrée si nécessaire
             }
-        };
 
-        const createProfileMenu = () => {
-            if (!document.querySelector('.profile-menu')) {
-                const token = localStorage.getItem('jwt');
-                const decoded = token ? parseJWT(token) : null;
-                const username = decoded?.username;
-
-                const menu = document.createElement('div');
-                menu.className = 'profile-menu';
-                
-                const menuItems = [
-                    { text: 'Voir Profil', icon: '👤', href: username ? `profile.html?username=${username}` : 'profile.html' },
-                    { text: 'Paramètres', icon: '⚙️', href: 'settings.html' },
-                    { text: 'FAQ', icon: '❓', href: '#faq' },
-                    { text: 'Déconnexion', icon: '🚪', href: '#' }
-                ];
-                
-                menuItems.forEach(item => {
-                    const menuItem = document.createElement('a');
-                    menuItem.href = item.href;
-                    menuItem.innerHTML = `<span class="menu-icon">${item.icon}</span> ${item.text}`;
-                    
-                    if (item.text === 'Déconnexion') {
-                        menuItem.id = 'logout-link'; 
-                    }                
-                    menu.appendChild(menuItem);
-                });
-                
-                document.querySelector('.profile').appendChild(menu);
-
-                const logoutLink = document.getElementById('logout-link');
-                if (logoutLink) {
-                    logoutLink.addEventListener('click', function(e) {
-                        e.preventDefault(); 
-                        localStorage.removeItem('jwt');
-                        window.location.href = 'login.html';
-                    });
+            // Retrouver ou re-sélectionner après possible injection tardive
+            const newMenu = document.querySelector('.profile-menu');
+            if (newMenu) {
+                newMenu.classList.toggle('active');
+                if (newMenu.classList.contains('active')) {
+                    document.addEventListener('click', closeMenuOnClickOutside);
+                } else {
+                    document.removeEventListener('click', closeMenuOnClickOutside);
                 }
             }
-        };
-
-        const toggleProfileMenu = () => {
-            createProfileMenu();
-            const menu = document.querySelector('.profile-menu');
-            menu.classList.toggle('active');
-            
-            if (menu.classList.contains('active')) {
-                document.addEventListener('click', closeMenuOnClickOutside);
-            } else {
-                document.removeEventListener('click', closeMenuOnClickOutside);
-            }
-        };
-
-        const closeMenuOnClickOutside = (event) => {
-            const menu = document.querySelector('.profile-menu');
-            const profile = document.querySelector('.profile');
-            
-            if (!profile.contains(event.target)) {
-                menu.classList.remove('active');
-                document.removeEventListener('click', closeMenuOnClickOutside);
-            }
-        };
-
-        profilePic.addEventListener('click', function(event) {
-            event.stopPropagation();
-            toggleProfileMenu();
         });
     }
 });
+
+function closeMenuOnClickOutside(event) {
+    const menu = document.querySelector('.profile-menu');
+    const profile = document.querySelector('.profile');
+
+    if (menu && !profile.contains(event.target)) {
+        menu.classList.remove('active');
+        document.removeEventListener('click', closeMenuOnClickOutside);
+    }
+}
+
 
 // Fonction pour vérifier si l'utilisateur connecté est le créateur du quiz
 function isUserQuizCreator(creatorName) {
@@ -174,11 +133,28 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function updateProfile(user) {
-    document.getElementById("profile-name").innerHTML = user.username + "";
-    document.getElementById("stat-quiz-cree").innerHTML = user.nombreQuiz + "";
-    document.getElementById("stat-quiz-complete").innerHTML = user.nombreParties + "";
-    document.getElementById("stat-pts-total").innerHTML = user.scoreTotal + "";
+    document.getElementById("profile-name").textContent = user.username;
+    document.getElementById("stat-quiz-cree").textContent = user.nombreQuiz;
+    document.getElementById("stat-quiz-complete").textContent = user.nombreParties;
+    document.getElementById("stat-pts-total").textContent = user.scoreTotal;
+
+    // Charger l'avatar depuis l'équipement
+    fetch(`http://localhost:8000/api/equipped/${user.username}`)
+        .then(res => res.json())
+        .then(data => {
+            const avatarImg = document.querySelector('.profile-avatar img');
+            const avatarFile = data.avatar?.[0]?.nomFichier;
+            if (avatarImg) {
+                avatarImg.src = avatarFile 
+                    ? `ressources/avatars/${avatarFile}`
+                    : 'ressources/avatars/default.png';
+            }
+        })
+        .catch(error => {
+            console.error("Erreur lors du chargement de l'avatar :", error);
+        });
 }
+
 
 function displayCreatedQuizzes(quizzes) {
     const quizContainer = document.getElementById('created-quizzes');

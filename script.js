@@ -1878,4 +1878,72 @@ document.addEventListener('DOMContentLoaded', function() {
     } else if (document.querySelector('.profile-container')) {
         initProfilePage();
     }
+
+    applyTheme();
+
 });
+
+async function applyTheme() {
+    const token = localStorage.getItem('jwt');
+    if (!token) return;
+
+    const parseJWT = (token) => {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            return JSON.parse(atob(base64));
+        } catch (e) {
+            return null;
+        }
+    };
+
+    const username = parseJWT(token)?.username;
+    if (!username) return;
+
+    try {
+        const res = await fetch(`http://localhost:8000/api/equipped/${username}`);
+        const data = await res.json();
+        const theme = data.theme?.[0];
+
+        if (!theme) return;
+
+        const header = document.querySelector('header');
+        if (header) {
+            header.style.background = `linear-gradient(135deg, ${theme.couleurPrincipal}, ${theme.couleurSecondaire})`;
+            header.style.boxShadow = `0 4px 20px ${theme.couleurSecondaire}4D`;
+        }
+
+        const footer = document.querySelector('footer');
+        if (footer) {
+            footer.style.background = `linear-gradient(135deg, ${theme.couleurPrincipal}, ${theme.couleurSecondaire})`;
+        }
+
+        document.body.style.color = theme.couleurTexteUn || '#ffffff';
+
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .recommended-quizzes h2::after {
+                background: linear-gradient(90deg, ${theme.couleurPrincipal}, ${theme.couleurSecondaire});
+            }
+            .footer-links a {
+                color: ${theme.couleurTexteUn};
+            }
+            .footer-links a:hover {
+                color: #ffffff;
+            }
+            .quiz-card-btn {
+                border: 2px solid ${theme.couleurPrincipal};
+                color: ${theme.couleurPrincipal};
+                background: transparent;
+            }
+            .quiz-card-btn:hover {
+                background: linear-gradient(90deg, ${theme.couleurPrincipal}, ${theme.couleurSecondaire});
+                color: ${theme.couleurTexteUn || '#ffffff'};
+            }
+        `;
+        document.head.appendChild(style);
+
+    } catch (err) {
+        console.error('Erreur application du thème:', err);
+    }
+}

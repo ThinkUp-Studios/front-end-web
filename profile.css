@@ -35,10 +35,14 @@
 .profile-avatar img {
     width: 150px;
     height: 150px;
+    object-fit: cover;
     border-radius: 50%;
     border: 5px solid #fff;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    display: block;
+    background-color: #f0f0f0;
 }
+
 
 .change-avatar-btn {
     position: absolute;

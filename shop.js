@@ -1,4 +1,3 @@
-// shop.js
 const API_BASE = 'http://localhost:8000/api';
 
 function parseJWT(token) {
@@ -15,76 +14,21 @@ function parseJWT(token) {
     }
 }
 
+
 const token = localStorage.getItem('jwt');
 const decoded = parseJWT(token);
 const username = decoded?.username;
 
-const profilePic = document.querySelector('.profile-pic');
-
-if (profilePic) {
-    const createProfileMenu = () => {
-        if (!document.querySelector('.profile-menu')) {
-            const menu = document.createElement('div');
-            menu.className = 'profile-menu';
-
-            const menuItems = [
-                { text: 'Voir Profil', icon: '👤', href: username ? `profile.html?username=${username}` : 'profile.html' },
-                { text: 'Paramètres', icon: '⚙️', href: 'settings.html' },
-                { text: 'FAQ', icon: '❓', href: '#faq' },
-                { text: 'Déconnexion', icon: '🚪', href: '#' }
-            ];
-
-            menuItems.forEach(item => {
-                const menuItem = document.createElement('a');
-                menuItem.href = item.href;
-                menuItem.innerHTML = `<span class="menu-icon">${item.icon}</span> ${item.text}`;
-
-                if (item.text === 'Déconnexion') {
-                    menuItem.id = 'logout-link';
-                }
-                menu.appendChild(menuItem);
-            });
-
-            document.querySelector('.profile').appendChild(menu);
-
-            const logoutLink = document.getElementById('logout-link');
-            if (logoutLink) {
-                logoutLink.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    localStorage.removeItem('jwt');
-                    window.location.href = 'login.html';
-                });
-            }
-        }
-    };
-
-    const toggleProfileMenu = () => {
-        createProfileMenu();
-        const menu = document.querySelector('.profile-menu');
-        menu.classList.toggle('active');
-
-        if (menu.classList.contains('active')) {
-            document.addEventListener('click', closeMenuOnClickOutside);
-        } else {
-            document.removeEventListener('click', closeMenuOnClickOutside);
-        }
-    };
-
-    const closeMenuOnClickOutside = (event) => {
-        const menu = document.querySelector('.profile-menu');
-        const profile = document.querySelector('.profile');
-
-        if (!profile.contains(event.target)) {
-            menu.classList.remove('active');
-            document.removeEventListener('click', closeMenuOnClickOutside);
-        }
-    };
-
-    profilePic.addEventListener('click', function(event) {
-        event.stopPropagation();
-        toggleProfileMenu();
-    });
-}
+import {
+    fetchUserCurrency,
+    displayCurrency,
+    setupProfileMenu
+  } from './globalCurrencyProfile.js';
+  
+  if (username) {
+    fetchUserCurrency(username).then(displayCurrency);
+    setupProfileMenu(username);
+  }
 
 const main = document.querySelector('.main-content');
 
@@ -110,14 +54,24 @@ function createCard(item, type) {
     const card = document.createElement('div');
     card.className = 'quiz-card';
 
-    const image = document.createElement('img');
-    image.className = 'quiz-card-image';
+    const imageWrapper = document.createElement('div');
+    imageWrapper.style.display = 'flex';
+    imageWrapper.style.justifyContent = 'center';
+    imageWrapper.style.alignItems = 'center';
+    imageWrapper.style.padding = '1rem';
+    imageWrapper.style.borderBottom = '1px solid #2f2f2f';
+
     if (type === 'avatar') {
+        const image = document.createElement('img');
+        image.className = 'quiz-card-image';
+        image.style.maxHeight = '150px';
+        image.style.maxWidth = '100%';
+        image.style.objectFit = 'contain';
         image.src = `ressources/avatars/${item.nomFichier}`;
+        imageWrapper.appendChild(image);
     } else {
-        const gradient = `linear-gradient(135deg, ${item.couleurPrincipal}, ${item.couleurSecondaire})`;
-        image.style.background = gradient;
-        image.style.height = '180px';
+        imageWrapper.style.height = '180px';
+        imageWrapper.style.background = `linear-gradient(135deg, ${item.couleurPrincipal}, ${item.couleurSecondaire})`;
     }
 
     const content = document.createElement('div');
@@ -154,7 +108,7 @@ function createCard(item, type) {
     content.appendChild(price);
     content.appendChild(button);
 
-    card.appendChild(image);
+    card.appendChild(imageWrapper);
     card.appendChild(content);
 
     return card;
@@ -225,7 +179,7 @@ async function afficherMagasin() {
         const header = document.querySelector('header');
         if (header) {
             header.style.background = `linear-gradient(135deg, ${theme.couleurPrincipal} 0%, ${theme.couleurSecondaire} 100%)`;
-            header.style.boxShadow = `0 4px 20px ${theme.couleurSecondaire}4D`; // 4D = 30% alpha en hex
+            header.style.boxShadow = `0 4px 20px ${theme.couleurSecondaire}4D`;
         }
 
         document.body.style.color = theme.couleurTexteUn || '#ffffff';
@@ -233,33 +187,24 @@ async function afficherMagasin() {
             btn.style.background = `linear-gradient(90deg, ${theme.couleurPrincipal}, ${theme.couleurSecondaire})`;
         });
 
-        document.querySelectorAll('.recommended-quizzes h2::after').forEach(elem => {
-            elem.style.background = `linear-gradient(90deg, ${theme.couleurPrincipal}, ${theme.couleurSecondaire})`;
-        });
-
         const customStyle = document.createElement('style');
         customStyle.innerHTML = `
             .recommended-quizzes h2::after {
                 background: linear-gradient(90deg, ${theme.couleurPrincipal}, ${theme.couleurSecondaire});
+            }
+            .footer-links a {
+                color: ${theme.couleurTexteUn};
+            }
+            .footer-links a:hover {
+                color: #ffffff;
             }
         `;
         document.head.appendChild(customStyle);
 
         const footer = document.querySelector('footer');
         if (footer) {
-            footer.style.background = theme.couleurSecondaire;
+            footer.style.background = `linear-gradient(135deg, ${theme.couleurPrincipal} 0%, ${theme.couleurSecondaire} 100%)`;
         }
-
-        const styleFooterHover = document.createElement('style');
-        styleFooterHover.innerHTML = `
-            .footer-links a {
-                color: ${theme.couleurTexteUn};
-            }
-            .footer-links a:hover {
-                color: #FFFFFF;
-            }
-        `;
-        document.head.appendChild(styleFooterHover);
     }
 
     const sectionAvatar = document.createElement('section');

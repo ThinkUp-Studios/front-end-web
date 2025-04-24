@@ -1,88 +1,22 @@
+import {
+    parseJWT,
+    fetchUserCurrency,
+    displayCurrency,
+    setupProfileMenu,
+    setProfilePicture
+  } from './globalCurrencyProfile.js';
+  
+  const token = localStorage.getItem('jwt');
+  const decoded = parseJWT(token);
+  const username = decoded?.username;
+  
+  if (username) {
+    fetchUserCurrency(username).then(displayCurrency);
+    setupProfileMenu(username);
+    setProfilePicture(username);
+  }
 document.addEventListener('DOMContentLoaded', function() {
-    const profilePic = document.querySelector('.profile-pic');
-
-    if (profilePic) {
-        const parseJWT = (token) => {
-            try {
-                const base64Url = token.split('.')[1];
-                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
-
-                return JSON.parse(jsonPayload);
-            } catch (e) {
-                return null;
-            }
-        };
-
-        const createProfileMenu = () => {
-            if (!document.querySelector('.profile-menu')) {
-                const token = localStorage.getItem('jwt');
-                const decoded = token ? parseJWT(token) : null;
-                const username = decoded?.username;
-
-                const menu = document.createElement('div');
-                menu.className = 'profile-menu';
-                
-                const menuItems = [
-                    { text: 'Voir Profil', icon: '👤', href: username ? `profile.html?username=${username}` : 'profile.html' },
-                    { text: 'Paramètres', icon: '⚙️', href: 'settings.html' },
-                    { text: 'FAQ', icon: '❓', href: '#faq' },
-                    { text: 'Déconnexion', icon: '🚪', href: '#' }
-                ];
-                
-                menuItems.forEach(item => {
-                    const menuItem = document.createElement('a');
-                    menuItem.href = item.href;
-                    menuItem.innerHTML = `<span class="menu-icon">${item.icon}</span> ${item.text}`;
-                    
-                    if (item.text === 'Déconnexion') {
-                        menuItem.id = 'logout-link'; 
-                    }                
-                    menu.appendChild(menuItem);
-                });
-                
-                document.querySelector('.profile').appendChild(menu);
-
-                const logoutLink = document.getElementById('logout-link');
-                if (logoutLink) {
-                    logoutLink.addEventListener('click', function(e) {
-                        e.preventDefault(); 
-                        localStorage.removeItem('jwt');
-                        window.location.href = 'login.html';
-                    });
-                }
-            }
-        };
-
-        const toggleProfileMenu = () => {
-            createProfileMenu();
-            const menu = document.querySelector('.profile-menu');
-            menu.classList.toggle('active');
-            
-            if (menu.classList.contains('active')) {
-                document.addEventListener('click', closeMenuOnClickOutside);
-            } else {
-                document.removeEventListener('click', closeMenuOnClickOutside);
-            }
-        };
-
-        const closeMenuOnClickOutside = (event) => {
-            const menu = document.querySelector('.profile-menu');
-            const profile = document.querySelector('.profile');
-            
-            if (!profile.contains(event.target)) {
-                menu.classList.remove('active');
-                document.removeEventListener('click', closeMenuOnClickOutside);
-            }
-        };
-
-        profilePic.addEventListener('click', function(event) {
-            event.stopPropagation();
-            toggleProfileMenu();
-        });
-    }
+    applyTheme();
 });
 
 
@@ -290,4 +224,118 @@ if (logoutLink) {
         localStorage.removeItem('jwt'); // Supprime le token
         window.location.href = 'login.html'; // Redirige manuellement
     });
+}
+
+async function applyTheme() {
+    const token = localStorage.getItem('jwt');
+    if (!token) return;
+
+    const parseJWT = (token) => {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            return JSON.parse(atob(base64));
+        } catch (e) {
+            return null;
+        }
+    };
+
+    const username = parseJWT(token)?.username;
+    if (!username) return;
+
+    try {
+        const res = await fetch(`http://localhost:8000/api/equipped/${username}`);
+        const data = await res.json();
+        const theme = data.theme?.[0];
+
+        if (!theme) return;
+
+        const header = document.querySelector('header');
+        if (header) {
+            header.style.background = `linear-gradient(135deg, ${theme.couleurPrincipal}, ${theme.couleurSecondaire})`;
+            header.style.boxShadow = `0 4px 20px ${theme.couleurSecondaire}4D`;
+        }
+
+        const footer = document.querySelector('footer');
+        if (footer) {
+            footer.style.background = `linear-gradient(135deg, ${theme.couleurPrincipal}, ${theme.couleurSecondaire})`;
+        }
+
+        document.body.style.color = theme.couleurTexteUn || '#ffffff';
+
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .hero:before {
+                background: linear-gradient(135deg, ${theme.couleurPrincipal} 0%, ${theme.couleurSecondaire} 100%);
+            }
+            .hero h1 {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+                font-weight: 800;
+                letter-spacing: -1px;
+                background: linear-gradient(90deg, ${theme.couleurPrincipal}, ${theme.couleurSecondaire});
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+            .btn {
+                background: linear-gradient(90deg, ${theme.couleurPrincipal}, ${theme.couleurSecondaire});
+                box-shadow: 0 4px 15px ${hexToRgba(theme.couleurPrincipal, 0.3)};
+            }
+            .btn:hover {
+                box-shadow: 0 7px 20px ${hexToRgba(theme.couleurPrincipal, 0.3)};
+            }
+            .featured-quizzes h2:after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 50px;
+                height: 3px;
+                background: linear-gradient(90deg, ${theme.couleurPrincipal}, ${theme.couleurSecondaire});
+                border-radius: 3px;
+            }
+            .quiz-card-category {
+                background: linear-gradient(90deg, ${theme.couleurPrincipal}, ${theme.couleurSecondaire});
+            }
+            .quiz-card-tag{
+                background: linear-gradient(90deg, ${theme.couleurPrincipal}, ${theme.couleurSecondaire});
+            }
+            #leaderboard-btn{
+                background-color: ${theme.couleurPrincipal};
+            }
+            #leaderboard-btn:hover{
+                color: ${theme.couleurPrincipal};
+            }
+            .recommended-quizzes h2::after {
+                background: linear-gradient(90deg, ${theme.couleurPrincipal}, ${theme.couleurSecondaire});
+            }
+            .footer-links a {
+                color: ${theme.couleurTexteUn};
+            }
+            .footer-links a:hover {
+                color: #ffffff;
+            }
+            .quiz-card-btn {
+                border: 2px solid ${theme.couleurPrincipal};
+                color: ${theme.couleurPrincipal};
+                background: transparent;
+            }
+            .quiz-card-btn:hover {
+                background: linear-gradient(90deg, ${theme.couleurPrincipal}, ${theme.couleurSecondaire});
+                color: ${theme.couleurTexteUn || '#ffffff'};
+            }
+        `;
+        document.head.appendChild(style);
+
+    } catch (err) {
+        console.error('Erreur application du thème:', err);
+    }
+}
+
+function hexToRgba(hex, alpha = 1) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
